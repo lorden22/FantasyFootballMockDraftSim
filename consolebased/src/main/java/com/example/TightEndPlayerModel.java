@@ -1,3 +1,4 @@
+package com.example;
 
 public class TightEndPlayerModel extends PlayerModel{
 	private static final double TIGHTENDALLOWEDREACH = 0.0;

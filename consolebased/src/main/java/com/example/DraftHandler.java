@@ -1,3 +1,5 @@
+package com.example;
+
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,6 +61,10 @@ public class DraftHandler {
 		for(TeamModel currTeam : this.teams) {
 			System.out.println(currTeam);
 		}
+	}
+
+	public ArrayList<TeamModel> returnTeams() {
+		return this.teams;
 	}
 
 	private void printNextAvilPlayers() {

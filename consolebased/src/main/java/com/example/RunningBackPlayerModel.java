@@ -1,4 +1,4 @@
-
+package com.example;
 
 public class RunningBackPlayerModel extends PlayerModel {
 	private static final double RUNNINGBACKPOSITIONREACHWEIGHT = 0.2;

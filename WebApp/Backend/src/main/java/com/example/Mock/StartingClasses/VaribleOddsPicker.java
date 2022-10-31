@@ -1,3 +1,4 @@
+package com.example.Mock.StartingClasses;
 
 public class VaribleOddsPicker {
 	private int randomGenValue;

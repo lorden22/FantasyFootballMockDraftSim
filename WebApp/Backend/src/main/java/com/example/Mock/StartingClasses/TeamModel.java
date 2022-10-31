@@ -1,5 +1,8 @@
+package com.example.Mock.StartingClasses;
 import java.util.ArrayList;
 import java.util.TreeMap;
+
+import org.yaml.snakeyaml.util.PlatformFeatureDetector;
 
 public class TeamModel implements Comparable<TeamModel>{
 	private String teamName;
@@ -9,7 +12,7 @@ public class TeamModel implements Comparable<TeamModel>{
 	
 	
 	
-	public TeamModel(String teamName, boolean userTeam, int teamNumber){
+	public TeamModel(String teamName, Boolean userTeam, int teamNumber){
 		this.teamName = teamName;
 		this.thisTeamPlayers = new TreeMap<String,ArrayList<PlayerModel>>();
 		this.userTeam = userTeam;
@@ -97,13 +100,19 @@ public class TeamModel implements Comparable<TeamModel>{
 					copyOfThisTeamPlayers.get(currPosition).remove(currSpecialStarter);
 				}
 			} 
-			return kickerStarterString + "\n" + defenseStarterString;
-		}
+		return kickerStarterString + "\n" + defenseStarterString;
+	}
+
+	public TreeMap<String,ArrayList<PlayerModel>> getTeamTreeMap() {
+		return this.thisTeamPlayers;
+	}
 
 	public String toString() {
-		TreeMap<String,ArrayList<PlayerModel>> copyOfThisTeamPlayers = 
-			new TreeMap<String,ArrayList<PlayerModel>>(this.thisTeamPlayers);
-		
+		TreeMap<String,ArrayList<PlayerModel>> copyOfThisTeamPlayers = new TreeMap<String,ArrayList<PlayerModel>>();
+
+		for(String currPosition : thisTeamPlayers.keySet()) {
+			copyOfThisTeamPlayers.put(currPosition, new ArrayList<PlayerModel>(thisTeamPlayers.get(currPosition)));
+		}
 		
 		PlayerModel flexPlayer = null;	
 		

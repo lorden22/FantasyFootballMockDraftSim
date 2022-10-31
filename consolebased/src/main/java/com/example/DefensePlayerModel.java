@@ -1,3 +1,5 @@
+package com.example;
+
 public class DefensePlayerModel extends PlayerModel {
     private static final double DEFENSEALLOWEDREACH = 0.5;
     public static final String POSITIONSHORTHANDLE = "DEF";

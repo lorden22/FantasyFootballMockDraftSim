@@ -1,16 +1,18 @@
 package com.example.Mock;
-
-import javax.swing.Spring;
+import java.util.ArrayList;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import com.example.Mock.DraftSim.MockDraftDriver;
+import com.example.Mock.StartingClasses.MockDraftDriver;
+
+import com.example.Mock.Dao.DraftedTeamsDataObject;
+import com.example.Mock.StartingClasses.TeamModel;;
 
 @SpringBootApplication
 public class Application {
 
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
-		MockDraftDriver.main(args);
+		DraftedTeamsDataObject.updateTeams(new ArrayList<TeamModel>(MockDraftDriver.main(args)));
 	}
 }

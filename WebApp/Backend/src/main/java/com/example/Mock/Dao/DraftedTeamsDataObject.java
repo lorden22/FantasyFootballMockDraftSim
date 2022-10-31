@@ -1,10 +1,13 @@
 package com.example.Mock.Dao;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.TreeMap;
 
 import org.springframework.stereotype.Repository;
 
-import com.example.Mock.DraftSim.TeamModel;
+import com.example.Mock.StartingClasses.PlayerModel;
+import com.example.Mock.StartingClasses.TeamModel;
 
 @Repository("Teams")
 public class DraftedTeamsDataObject implements TeamsDao {
@@ -18,7 +21,12 @@ public class DraftedTeamsDataObject implements TeamsDao {
     }
 
     @Override
-    public String getTeam(int teamNumber) {
+    public TreeMap<String,ArrayList<PlayerModel>> getTeamObject(int teamNumber) {
+        return teamsDB.get(teamNumber).getTeamTreeMap();
+    }
+
+    @Override
+    public String getTeamString(int teamNumber) {
         return teamsDB.get(teamNumber).toString();
     }
 }

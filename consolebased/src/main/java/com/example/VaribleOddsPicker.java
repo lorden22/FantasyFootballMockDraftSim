@@ -1,3 +1,4 @@
+package com.example;
 
 public class VaribleOddsPicker {
 	private int randomGenValue;

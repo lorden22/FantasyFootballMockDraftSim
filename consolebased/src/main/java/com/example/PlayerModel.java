@@ -1,7 +1,9 @@
+package com.example;
 
 public class PlayerModel implements Comparable<PlayerModel>{
 	private String firstName;
 	private String lastName;
+	private String fullName;
 	private String position;
 	private double predictedScore;
 	private double avgADP;
@@ -14,6 +16,7 @@ public class PlayerModel implements Comparable<PlayerModel>{
 		this.position = position;
 		this.avgADP = avgADP;
 		this.allowedReach = this.avgADP - positionAllowedReach;
+		this.fullName = this.firstName + " " + this.lastName;
 	}
 
 	private String getFirstName() {
@@ -28,6 +31,13 @@ public class PlayerModel implements Comparable<PlayerModel>{
 	}
 	private void setLastName(String lastNameChange) {
 		this.lastName = lastNameChange;
+	}
+
+	public String getFullName() {
+		return this.fullName;
+	}
+	private void setFullNameName(String fullNameChange) {
+		this.fullName = fullNameChange;
 	}
 	
 	public String getPosition() {
@@ -52,7 +62,7 @@ public class PlayerModel implements Comparable<PlayerModel>{
 		this.avgADP = avgADPChange;
 	}
 	
-	public double getAllowedReach() {
+	protected double getAllowedReach() {
 		return this.allowedReach;
 	}
 	private void setAllowedReach(double allowedReachChange) {

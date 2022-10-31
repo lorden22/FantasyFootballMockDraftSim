@@ -1,3 +1,4 @@
+package com.example; 
 import java.io.File;
 import java.util.Scanner;
 import java.io.FileNotFoundException;
@@ -21,9 +22,9 @@ public class MockDraftDriver {
 		return round+pick;
 	}
 
-	public static void main(String[] args ) {
+	public static ArrayList<TeamModel> main(String[] args ) {
 		System.out.println("---------Reading Starting File In Now----------");
-		File playerStatFile = new File("test.txt");
+		File playerStatFile = new File("WebApp/Backend/src/main/java/com/example/Mock/StartingClasses/WebScraping/PlayerData.txt");
 		TreeMap<String,ArrayList<Object>> allPlayers = new TreeMap<String,ArrayList<Object>>();
 		
 		try {
@@ -115,10 +116,17 @@ public class MockDraftDriver {
 		draftHandler.startDraft();
 
 		System.out.println("\nDraft is finsh...\n-----------Printing Final Teams----------");
-		draftHandler.printTeams();	
+		draftHandler.printTeams();
+		System.out.println("Loop 2----------------------");
+		draftHandler.printTeams();
+		System.out.println("Loop 3----------------------");
+		draftHandler.printTeams();
 
 		System.out.println("\nDone");
 		System.out.println("---------Exiting----------");
+
+		return draftHandler.returnTeams();	
+
 	}
 	
 }

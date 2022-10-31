@@ -1,13 +1,18 @@
 package com.example.Mock.API;
 
+import java.util.ArrayList;
+import java.util.TreeMap;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.Mock.DraftSim.TeamModel;
 import com.example.Mock.Service.TeamsServices;
+import com.example.Mock.StartingClasses.PlayerModel;
+import com.example.Mock.StartingClasses.TeamModel;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 
 @RequestMapping("api/teams")
 
@@ -20,8 +25,17 @@ public class TeamsController {
         this.teamsServices = teamsServices;
     }
 
-    @GetMapping(path="{teamNumber}")
-    public String getTeam(@PathVariable("teamNumber") int teamNummber) {
-       return this.teamsServices.getTeam(teamNummber);
+    @GetMapping(path="/getTeamObject/{teamNumber}")
+    public TreeMap<String,ArrayList<PlayerModel>> getTeamObject(@PathVariable("teamNumber") int teamNummber) {
+       return this.teamsServices.getTeamObject(teamNummber);
     }
+
+    @GetMapping(path="/getTeamString/{teamNumber}")
+    public String getTeamString(@PathVariable("teamNumber") int teamNummber) {
+       return this.teamsServices.getTeamString(teamNummber);
+    }
+
+
+
+
 }
