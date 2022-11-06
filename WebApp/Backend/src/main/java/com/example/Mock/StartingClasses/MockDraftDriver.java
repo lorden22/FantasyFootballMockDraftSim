@@ -1,5 +1,4 @@
 package com.example.Mock.StartingClasses;
-
 import java.io.File;
 import java.util.Scanner;
 import java.io.FileNotFoundException;
@@ -102,7 +101,7 @@ public class MockDraftDriver {
 				nextPlayer.indexOf(" ")),nextPlayer.substring(nextPlayer.indexOf(" ")+1), Double.valueOf(nextPlayerStats.get(1).toString()), 
 				getADP(desiredNumTeams,desiredNumTeams+Double.valueOf(nextPlayerStats.get(2).toString()))));
 			}
-			else if (nextPlayerPos.equals("DEF")) {
+			else if (nextPlayerPos.equals("DST")) {
 				allPlayerModels.add(new DefensePlayerModel(nextPlayer.substring(0, 
 				nextPlayer.indexOf(" ")),nextPlayer.substring(nextPlayer.indexOf(" ")+1), Double.valueOf(nextPlayerStats.get(1).toString()), 
 				getADP(desiredNumTeams,desiredNumTeams+Double.valueOf(nextPlayerStats.get(2).toString()))));
@@ -118,16 +117,7 @@ public class MockDraftDriver {
 
 		System.out.println("\nDraft is finsh...\n-----------Printing Final Teams----------");
 		draftHandler.printTeams();
-		System.out.println("Loop 2----------------------");
-		draftHandler.printTeams();
-		System.out.println("Loop 3----------------------");
-		draftHandler.printTeams();
-
-		System.out.println("\nDone");
-		System.out.println("---------Exiting----------");
-
-		return draftHandler.returnTeams();	
-
+		return draftHandler.returnTeams();
 	}
 	
 }

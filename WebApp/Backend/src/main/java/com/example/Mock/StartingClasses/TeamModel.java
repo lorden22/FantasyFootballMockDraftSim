@@ -2,8 +2,6 @@ package com.example.Mock.StartingClasses;
 import java.util.ArrayList;
 import java.util.TreeMap;
 
-import org.yaml.snakeyaml.util.PlatformFeatureDetector;
-
 public class TeamModel implements Comparable<TeamModel>{
 	private String teamName;
 	private boolean userTeam = false;

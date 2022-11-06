@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.example.Mock.Service.TeamsServices;
 import com.example.Mock.StartingClasses.PlayerModel;
-import com.example.Mock.StartingClasses.TeamModel;
-import com.fasterxml.jackson.databind.util.JSONPObject;
 
 @RequestMapping("api/teams")
 
@@ -34,8 +32,4 @@ public class TeamsController {
     public String getTeamString(@PathVariable("teamNumber") int teamNummber) {
        return this.teamsServices.getTeamString(teamNummber);
     }
-
-
-
-
 }

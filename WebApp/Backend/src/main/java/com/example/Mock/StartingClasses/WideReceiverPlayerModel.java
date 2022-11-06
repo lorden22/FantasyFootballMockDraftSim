@@ -1,6 +1,5 @@
 package com.example.Mock.StartingClasses;
 
-
 public class WideReceiverPlayerModel extends PlayerModel {
 	private static final double WIDERECEIVERALLOWEDREACH = 0.1;
 	public static final String POSITIONSHORTHANDLE = "WR";

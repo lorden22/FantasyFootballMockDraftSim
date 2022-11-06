@@ -125,7 +125,7 @@ public class TeamModel implements Comparable<TeamModel>{
 
 			int amountOfStarters = 1;
 			
-			ArrayList<PlayerModel> playersAtThisPosition = new ArrayList<PlayerModel>(copyOfThisTeamPlayers.get(currPosition));
+			ArrayList<PlayerModel> playersAtThisPosition = copyOfThisTeamPlayers.get(currPosition);
 			
 			if(currPosition.equals(RunningBackPlayerModel.POSITIONSHORTHANDLE) ||
 			currPosition.equals(WideReceiverPlayerModel.POSITIONSHORTHANDLE)) {
