@@ -13,6 +13,11 @@ public class Application {
 
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
-		DraftedTeamsDataObject.updateTeams(new ArrayList<TeamModel>(MockDraftDriver.main(args)));
+
+		MockDraftDriver mainMock = new MockDraftDriver();
+		mainMock.main(args);
+
+		DraftedTeamsDataObject.updateTeams(mainMock.returnTeams());
+		DraftedTeamsDataObject.updatePlayers(mainMock.returnPlayers());
 	}
 }

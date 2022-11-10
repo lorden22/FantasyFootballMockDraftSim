@@ -1,6 +1,7 @@
 package com.example.Mock.API;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,5 +32,16 @@ public class TeamsController {
     @GetMapping(path="/getTeamString/{teamNumber}")
     public String getTeamString(@PathVariable("teamNumber") int teamNummber) {
        return this.teamsServices.getTeamString(teamNummber);
+    }
+
+    @GetMapping(path="/getPlayersLeft/") 
+    public List<PlayerModel> getPlayersLeft() {
+        return this.teamsServices.getPlayersLeft();
+    }
+
+    @GetMapping(path="/getPlayerDrafted/")
+    public List<PlayerModel> getPlayerDrafted() {
+        this.teamsServices.getPlayersDraftedRanked().sort(null);
+        return this.teamsServices.getPlayersDraftedRanked();
     }
 }

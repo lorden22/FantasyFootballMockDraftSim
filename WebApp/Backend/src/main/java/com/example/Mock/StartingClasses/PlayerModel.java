@@ -1,5 +1,4 @@
 package com.example.Mock.StartingClasses;
-
 public class PlayerModel implements Comparable<PlayerModel>{
 	private String firstName;
 	private String lastName;

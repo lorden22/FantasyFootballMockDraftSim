@@ -1,6 +1,7 @@
 package com.example.Mock.Service;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.TreeMap;
 
 import javax.xml.crypto.dsig.keyinfo.RetrievalMethod;
@@ -28,5 +29,13 @@ public class TeamsServices {
 
     public String getTeamString(int teamNumber){
         return this.teamsDao.getTeamString(teamNumber);
+    }
+
+    public List<PlayerModel> getPlayersLeft() {
+        return this.teamsDao.getPlayersLeft();
+    }
+
+    public List<PlayerModel> getPlayersDraftedRanked() {
+        return this.teamsDao.getPlayersDraftedRanked();
     }
 }

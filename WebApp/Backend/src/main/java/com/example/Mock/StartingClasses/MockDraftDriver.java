@@ -5,11 +5,16 @@ import java.io.FileNotFoundException;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.TreeMap;
 
 
 
 public class MockDraftDriver {
+
+	private static ArrayList<TeamModel> teamList;
+	private static ArrayList<PlayerModel> playerLeftList;
 
 	private static double getADP(int totalDraftPicksInRound, double rank) { 
 		double pick;
@@ -22,7 +27,7 @@ public class MockDraftDriver {
 		return round+pick;
 	}
 
-	public static ArrayList<TeamModel> main(String[] args ) {
+	public static void main(String[] args ) {
 		System.out.println("---------Reading Starting File In Now----------");
 		File playerStatFile = new File("WebApp/Backend/src/main/java/com/example/Mock/StartingClasses/WebScraping/PlayerData.txt");
 		TreeMap<String,ArrayList<Object>> allPlayers = new TreeMap<String,ArrayList<Object>>();
@@ -117,7 +122,16 @@ public class MockDraftDriver {
 
 		System.out.println("\nDraft is finsh...\n-----------Printing Final Teams----------");
 		draftHandler.printTeams();
-		return draftHandler.returnTeams();
+		teamList = draftHandler.returnTeams();
+		playerLeftList = draftHandler.returnLeftPlayers();
+	}
+
+	public ArrayList<TeamModel> returnTeams() {
+		return this.teamList;
+	}
+
+	public ArrayList<PlayerModel> returnPlayers() {
+		return this.playerLeftList;
 	}
 	
 }

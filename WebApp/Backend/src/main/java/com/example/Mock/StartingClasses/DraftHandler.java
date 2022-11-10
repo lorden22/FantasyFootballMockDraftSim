@@ -37,6 +37,7 @@ public class DraftHandler {
 			}
 			Collections.reverse(this.teams);
 		}
+
 	}
 
 
@@ -118,6 +119,10 @@ public class DraftHandler {
 
 	public ArrayList<TeamModel> returnTeams() {
 		return this.teams;
+	}
+	
+	public ArrayList<PlayerModel> returnLeftPlayers() {
+		return this.playersLeft;
 	}
 
 	private void printNextAvilPlayers() {
