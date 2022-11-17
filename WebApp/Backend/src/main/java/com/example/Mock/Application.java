@@ -14,10 +14,6 @@ public class Application {
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
 
-		MockDraftDriver mainMock = new MockDraftDriver();
-		mainMock.main(args);
-
-		DraftedTeamsDataObject.updateTeams(mainMock.returnTeams());
-		DraftedTeamsDataObject.updatePlayers(mainMock.returnPlayers());
+		//MockDraftDriver mainMock = new MockDraftDriver();
 	}
 }

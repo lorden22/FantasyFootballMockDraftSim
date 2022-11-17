@@ -13,8 +13,94 @@ import java.util.TreeMap;
 
 public class MockDraftDriver {
 
-	private static ArrayList<TeamModel> teamList;
-	private static ArrayList<PlayerModel> playerLeftList;
+	private static ArrayList<TeamModel> teamListConsole;
+	private static ArrayList<PlayerModel> playerLeftListConsole;
+	private ArrayList<TeamModel> teamList;
+	private ArrayList<PlayerModel> playerLeftList;
+
+
+
+	public MockDraftDriver() {
+		teamList = new ArrayList<TeamModel>();
+		playerLeftList = new ArrayList<PlayerModel>();
+	}
+
+	public void createdDraftEnv(String teamName, int draftSize, int desiredDraftPosition){
+		File playerStatFile = new File("WebApp/Backend/src/main/java/com/example/Mock/StartingClasses/WebScraping/PlayerData.txt");
+		TreeMap<String,ArrayList<Object>> allPlayers = new TreeMap<String,ArrayList<Object>>();
+		
+		try {
+			
+			Scanner fileReader = new Scanner(playerStatFile);
+			
+			while(fileReader.hasNextLine()) {
+				String currPlayerStatsString = fileReader.nextLine();
+				String[] currPlayerStatsArray = currPlayerStatsString.split(" ");
+				ArrayList<Object> otherPlayStats = new ArrayList<Object>(0);
+				
+				for(String nextVal : Arrays.copyOfRange(currPlayerStatsArray, 2, currPlayerStatsArray.length)) {
+					try {
+						otherPlayStats.add(Double.parseDouble(nextVal));
+					}
+					catch (NumberFormatException error) {
+						otherPlayStats.add("" + nextVal);
+					}
+				}
+				
+				allPlayers.put(currPlayerStatsArray[0] + " " + currPlayerStatsArray[1], otherPlayStats);
+			}
+			fileReader.close();
+		}
+		catch (FileNotFoundException error) {
+			System.out.println("File Not Found - Check File Name");
+		}
+
+		catch (Exception error) {
+			System.out.println("Other Error Found - See Below /n ------------------------------------------");
+			error.printStackTrace();
+		}
+
+		ArrayList<PlayerModel> allPlayerModels = new ArrayList<PlayerModel>();
+		
+		for(String nextPlayer : allPlayers.keySet()) {
+			ArrayList<Object> nextPlayerStats = allPlayers.get(nextPlayer);
+			String nextPlayerPos = nextPlayerStats.get(0).toString();
+			
+			if(nextPlayerPos.equals("RB")) {
+				allPlayerModels.add(new RunningBackPlayerModel(nextPlayer.substring(0, 
+				nextPlayer.indexOf(" ")),nextPlayer.substring(nextPlayer.indexOf(" ")+1) ,Double.valueOf(nextPlayerStats.get(1).toString()), 
+				getADP(draftSize,draftSize+Double.valueOf(nextPlayerStats.get(2).toString()))));
+			}
+			else if(nextPlayerPos.equals("WR")) {
+				allPlayerModels.add(new WideReceiverPlayerModel(nextPlayer.substring(0, 
+				nextPlayer.indexOf(" ")),nextPlayer.substring(nextPlayer.indexOf(" ")+1), Double.valueOf(nextPlayerStats.get(1).toString()), 
+				getADP(draftSize,draftSize+Double.valueOf(nextPlayerStats.get(2).toString()))));
+			}
+			else if(nextPlayerPos.equals("TE")) {
+				allPlayerModels.add(new TightEndPlayerModel(nextPlayer.substring(0, 
+				nextPlayer.indexOf(" ")),nextPlayer.substring(nextPlayer.indexOf(" ")+1), Double.valueOf(nextPlayerStats.get(1).toString()), 
+				getADP(draftSize,draftSize+Double.valueOf(nextPlayerStats.get(2).toString()))));
+			}
+			else if(nextPlayerPos.equals("QB")) {
+				allPlayerModels.add(new QuarterBackPlayerModel(nextPlayer.substring(0, 
+				nextPlayer.indexOf(" ")),nextPlayer.substring(nextPlayer.indexOf(" ")+1), Double.valueOf(nextPlayerStats.get(1).toString()), 
+				getADP(draftSize,draftSize+Double.valueOf(nextPlayerStats.get(2).toString()))));
+			}
+			else if(nextPlayerPos.equals("K")) {
+				allPlayerModels.add(new KickerPlayerModel(nextPlayer.substring(0, 
+				nextPlayer.indexOf(" ")),nextPlayer.substring(nextPlayer.indexOf(" ")+1), Double.valueOf(nextPlayerStats.get(1).toString()), 
+				getADP(draftSize,draftSize+Double.valueOf(nextPlayerStats.get(2).toString()))));
+			}
+			else if (nextPlayerPos.equals("DST")) {
+				allPlayerModels.add(new DefensePlayerModel(nextPlayer.substring(0, 
+				nextPlayer.indexOf(" ")),nextPlayer.substring(nextPlayer.indexOf(" ")+1), Double.valueOf(nextPlayerStats.get(1).toString()), 
+				getADP(draftSize,draftSize+Double.valueOf(nextPlayerStats.get(2).toString()))));
+			}
+		}
+		allPlayerModels.sort(null);
+
+		this.playerLeftList = allPlayerModels;
+	} 
 
 	private static double getADP(int totalDraftPicksInRound, double rank) { 
 		double pick;
@@ -26,7 +112,6 @@ public class MockDraftDriver {
 		else pick = (rank % totalDraftPicksInRound) / 100.0;
 		return round+pick;
 	}
-
 	public static void main(String[] args ) {
 		System.out.println("---------Reading Starting File In Now----------");
 		File playerStatFile = new File("WebApp/Backend/src/main/java/com/example/Mock/StartingClasses/WebScraping/PlayerData.txt");
@@ -122,15 +207,15 @@ public class MockDraftDriver {
 
 		System.out.println("\nDraft is finsh...\n-----------Printing Final Teams----------");
 		draftHandler.printTeams();
-		teamList = draftHandler.returnTeams();
-		playerLeftList = draftHandler.returnLeftPlayers();
+		teamListConsole = new ArrayList<TeamModel>(draftHandler.returnTeams());
+		playerLeftListConsole = draftHandler.returnLeftPlayers();
 	}
 
 	public ArrayList<TeamModel> returnTeams() {
 		return this.teamList;
 	}
 
-	public ArrayList<PlayerModel> returnPlayers() {
+	public List<PlayerModel> returnPlayers() {
 		return this.playerLeftList;
 	}
 	

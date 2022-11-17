@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
+import com.example.Mock.Dao.DraftDao;
 import com.example.Mock.Dao.TeamsDao;
 import com.example.Mock.StartingClasses.PlayerModel;
 import com.example.Mock.StartingClasses.TeamModel;
@@ -17,10 +18,12 @@ import com.example.Mock.StartingClasses.TeamModel;
 @Service
 public class TeamsServices {
     private TeamsDao teamsDao;
+    private DraftDao draftDao;
 
     @Autowired
-    public TeamsServices(@Qualifier("Teams") TeamsDao teamsDao){
+    public TeamsServices(@Qualifier("Teams") TeamsDao teamsDao, @Qualifier("Draft") DraftDao draftDao ){
         this.teamsDao = teamsDao;
+        this.draftDao = draftDao;
     }
     
     public TreeMap<String,ArrayList<PlayerModel>> getTeamObject(int teamNumber) {
@@ -38,4 +41,10 @@ public class TeamsServices {
     public List<PlayerModel> getPlayersDraftedRanked() {
         return this.teamsDao.getPlayersDraftedRanked();
     }
+
+    public List<PlayerModel> startDraft(String teamName, int draftSize, int desiredDraftPosition) {
+        return this.draftDao.startDraft(teamName, draftSize, desiredDraftPosition);
+    }
+
+
 }
