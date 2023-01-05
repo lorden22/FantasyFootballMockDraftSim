@@ -35,7 +35,7 @@ public class TeamsServices {
     }
 
     public List<PlayerModel> getPlayersLeft() {
-        return this.teamsDao.getPlayersLeft();
+        return this.draftDao.getPlayersLeft();
     }
 
     public List<PlayerModel> getPlayersDraftedRanked() {
@@ -46,5 +46,7 @@ public class TeamsServices {
         return this.draftDao.startDraft(teamName, draftSize, desiredDraftPosition);
     }
 
-
+    public List<String> simTo(int nextUserPick){
+        return this.draftDao.simComputerPicks(nextUserPick);
+    }
 }

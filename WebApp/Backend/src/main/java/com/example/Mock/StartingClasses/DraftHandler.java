@@ -8,9 +8,10 @@ public class DraftHandler {
 	private ArrayList<PlayerModel> playersLeft;
 	private ArrayList<TeamModel> teams;
 	private VaribleOddsPicker randomNumGen;
+	private int currRoundPick; 
 	
 	public DraftHandler(ArrayList<PlayerModel> startingPlayers, int numTeams, String userTeamName, String desiredDraftPickString) {
-		this.playersLeft = new ArrayList<PlayerModel>(startingPlayers);
+		this.playersLeft = startingPlayers;
 		this.randomNumGen = new VaribleOddsPicker();
 		this.teams = new ArrayList<TeamModel>();
 		int desiredDraftPickInt;
@@ -27,17 +28,36 @@ public class DraftHandler {
 			}
 			else this.teams.add(new TeamModel("Test Team " + currTeamNum, false,currTeamNum));
 		}
+		this.currRoundPick = 1;
 	}
 
 	public void startDraft() {
 		while(this.playersLeft.size() >= this.teams.size() &&
 			this.teams.get(0).getTeamSize() <= 15) { 
 			for(TeamModel currTeam : this.teams) {
-				this.nextDraftPick(currTeam);
+				this.nextDraftPick(currTeam,-1);
 			}
 			Collections.reverse(this.teams);
 		}
 
+	}
+
+	public ArrayList<String> simTo(int nextUserPick){
+		ArrayList<String> computerDraftLog = new ArrayList<String>();
+		while (currRoundPick != nextUserPick) {
+			TeamModel currTeam = this.teams.get(currRoundPick-1);
+			String draftLog = this.nextDraftPick(currTeam,currRoundPick);
+			System.out.println(draftLog);
+			computerDraftLog.add(draftLog);
+			if(currRoundPick+1 > this.teams.size()) {
+				Collections.reverse(this.teams);
+				currRoundPick = 1;
+			}
+			else {
+				currRoundPick++;
+			}
+		}
+		return computerDraftLog;
 	}
 
 
@@ -84,15 +104,14 @@ public class DraftHandler {
 		return null;
 	}
 
-	private void nextDraftPick(TeamModel currTeam) {
-		int nextPick;
+	private String nextDraftPick(TeamModel currTeam, int nextPick) {
 		PlayerModel nextPlayer;
 		if(currTeam.isUserTeam()) {
-			this.printNextAvilPlayers();
-			System.out.println("Your pick.... \n Enter the number of the player in the list to draft");
-			Scanner inputReader = new Scanner(System.in);
-			nextPick = inputReader.nextInt();
-			System.out.println();
+			//this.printNextAvilPlayers();
+			//System.out.println("Your pick.... \n Enter the number of the player in the list to draft");
+			//Scanner inputReader = new Scanner(System.in);
+			//nextPick = inputReader.nextInt();
+			//System.out.println();
 			nextPlayer = this.playersLeft.get(nextPick-1);
 		}
 		else {
@@ -104,11 +123,12 @@ public class DraftHandler {
 				nextPlayer = this.playersLeft.get(nextPick-1);
 			}
 		}
-		System.out.println(currTeam.getTeamName()+ " picked " + nextPlayer);
+		String currPickDraftLog = "Pick " + (this.teams.get(this.teams.size()-1).getTeamSize() + 1)+ "." + currRoundPick + " - " + currTeam.getTeamName()+ " picked " + nextPlayer;
 		currTeam.addPlayer(nextPlayer.getPosition(), nextPlayer);
 
 		this.playersLeft.remove(nextPlayer);
 		this.playersLeft.sort(null);
+		return currPickDraftLog;
 	}
 
 	public void printTeams() {

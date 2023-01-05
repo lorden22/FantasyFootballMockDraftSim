@@ -53,6 +53,12 @@ public class TeamsController {
         @RequestParam("draftSize") int draftSize, 
         @RequestParam("draftPosition") int draftPosition) {
            return this.teamsServices.startDraft(teamName, draftSize, draftPosition);
-        }
     }
+
+    @PostMapping(path="/simTo/")
+    public List<String> simtTo(
+        @RequestParam("nextUserPick") int nextUserPick) {
+            return this.teamsServices.simTo(nextUserPick);
+    }
+}
     

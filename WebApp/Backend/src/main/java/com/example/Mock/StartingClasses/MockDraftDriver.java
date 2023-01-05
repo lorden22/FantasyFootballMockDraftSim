@@ -17,6 +17,7 @@ public class MockDraftDriver {
 	private static ArrayList<PlayerModel> playerLeftListConsole;
 	private ArrayList<TeamModel> teamList;
 	private ArrayList<PlayerModel> playerLeftList;
+	private DraftHandler draftHandler;
 
 
 
@@ -100,7 +101,13 @@ public class MockDraftDriver {
 		allPlayerModels.sort(null);
 
 		this.playerLeftList = allPlayerModels;
-	} 
+		DraftHandler draftHandler = new DraftHandler(this.playerLeftList,draftSize,teamName,""+desiredDraftPosition);
+		this.draftHandler = draftHandler;
+	}
+	
+	public List<String> simTo(int nextUserPick) {
+		return this.draftHandler.simTo(nextUserPick);
+	}
 
 	private static double getADP(int totalDraftPicksInRound, double rank) { 
 		double pick;

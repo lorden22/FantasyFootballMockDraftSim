@@ -6,29 +6,31 @@
 
     <script>
         async function getPlayerLeft() {
-            var res = await fetch("http://localhost:8080/api/teams/getPlayersLeft/")
+            var res = await fetch("http://localhost:8080/api/teams/getPlayersLeft/",{
+                method: 'GET',
+            })
             var data = await res.json()
             console.log(data)
             var returnVal = ""
             for(var intCurrPlayer in data) {
                 currPlayer = data[intCurrPlayer]
-                returnVal += (intCurrPlayer + ". " + currPlayer.fullName + " " +currPlayer.position + " - Predicted Score 2022 = " 
+                returnVal += ((1+Number(intCurrPlayer)) + ". " + currPlayer.fullName + " " +currPlayer.position + " - Predicted Score 2022 = " 
                 + currPlayer.predictedScore + ", Avg ADP = " + currPlayer.avgADP + "<br />")
-            console.log(returnVal)
-            document.getElementById("draftDiv").innerHTML = returnVal
         }
+        console.log(returnVal)
+        document.getElementById("playerListPar").innerHTML = returnVal
     }
     </script>
 
     <script>
-        function updatePlayerListPar(data) {
+        async function updatePlayerListPar(data) {
             returnVal = ""
             for(var intCurrPlayer in data) {
-                    currPlayer = data[intCurrPlayer]
-                    returnVal +=  (1+Number(intCurrPlayer) + ". " + currPlayer.fullName + " " +currPlayer.position + " - Predicted Score 2022 = " 
-                    + currPlayer.predictedScore + ", Avg ADP = " + currPlayer.avgADP + "<br />")
-                }
-                document.getElementById("playerListPar").innerHTML = returnVal
+                currPlayer = data[intCurrPlayer]
+                returnVal += ((1+Number(intCurrPlayer)) + ". " + currPlayer.fullName + " " +currPlayer.position + " - Predicted Score 2022 = " 
+                + currPlayer.predictedScore + ", Avg ADP = " + currPlayer.avgADP + "<br />")
+            }
+            document.getElementById("playerListPar").innerHTML = returnVal
         }
     </script>
 
@@ -73,12 +75,59 @@
                 var data = await res.json()
                 console.log(data)
 
-                document.getElementById("draftFormDiv").innerHTML = ""
+                document.getElementById("draftFormDiv").innerHTML = "";
                 updatePlayerListPar(data)
-                document.getElementById("draftControllerForm").style.display = "block"
-                document.getElementById("draftLogPar").innerHTML = "Waiting for user input..."
+                if (draftPosition == 1) {
+                    document.getElementById("draftControllerForm").style.display = "block";
+                    document.getElementById("currPick").innerHTML = "1";
+                    document.getElementById("nextUserPick").innerHTML = "1";
+                }
+                else {
+                    document.getElementById("waitingDraftControllerForm").style.display = "block";
+                    document.getElementById("currPick").innerHTML = "1";
+                    document.getElementById("nextUserPick").innerHTML = draftPosition;
+
+                }
+                document.getElementById("draftLogPar").innerHTML = "Waiting for user input...";
             }
         }
+    </script>
+
+<script>
+    function updateDraftLogPar(data) {
+        returnVal = ""
+        for(var nextDraftPick in data) {
+                returnVal += data[nextDraftPick] + "<br />"
+            }
+        document.getElementById("draftLogPar").innerHTML = returnVal
+    }
+</script>
+
+    <script>
+        async function simulateToNextPick() {
+            var nextUserPick = parseInt(document.getElementById("nextUserPick").innerHTML)
+            var res = await
+            fetch(("http://localhost:8080/api/teams/simTo/?nextUserPick="+nextUserPick), {
+                body: JSON.stringify({
+                        nextUserPick:nextUserPick,
+                    }),
+                    method: 'POST',
+                })
+            var data = await res.json()
+            console.log(data)
+
+            document.getElementById("draftLogPar").innerHTML = ""
+            updateDraftLogPar(data);
+            
+            document.getElementById("draftControllerForm").style.display = "block";
+            document.getElementById("currPick").innerHTML = nextUserPick
+            document.getElementById("nextUserPick").innerHTML = nextUserPick;
+
+            await getPlayerLeft();
+
+            
+        }
+        
     </script>
 
 </head>
@@ -104,7 +153,7 @@
             </div>
         </div>
         <br>
-        <div class="row id="draftProgess">
+        <div class="row" id="draftProgess">
             <div class="col-4"  id="playeLeftListCol">
                 <div id="playerListDiv"> 
                     <h3 style="text-align: center">Players Left</h3>
@@ -115,8 +164,13 @@
                 <div id="draftControllFormCol">
                     <h3 style="text-align: center">Draft Controls</h3>
                     <br>
+                    <form id="waitingDraftControllerForm" style="display: none; text-align: center;">
+                    <p>Currently pick is <span id="currPick">1</span>, your next pick is <span id="nextUserPick"></span>. 
+                        Click the button below to simulate to your next draft pick.</p>
+                    <input type="button" value="Simulate" onClick="simulateToNextPick()">  
+                    </form>
                     <form id="draftControllerForm" style="display: none; text-align: center;">
-                        <p>Enter number next to playe to draft: <input type="text" id="nextDraftPick"></p>
+                        <p>Enter number next to player to draft: <input type="text" id="nextDraftPick"></p>
                         <input type="button" value="Draft Player" onClick="draftPlayer(document.getElementById('nextDraftPick').value)">
                     </form>
                 </div>

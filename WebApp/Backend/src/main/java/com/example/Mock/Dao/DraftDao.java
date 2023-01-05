@@ -5,11 +5,11 @@ import com.example.Mock.StartingClasses.PlayerModel;
 
 public interface DraftDao {
     public List<PlayerModel> startDraft(String teamName, int draftSize, int desiredDraftPosition);
-    public void getPlayersLeft();
-    public void getPlayersDrafted();
+    public List<PlayerModel> getPlayersLeft();
+    public List<PlayerModel> getPlayersDrafted();
     public void getTeamOject();
     public void getTeamString();
-    public void simComputerPicks(); 
+    public List<String> simComputerPicks(int nextUserPick); 
 
 
 }

@@ -18,13 +18,13 @@ public class DraftDataObject implements DraftDao {
 
     public List<PlayerModel> startDraft(String teamName, int draftSize, int desiredDraftPosition){
         this.mockDraft.createdDraftEnv(teamName, draftSize, desiredDraftPosition);
+        return this.getPlayersLeft();
+    }
+    public List<PlayerModel> getPlayersLeft(){
         return this.mockDraft.returnPlayers();
     }
-    public void getPlayersLeft(){
-
-    }
-    public void getPlayersDrafted(){
-
+    public List<PlayerModel> getPlayersDrafted(){
+        return this.getPlayersLeft();
     }
     public void getTeamOject(){
 
@@ -32,7 +32,7 @@ public class DraftDataObject implements DraftDao {
     public void getTeamString(){
 
     }
-    public void simComputerPicks(){
-
+    public List<String> simComputerPicks(int nextUserPick){
+        return this.mockDraft.simTo(nextUserPick);
     }
 }
