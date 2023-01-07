@@ -28,6 +28,7 @@ public class VaribleOddsPicker {
 		}
 		else this.randomGenValue = 6;
 		return this.returnInt();
+
 	}
 	
 	private int returnInt() {

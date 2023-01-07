@@ -8,59 +8,85 @@ public class DraftHandler {
 	private ArrayList<PlayerModel> playersLeft;
 	private ArrayList<TeamModel> teams;
 	private VaribleOddsPicker randomNumGen;
-	private int currRoundPick; 
+	private int currRoundPick;
+	private int currRound;
+	private int nextUserPick;
 	
 	public DraftHandler(ArrayList<PlayerModel> startingPlayers, int numTeams, String userTeamName, String desiredDraftPickString) {
 		this.playersLeft = startingPlayers;
 		this.randomNumGen = new VaribleOddsPicker();
 		this.teams = new ArrayList<TeamModel>();
-		int desiredDraftPickInt;
+		this.currRoundPick = 1;
+		this.currRound = 1;
+
 
 		if(desiredDraftPickString.matches("R") ||
 		desiredDraftPickString.matches("r")) {
-			desiredDraftPickInt = (int)Math.floor(Math.random() * numTeams) +1;
+			this.nextUserPick = (int)Math.floor(Math.random() * numTeams) +1;
 		}
-		else desiredDraftPickInt = Integer.parseInt(desiredDraftPickString);
+		else this.nextUserPick = Integer.parseInt(desiredDraftPickString);
 
 		for(int currTeamNum = 1; currTeamNum <= numTeams; currTeamNum++) {
-			if(currTeamNum == desiredDraftPickInt) {
+			if(currTeamNum == this.nextUserPick) {
 				this.teams.add(new TeamModel(userTeamName,true,currTeamNum));
 			}
 			else this.teams.add(new TeamModel("Test Team " + currTeamNum, false,currTeamNum));
 		}
-		this.currRoundPick = 1;
 	}
 
-	public void startDraft() {
-		while(this.playersLeft.size() >= this.teams.size() &&
-			this.teams.get(0).getTeamSize() <= 15) { 
-			for(TeamModel currTeam : this.teams) {
-				this.nextDraftPick(currTeam,-1);
-			}
-			Collections.reverse(this.teams);
+	public ArrayList<PlayerModel> simTo(){
+		ArrayList<PlayerModel> computerDraftLog = new ArrayList<PlayerModel>();
+		while (this.currRoundPick != this.nextUserPick && this.currRound <= 15) {
+			TeamModel currTeam = this.teams.get(this.currRoundPick-1);
+			PlayerModel playerPicked = this.nextDraftPick(currTeam,this.currRoundPick);
+			playerPicked.setSpotDrafted(this.currRound+"."+this.currRoundPick);
+			playerPicked.setTeamDraftedBy(currTeam.getTeamName());
+			computerDraftLog.add(playerPicked);
+			this.checkForChangesInDraftEnv();
 		}
-
-	}
-
-	public ArrayList<String> simTo(int nextUserPick){
-		ArrayList<String> computerDraftLog = new ArrayList<String>();
-		while (currRoundPick != nextUserPick) {
-			TeamModel currTeam = this.teams.get(currRoundPick-1);
-			String draftLog = this.nextDraftPick(currTeam,currRoundPick);
-			System.out.println(draftLog);
-			computerDraftLog.add(draftLog);
-			if(currRoundPick+1 > this.teams.size()) {
-				Collections.reverse(this.teams);
-				currRoundPick = 1;
-			}
-			else {
-				currRoundPick++;
-			}
+		if (checkForEndOfDraft()) {
+			computerDraftLog.add(new PlayerModel(null, null, null,0,0,0));
 		}
 		return computerDraftLog;
 	}
 
+	public ArrayList<PlayerModel> userDraftPick(int pick) {
+		ArrayList<PlayerModel> userDraftLog = new ArrayList<PlayerModel>();
+		for (TeamModel currTeam: this.teams) {
+			if (currTeam.isUserTeam()) {
+				PlayerModel playerPicked = this.nextDraftPick(currTeam, pick);
+				playerPicked.setSpotDrafted(this.currRound+"."+this.currRoundPick);
+				playerPicked.setTeamDraftedBy(currTeam.getTeamName());
+				userDraftLog.add(playerPicked);
+				this.checkForChangesInDraftEnv();
+				break;
+			}
+		}
+		if (checkForEndOfDraft()) {
+			userDraftLog.add(new PlayerModel(null, null, null,0,0,0));
+		}
+		return userDraftLog;
+	}
 
+	public ArrayList<TeamModel> returnTeams() {
+		return this.teams;
+	}
+
+	public ArrayList<PlayerModel> retunPlayesLeft() {
+		return this.playersLeft;
+	}
+
+	public int getCurrRound() {
+		return this.currRound;
+	}
+
+	public int getCurrPick() {
+		return this.currRoundPick;
+	}
+
+	public int getNextUserPick() {
+		return this.nextUserPick;
+	}
 
 	private PlayerModel makeComputerDraftCertainPooss(TeamModel currTeam, int nextPick) {
 		if(currTeam.getTeamSize() == 8) {
@@ -104,14 +130,9 @@ public class DraftHandler {
 		return null;
 	}
 
-	private String nextDraftPick(TeamModel currTeam, int nextPick) {
+	private PlayerModel nextDraftPick(TeamModel currTeam, int nextPick) {
 		PlayerModel nextPlayer;
 		if(currTeam.isUserTeam()) {
-			//this.printNextAvilPlayers();
-			//System.out.println("Your pick.... \n Enter the number of the player in the list to draft");
-			//Scanner inputReader = new Scanner(System.in);
-			//nextPick = inputReader.nextInt();
-			//System.out.println();
 			nextPlayer = this.playersLeft.get(nextPick-1);
 		}
 		else {
@@ -123,43 +144,37 @@ public class DraftHandler {
 				nextPlayer = this.playersLeft.get(nextPick-1);
 			}
 		}
-		String currPickDraftLog = "Pick " + (this.teams.get(this.teams.size()-1).getTeamSize() + 1)+ "." + currRoundPick + " - " + currTeam.getTeamName()+ " picked " + nextPlayer;
-		currTeam.addPlayer(nextPlayer.getPosition(), nextPlayer);
-
 		this.playersLeft.remove(nextPlayer);
 		this.playersLeft.sort(null);
-		return currPickDraftLog;
+		return nextPlayer;
 	}
 
-	public void printTeams() {
+	private int findNexUserDraftPick(){
 		for(TeamModel currTeam : this.teams) {
-			System.out.println(currTeam);
+			if (currTeam.isUserTeam()) {
+				return this.teams.indexOf(currTeam)+1;
+			}
 		}
+		return -1;
 	}
 
-	public ArrayList<TeamModel> returnTeams() {
-		return this.teams;
-	}
-	
-	public ArrayList<PlayerModel> returnLeftPlayers() {
-		return this.playersLeft;
-	}
-
-	private void printNextAvilPlayers() {
-		System.out.println();
-		System.out.println("Next Available Players Eligible to Draft");
-		int maxSizeOfList = 6;
-		if(maxSizeOfList > this.playersLeft.size()) {
-			maxSizeOfList = this.playersLeft.size();
+	private void checkForChangesInDraftEnv() {
+		if(this.currRoundPick+1 > this.teams.size()) {
+			Collections.reverse(this.teams);
+			this.currRoundPick = 1;
+			this.currRound++;
+			this.nextUserPick = findNexUserDraftPick();
 		}
-		for(PlayerModel nextAvilPlayer : this.playersLeft.subList(0, maxSizeOfList)) {
-			System.out.println(this.playersLeft.indexOf(nextAvilPlayer)+1 + " - " + nextAvilPlayer);
+		else {
+			this.currRoundPick++;
 		}
-		System.out.println();
+		System.out.println(this.currRound+"."+this.currRoundPick);
 	}
 
-
-
-
-
+	private boolean checkForEndOfDraft() {
+		if (this.currRound > 15) {
+			return true;
+		}
+		return false;
+	}
 }

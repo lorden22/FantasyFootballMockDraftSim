@@ -7,6 +7,8 @@ public class PlayerModel implements Comparable<PlayerModel>{
 	private double predictedScore;
 	private double avgADP;
 	private double allowedReach;
+	private String spotDrafted;
+	private String teamDraftedBy;
 	
 	public PlayerModel(String firstName, String lastName, String position, double predictedScore, double avgADP, double positionAllowedReach) {
 		this.firstName = firstName;
@@ -18,7 +20,7 @@ public class PlayerModel implements Comparable<PlayerModel>{
 		this.fullName = this.firstName + " " + this.lastName;
 	}
 
-	private String getFirstName() {
+	public String getFirstName() {
 		return this.firstName;
 	}
 	private void setFirstName(String firstNameChange) {
@@ -82,7 +84,19 @@ public class PlayerModel implements Comparable<PlayerModel>{
 		}
 		else return 0;
 	}
+
+	public String getSpotDrafted() {
+		return this.spotDrafted;
+	}
+	public void setSpotDrafted(String spotDraftedChange) {
+		this.spotDrafted = spotDraftedChange;
+	}
 	
-	
-	
+	public String getTeamDraftedBy() {
+		return this.teamDraftedBy;
+	}
+
+	public void setTeamDraftedBy(String teamDraftedByChange) {
+		this.teamDraftedBy = teamDraftedByChange;
+	}
 }

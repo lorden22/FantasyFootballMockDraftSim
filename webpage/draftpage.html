@@ -1,8 +1,42 @@
 <!DOCTYPE html>
-<head lang="en">
+<head>
+    <lang="en">
     <title>2022 FootballMockDraft</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="styles.css">
+
+    <script>
+        async function getCurrRound() {
+            var res = await fetch("http://localhost:8080/api/teams/getCurrRound/",{
+                method: 'GET',
+            })
+            var data = await res.json()
+            console.log(data)
+            return data;
+        }   
+    </script>
+
+    <script>
+        async function getCurrPick() {
+            var res = await fetch("http://localhost:8080/api/teams/getCurrPick/",{
+                method: 'GET',
+            })
+            var data = await res.json()
+            console.log(data)
+            return data;
+        }   
+    </script>
+
+    <script>
+        async function getNextUserPick() {
+            var res = await fetch("http://localhost:8080/api/teams/getNextUserPick/",{
+                method: 'GET',
+            })
+            var data = await res.json()
+            console.log(data)
+            return data;
+        }   
+    </script>
 
     <script>
         async function getPlayerLeft() {
@@ -16,10 +50,10 @@
                 currPlayer = data[intCurrPlayer]
                 returnVal += ((1+Number(intCurrPlayer)) + ". " + currPlayer.fullName + " " +currPlayer.position + " - Predicted Score 2022 = " 
                 + currPlayer.predictedScore + ", Avg ADP = " + currPlayer.avgADP + "<br />")
+            }
+            console.log(returnVal)
+            document.getElementById("playerListPar").innerHTML = returnVal
         }
-        console.log(returnVal)
-        document.getElementById("playerListPar").innerHTML = returnVal
-    }
     </script>
 
     <script>
@@ -27,11 +61,89 @@
             returnVal = ""
             for(var intCurrPlayer in data) {
                 currPlayer = data[intCurrPlayer]
-                returnVal += ((1+Number(intCurrPlayer)) + ". " + currPlayer.fullName + " " +currPlayer.position + " - Predicted Score 2022 = " 
+                returnVal += ((1+Number(intCurrPlayer)) + ". " + currPlayer.fullName + ", " +currPlayer.position + " - Predicted Score 2022 = " 
                 + currPlayer.predictedScore + ", Avg ADP = " + currPlayer.avgADP + "<br />")
             }
             document.getElementById("playerListPar").innerHTML = returnVal
         }
+    </script>
+
+    <script>
+    async function parseDraftLogData(data) {
+        var updatedDraftLog
+        var currPick = await getCurrPick();
+        var currRound = await getCurrRound()
+
+        if (currPick == 1 && currRound == 1) {
+            document.getElementById("draftLogPar").innerHTML = ""
+            updatedDraftLog = ""
+        }
+        else updateVal = document.getElementById("draftLogPar").innerHTML;
+
+        for(var intCurrPlayer in data) {
+            currPlayer = data[intCurrPlayer]
+            console.log(currPlayer)
+            if (currPlayer.firstName == "null") {
+                await endDraft();
+            }
+           else {
+                updateVal += currPlayer.spotDrafted + " - " + currPlayer.teamDraftedBy + " picked " + currPlayer.fullName + ", " +currPlayer.position + " - Predicted Score 2022 = " +
+                currPlayer.predictedScore + ", Avg ADP = " + currPlayer.avgADP + "<br />"
+           }
+        }
+        document.getElementById("draftLogPar").innerHTML = updateVal
+    }
+    </script>
+
+    <script>
+    async function cheackToClearDraftLog() {
+        var currPick = await getCurrPick();
+        var currRound = await getCurrRound();
+        if (currPick == 1  && currRound == 1) {
+            document.getElementById("draftLogPar").innerHTML = ""
+        }
+    }
+    </script>
+
+    <script>
+        async function changeFormForNextPick() {
+            var nextDraftPick = await getCurrPick();
+            var currRound = await getCurrRound();
+            var nextUserPick = await getNextUserPick();
+
+            if (nextDraftPick == nextUserPick) {
+                document.getElementById("waitingDraftControllerForm").style.display = "none";
+                document.getElementById("draftControllerForm").style.display = "block";
+            }
+            else {
+                document.getElementById("waitingDraftControllerForm").style.display = "block";
+                document.getElementById("draftControllerForm").style.display = "none";
+            }
+
+            document.getElementById("nextUserPick").innerHTML = nextUserPick
+            document.getElementById("currPick").innerHTML =  nextDraftPick
+            document.getElementById("currUserPickRound").innerHTML = currRound
+            document.getElementById("currRound").innerHTML = currRound
+            document.getElementById("currUserPickSpot").innerHTML = nextUserPick;
+
+            if (currPick > nextDraftPick) {
+                document.getElementById("nextUserPickRoud").innerHTML = currRound;
+            }
+            else {
+                document.getElementById("nextUserPickRoud").innerHTML = currRound+1;
+            }
+        }
+    </script>
+
+    <script>
+        async function endDraft() {
+            if(await getCurrRound() >= 16) {
+                document.getElementById("draftControllerForm").style.display = "none";
+                document.getElementById("waitingDraftControllerForm").style.display = "none";
+                document.getElementById("draftCompleteForm").style.display = "block";
+            }
+        }
+
     </script>
 
     <script>
@@ -79,55 +191,57 @@
                 updatePlayerListPar(data)
                 if (draftPosition == 1) {
                     document.getElementById("draftControllerForm").style.display = "block";
-                    document.getElementById("currPick").innerHTML = "1";
-                    document.getElementById("nextUserPick").innerHTML = "1";
+                    document.getElementById("currPick").innerHTML = await getCurrPick();
+                    document.getElementById("nextUserPick").innerHTML = await getNextUserPick();
                 }
                 else {
                     document.getElementById("waitingDraftControllerForm").style.display = "block";
-                    document.getElementById("currPick").innerHTML = "1";
-                    document.getElementById("nextUserPick").innerHTML = draftPosition;
+                    document.getElementById("currPick").innerHTML =  await getCurrPick();   
+                    document.getElementById("nextUserPick").innerHTML = await getNextUserPick();
 
                 }
                 document.getElementById("draftLogPar").innerHTML = "Waiting for user input...";
+                getPlayerLeft()
+
             }
         }
     </script>
-
-<script>
-    function updateDraftLogPar(data) {
-        returnVal = ""
-        for(var nextDraftPick in data) {
-                returnVal += data[nextDraftPick] + "<br />"
-            }
-        document.getElementById("draftLogPar").innerHTML = returnVal
-    }
-</script>
-
     <script>
         async function simulateToNextPick() {
-            var nextUserPick = parseInt(document.getElementById("nextUserPick").innerHTML)
+            await cheackToClearDraftLog();          
             var res = await
-            fetch(("http://localhost:8080/api/teams/simTo/?nextUserPick="+nextUserPick), {
-                body: JSON.stringify({
-                        nextUserPick:nextUserPick,
+            fetch("http://localhost:8080/api/teams/simTo/", {
+                    method: 'POST',
+                })
+            var data = await res.json()
+    
+            await getPlayerLeft();
+            await changeFormForNextPick();
+            parseDraftLogData(data)
+        }
+    </script>
+
+    <script>
+        async function userDraftPlayer() {
+            await cheackToClearDraftLog();   
+            var playerToDraftIndex = parseInt(document.getElementById("nextDraftPick").value)
+
+            var res = await
+            fetch("http://localhost:8080/api/teams/userDraftPlayer/?playerIndex="+playerToDraftIndex, {
+                    body: JSON.stringify({
+                        playerToDraftIndex:playerToDraftIndex,
                     }),
                     method: 'POST',
                 })
             var data = await res.json()
             console.log(data)
 
-            document.getElementById("draftLogPar").innerHTML = ""
-            updateDraftLogPar(data);
             
-            document.getElementById("draftControllerForm").style.display = "block";
-            document.getElementById("currPick").innerHTML = nextUserPick
-            document.getElementById("nextUserPick").innerHTML = nextUserPick;
-
             await getPlayerLeft();
-
-            
-        }
-        
+            await changeFormForNextPick();
+            parseDraftLogData(data)
+            await endDraft();
+        }     
     </script>
 
 </head>
@@ -165,13 +279,18 @@
                     <h3 style="text-align: center">Draft Controls</h3>
                     <br>
                     <form id="waitingDraftControllerForm" style="display: none; text-align: center;">
-                    <p>Currently pick is <span id="currPick">1</span>, your next pick is <span id="nextUserPick"></span>. 
+                    <p>Currently pick is <span id="currRound">1</span>.<span id="currPick">1</span>, your next pick is <span id="nextUserPickRoud">1</span>.<span id="nextUserPick"></span>. 
                         Click the button below to simulate to your next draft pick.</p>
                     <input type="button" value="Simulate" onClick="simulateToNextPick()">  
                     </form>
                     <form id="draftControllerForm" style="display: none; text-align: center;">
+                        <p>It's your turn at pick <span id="currUserPickRound">1</span>.<span id="currUserPickSpot">1</span></p>
                         <p>Enter number next to player to draft: <input type="text" id="nextDraftPick"></p>
-                        <input type="button" value="Draft Player" onClick="draftPlayer(document.getElementById('nextDraftPick').value)">
+                        <input type="button" value="Draft Player" onClick="userDraftPlayer()">
+                    </form>
+                    <form id="draftCompleteForm" style="display: none; text-align: center;">
+                        <p>Draft Complete</p>
+                        <input type="button" value="Start New Draft" onClick="window.location.reload()">
                     </form>
                 </div>
             </div>

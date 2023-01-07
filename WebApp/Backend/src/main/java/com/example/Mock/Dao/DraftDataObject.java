@@ -23,16 +23,30 @@ public class DraftDataObject implements DraftDao {
     public List<PlayerModel> getPlayersLeft(){
         return this.mockDraft.returnPlayers();
     }
-    public List<PlayerModel> getPlayersDrafted(){
-        return this.getPlayersLeft();
+
+    public int getCurrPick(){
+        return this.mockDraft.getCurrPick();
     }
+
+    public int getCurrRound(){
+        return this.mockDraft.getCurrRound();
+    }
+
+    public int getNextUserPick(){
+        return this.mockDraft.getNextUserPick();
+    }
+
+    public List<PlayerModel> simComputerPicks(){
+        return this.mockDraft.simTo();
+    }
+
+    public List<PlayerModel> userDraftPick(int pick){
+        return this.mockDraft.userDraftPick(pick);
+    }
+
     public void getTeamOject(){
 
     }
     public void getTeamString(){
-
-    }
-    public List<String> simComputerPicks(int nextUserPick){
-        return this.mockDraft.simTo(nextUserPick);
     }
 }

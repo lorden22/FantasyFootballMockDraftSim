@@ -38,6 +38,18 @@ public class TeamsServices {
         return this.draftDao.getPlayersLeft();
     }
 
+    public int getCurrRound() {
+        return this.draftDao.getCurrRound();
+    }
+
+    public int getCurrPick(){
+        return this.draftDao.getCurrPick();
+    }
+
+    public int getNextUserPick(){
+        return this.draftDao.getNextUserPick();
+    }
+    
     public List<PlayerModel> getPlayersDraftedRanked() {
         return this.teamsDao.getPlayersDraftedRanked();
     }
@@ -46,7 +58,11 @@ public class TeamsServices {
         return this.draftDao.startDraft(teamName, draftSize, desiredDraftPosition);
     }
 
-    public List<String> simTo(int nextUserPick){
-        return this.draftDao.simComputerPicks(nextUserPick);
+    public List<PlayerModel> simTo(){
+        return this.draftDao.simComputerPicks();
+    }
+
+    public List<PlayerModel> userDraftPick(int pick){
+        return this.draftDao.userDraftPick(pick);
     }
 }

@@ -56,9 +56,29 @@ public class TeamsController {
     }
 
     @PostMapping(path="/simTo/")
-    public List<String> simtTo(
-        @RequestParam("nextUserPick") int nextUserPick) {
-            return this.teamsServices.simTo(nextUserPick);
+    public List<PlayerModel> simtTo() {
+            return this.teamsServices.simTo();
+    }
+
+    @GetMapping(path="/getCurrRound/")
+    public int getCurrRound() {
+        return this.teamsServices.getCurrRound();
+    }
+
+    @GetMapping(path="/getCurrPick/")
+    public int getCurrPick() {
+        return this.teamsServices.getCurrPick();
+    }
+
+    @GetMapping(path="/getNextUserPick/")
+    public int getNextUserPick() {
+        return this.teamsServices.getNextUserPick();
+    }
+
+    @PostMapping(path="/userDraftPlayer/")
+    public List<PlayerModel> userDraftPick(
+        @RequestParam("playerIndex") int playerIndex) {
+            return this.teamsServices.userDraftPick(playerIndex);
     }
 }
     
