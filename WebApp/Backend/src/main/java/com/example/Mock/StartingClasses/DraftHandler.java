@@ -11,6 +11,7 @@ public class DraftHandler {
 	private int currRoundPick;
 	private int currRound;
 	private int nextUserPick;
+	private int nextUserPickRound;
 	
 	public DraftHandler(ArrayList<PlayerModel> startingPlayers, int numTeams, String userTeamName, String desiredDraftPickString) {
 		this.playersLeft = startingPlayers;
@@ -18,7 +19,7 @@ public class DraftHandler {
 		this.teams = new ArrayList<TeamModel>();
 		this.currRoundPick = 1;
 		this.currRound = 1;
-
+		this.nextUserPickRound = 1;
 
 		if(desiredDraftPickString.matches("R") ||
 		desiredDraftPickString.matches("r")) {
@@ -36,12 +37,12 @@ public class DraftHandler {
 
 	public ArrayList<PlayerModel> simTo(){
 		ArrayList<PlayerModel> computerDraftLog = new ArrayList<PlayerModel>();
-		while (this.currRoundPick != this.nextUserPick && this.currRound <= 15) {
+		while (!(this.currRoundPick== this.nextUserPick && this.currRound == this.nextUserPickRound) && this.currRound <= 15) {
 			TeamModel currTeam = this.teams.get(this.currRoundPick-1);
 			PlayerModel playerPicked = this.nextDraftPick(currTeam,this.currRoundPick);
 			playerPicked.setSpotDrafted(this.currRound+"."+this.currRoundPick);
 			playerPicked.setTeamDraftedBy(currTeam.getTeamName());
-			computerDraftLog.add(playerPicked);
+			computerDraftLog.add(playerPicked);				
 			this.checkForChangesInDraftEnv();
 		}
 		if (checkForEndOfDraft()) {
@@ -58,6 +59,7 @@ public class DraftHandler {
 				playerPicked.setSpotDrafted(this.currRound+"."+this.currRoundPick);
 				playerPicked.setTeamDraftedBy(currTeam.getTeamName());
 				userDraftLog.add(playerPicked);
+				this.findUserNextDraftPick(this.teams);
 				this.checkForChangesInDraftEnv();
 				break;
 			}
@@ -149,26 +151,31 @@ public class DraftHandler {
 		return nextPlayer;
 	}
 
-	private int findNexUserDraftPick(){
-		for(TeamModel currTeam : this.teams) {
+	private void findUserNextDraftPick(ArrayList<TeamModel> teamsToCopy) {
+		ArrayList<TeamModel> copyOfTeams = new ArrayList<TeamModel>();
+		copyOfTeams.addAll(teamsToCopy);
+		Collections.reverse(copyOfTeams);
+	
+		for(TeamModel currTeam : copyOfTeams) {
 			if (currTeam.isUserTeam()) {
-				return this.teams.indexOf(currTeam)+1;
+				this.nextUserPick = copyOfTeams.indexOf(currTeam)+1;
+				break;
 			}
 		}
-		return -1;
+		this.nextUserPickRound++;
 	}
+
 
 	private void checkForChangesInDraftEnv() {
 		if(this.currRoundPick+1 > this.teams.size()) {
 			Collections.reverse(this.teams);
 			this.currRoundPick = 1;
 			this.currRound++;
-			this.nextUserPick = findNexUserDraftPick();
 		}
 		else {
 			this.currRoundPick++;
 		}
-		System.out.println(this.currRound+"."+this.currRoundPick);
+		System.out.println(this.currRound+"."+this.currRoundPick  + " - nextUserPick: " + this.nextUserPickRound  + "." + this.nextUserPick);
 	}
 
 	private boolean checkForEndOfDraft() {

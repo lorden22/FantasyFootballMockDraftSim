@@ -76,15 +76,16 @@
 
         if (currPick == 1 && currRound == 1) {
             document.getElementById("draftLogPar").innerHTML = ""
-            updatedDraftLog = ""
+            updateVal = ""
         }
         else updateVal = document.getElementById("draftLogPar").innerHTML;
 
         for(var intCurrPlayer in data) {
             currPlayer = data[intCurrPlayer]
             console.log(currPlayer)
-            if (currPlayer.firstName == "null") {
+            if (currPlayer.firstName == null) {
                 await endDraft();
+                break;
             }
            else {
                 updateVal += currPlayer.spotDrafted + " - " + currPlayer.teamDraftedBy + " picked " + currPlayer.fullName + ", " +currPlayer.position + " - Predicted Score 2022 = " +
@@ -110,6 +111,7 @@
             var nextDraftPick = await getCurrPick();
             var currRound = await getCurrRound();
             var nextUserPick = await getNextUserPick();
+            console.log(currRound + "." + nextDraftPick + " - " + nextUserPick)
 
             if (nextDraftPick == nextUserPick) {
                 document.getElementById("waitingDraftControllerForm").style.display = "none";
@@ -120,30 +122,32 @@
                 document.getElementById("draftControllerForm").style.display = "none";
             }
 
-            document.getElementById("nextUserPick").innerHTML = nextUserPick
             document.getElementById("currPick").innerHTML =  nextDraftPick
-            document.getElementById("currUserPickRound").innerHTML = currRound
             document.getElementById("currRound").innerHTML = currRound
-            document.getElementById("currUserPickSpot").innerHTML = nextUserPick;
 
-            if (currPick > nextDraftPick) {
-                document.getElementById("nextUserPickRoud").innerHTML = currRound;
-            }
+            if (currRound >= 15 && nextDraftPick > nextUserPick){
+                document.getElementById("nextPickInfo").innerHTML = "The Draft will end at the end of this round. " +
+                    "Press the button below to end the draft."
+            } 
             else {
+                document.getElementById("nextUserPick").innerHTML = nextUserPick                
                 document.getElementById("nextUserPickRoud").innerHTML = currRound+1;
+                document.getElementById("currUserPickRound").innerHTML = currRound
+                document.getElementById("currUserPickSpot").innerHTML = nextUserPick;
             }
         }
     </script>
 
     <script>
         async function endDraft() {
-            if(await getCurrRound() >= 16) {
+            if( await getCurrRound() >=16) {
                 document.getElementById("draftControllerForm").style.display = "none";
                 document.getElementById("waitingDraftControllerForm").style.display = "none";
-                document.getElementById("draftCompleteForm").style.display = "block";
+                document.getElementById("draftCompleteForm").style.display = "block"
+                return true;
             }
+            else return false;
         }
-
     </script>
 
     <script>
@@ -206,6 +210,7 @@
             }
         }
     </script>
+
     <script>
         async function simulateToNextPick() {
             await cheackToClearDraftLog();          
@@ -216,8 +221,11 @@
             var data = await res.json()
     
             await getPlayerLeft();
-            await changeFormForNextPick();
             parseDraftLogData(data)
+
+            if (await endDraft() == false) {
+                await changeFormForNextPick();
+            }
         }
     </script>
 
@@ -236,11 +244,12 @@
             var data = await res.json()
             console.log(data)
 
-            
             await getPlayerLeft();
-            await changeFormForNextPick();
             parseDraftLogData(data)
-            await endDraft();
+
+            if (await endDraft() == false) {
+                await changeFormForNextPick();
+            }
         }     
     </script>
 
@@ -279,8 +288,8 @@
                     <h3 style="text-align: center">Draft Controls</h3>
                     <br>
                     <form id="waitingDraftControllerForm" style="display: none; text-align: center;">
-                    <p>Currently pick is <span id="currRound">1</span>.<span id="currPick">1</span>, your next pick is <span id="nextUserPickRoud">1</span>.<span id="nextUserPick"></span>. 
-                        Click the button below to simulate to your next draft pick.</p>
+                    <p>Currently pick is <span id="currRound">1</span>.<span id="currPick">1</span>, <span id=nextPickInfo>your next pick is <span id="nextUserPickRoud">1</span>.<span id="nextUserPick"></span>. 
+                        Click the button below to simulate to your next draft pick.</span></p>
                     <input type="button" value="Simulate" onClick="simulateToNextPick()">  
                     </form>
                     <form id="draftControllerForm" style="display: none; text-align: center;">
