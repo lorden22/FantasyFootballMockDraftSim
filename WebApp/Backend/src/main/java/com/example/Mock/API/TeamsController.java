@@ -4,24 +4,23 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import com.example.Mock.Service.TeamsServices;
 import com.example.Mock.StartingClasses.PlayerModel;
 
 @RequestMapping("api/teams")
-
+@CrossOrigin
 @RestController
 public class TeamsController {
     private final TeamsServices teamsServices;
     
-    @Autowired
     public TeamsController(TeamsServices teamsServices){
         this.teamsServices = teamsServices;
     }

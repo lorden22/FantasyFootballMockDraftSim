@@ -2,3 +2,21 @@
     margin: 0 !important;
     padding: 0 !important;
 }
+
+html,
+body{
+    background-color: lightgrey;
+    height: 100%;
+    width: 100%;
+}
+
+.fillScreen{
+    height: 100%;
+    width: 100%;
+}
+
+
+
+.draftProgressPanel{
+    border: 1px solid black;
+}
