@@ -192,6 +192,8 @@
                 var data = await res.json()
                 console.log(data)
 
+                document.cookie = "teamName=" + teamName;
+
                 document.getElementById("draftFormDiv").innerHTML = "";
                 updatePlayerListPar(data)
                 if (draftPosition == 1) {

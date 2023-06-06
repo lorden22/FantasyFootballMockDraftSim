@@ -3,16 +3,21 @@ package com.example.Mock.Dao;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import com.example.Mock.StartingClasses.MockDraftDriver;
 import com.example.Mock.StartingClasses.PlayerModel;
 
-@Repository("Draft")
+@Repository
+@Scope(value="prototype")
 public class DraftDataObject implements DraftDao {
+
     private MockDraftDriver mockDraft;
 
     public DraftDataObject() {
+        System.out.println("DraftDataObject created");
         this.mockDraft = new MockDraftDriver();
     }
 
@@ -45,7 +50,6 @@ public class DraftDataObject implements DraftDao {
     }
 
     public void getTeamOject(){
-
     }
     public void getTeamString(){
     }

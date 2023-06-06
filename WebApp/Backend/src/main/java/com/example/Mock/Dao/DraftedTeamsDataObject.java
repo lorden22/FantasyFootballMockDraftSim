@@ -7,32 +7,36 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.TreeMap;
 
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
 import com.example.Mock.StartingClasses.PlayerModel;
 import com.example.Mock.StartingClasses.TeamModel;
 
-@Repository("Teams")
+@Repository
+@Scope(value="prototype")
 public class DraftedTeamsDataObject implements TeamsDao {
-    private static List<TeamModel> teamsDB;
-    private static List<PlayerModel> playersLeftDB;
+    private List<TeamModel> teamsDB;
+    private List<PlayerModel> playersLeftDB;
 
 
     public DraftedTeamsDataObject() {
+        System.out.println("DraftedTeamsDataObject created");
     }
 
-    public static void updateTeams(List<TeamModel> teaList) {
-        teamsDB = teaList;
+    public void updateTeams(List<TeamModel> teaList) {
+        this.teamsDB = teaList;
     }
 
-    public static void updatePlayers(List<PlayerModel> playersLeft) {
-        playersLeftDB = playersLeft;
-        playersLeftDB.sort(null);
+    public void updatePlayers(List<PlayerModel> playersLeft) {
+        this.playersLeftDB = playersLeft;
+        this.playersLeftDB.sort(null);
     }
 
     public List<PlayerModel> getPlayersDraftedRanked() {
         ArrayList<PlayerModel> playersDrafted = new ArrayList<PlayerModel>();
-        for (TeamModel currTeam : teamsDB) {
+        for (TeamModel currTeam : this.teamsDB) {
             for(String currPostion : currTeam.getTeamTreeMap().keySet()) {
                 playersDrafted.addAll(currTeam.getTeamTreeMap().get(currPostion));
             }
@@ -42,16 +46,16 @@ public class DraftedTeamsDataObject implements TeamsDao {
     }
 
     public List<PlayerModel> getPlayersLeft() {
-        return playersLeftDB;
+        return this.playersLeftDB;
     }
 
     @Override
     public TreeMap<String,ArrayList<PlayerModel>> getTeamObject(int teamNumber) {
-        return teamsDB.get(teamNumber).getTeamTreeMap();
+        return this.teamsDB.get(teamNumber).getTeamTreeMap();
     }
 
     @Override
     public String getTeamString(int teamNumber) {
-        return teamsDB.get(teamNumber).toString();
+        return this.teamsDB.get(teamNumber).toString();
     }
 }
