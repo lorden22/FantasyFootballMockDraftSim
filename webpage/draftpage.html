@@ -6,9 +6,28 @@
     <link rel="stylesheet" href="styles.css">
 
     <script>
-
+        function getCookie(cname) {
+            let name = cname + "=";
+            let decodedCookie = decodeURIComponent(document.cookie);
+            let ca = decodedCookie.split(';');
+            for(let i = 0; i <ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) == ' ') {
+                c = c.substring(1);
+                }
+                if (c.indexOf(name) == 0) {
+                    console.log(c.substring(name.length, c.length))
+                    return c.substring(name.length, c.length)
+                }
+            }
+            console.log("No cookie found")
+            return "";
+        }
+    </script>
+    
+    <script>
         async function getCurrRound() {
-            var res = await fetch("http://localhost:8080/api/teams/getCurrRound/",{
+            var res = await fetch("http://localhost:8080/api/teams/getCurrRound/?teamName=" + getCookie("teamName"),{
                 method: 'GET',
             })
             var data = await res.json()
@@ -19,7 +38,7 @@
 
     <script>
         async function getCurrPick() {
-            var res = await fetch("http://localhost:8080/api/teams/getCurrPick/",{
+            var res = await fetch("http://localhost:8080/api/teams/getCurrPick/?teamName=" + getCookie("teamName"),{
                 method: 'GET',
             })
             var data = await res.json()
@@ -30,7 +49,7 @@
 
     <script>
         async function getNextUserPick() {
-            var res = await fetch("http://localhost:8080/api/teams/getNextUserPick/",{
+            var res = await fetch("http://localhost:8080/api/teams/getNextUserPick/?teamName="+getCookie("teamName"),{
                 method: 'GET',
             })
             var data = await res.json()
@@ -41,7 +60,7 @@
 
     <script>
         async function getPlayerLeft() {
-            var res = await fetch("http://localhost:8080/api/teams/getPlayersLeft/",{
+            var res = await fetch("http://localhost:8080/api/teams/getPlayersLeft/?teamName="+getCookie("teamName"),{
                 method: 'GET',
             })
             var data = await res.json()
@@ -182,11 +201,6 @@
             if (checkStartDraftInput(teamName,draftSize,draftPosition) == true) {
                 var res = await 
                 fetch(("http://localhost:8080/api/teams/startDraft/?teamName="+teamName+"&draftSize="+draftSize+"&draftPosition="+draftPosition), {
-                    body: JSON.stringify({
-                        teamName:teamName,
-                        draftSize:draftSize,
-                        draftPosition:draftPosition, 
-                    }),
                     method: 'POST',
                 })
                 var data = await res.json()
@@ -218,7 +232,7 @@
         async function simulateToNextPick() {
             await cheackToClearDraftLog();          
             var res = await
-            fetch("http://localhost:8080/api/teams/simTo/", {
+            fetch("http://localhost:8080/api/teams/simTo/?teamName="+getCookie("teamName"), {
                     method: 'POST',
                 })
             var data = await res.json()
@@ -238,10 +252,7 @@
             var playerToDraftIndex = parseInt(document.getElementById("nextDraftPick").value)
 
             var res = await
-            fetch("http://localhost:8080/api/teams/userDraftPlayer/?playerIndex="+playerToDraftIndex, {
-                    body: JSON.stringify({
-                        playerToDraftIndex:playerToDraftIndex,
-                    }),
+            fetch("http://localhost:8080/api/teams/userDraftPlayer/?teamName="+getCookie("teamName")+"&playerIndex="+playerToDraftIndex, {
                     method: 'POST',
                 })
             var data = await res.json()
@@ -254,6 +265,13 @@
                 await changeFormForNextPick();
             }
         }     
+    </script>
+
+    <script>
+        function reloadPage() {
+            document.cookie = "teamName=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            location.reload();
+        }
     </script>
 
 </head>
@@ -302,7 +320,7 @@
                     </form>
                     <form id="draftCompleteForm" style="display: none; text-align: center;">
                         <p>Draft Complete</p>
-                        <input type="button" value="Start New Draft" onClick="window.location.reload()">
+                        <input type="button" value="Start New Draft" onClick="reloadPage()">
                     </form>
                 </div>
             </div>
@@ -310,7 +328,7 @@
                 <div id="draftLogDiv"> 
                 <h3 style="text-align: center" >Draft Log</h3>
                 <p style="text-align: center" id="draftLogPar"></p>
-            </div> 
+            </div>
         </div>
     </div>
 </body>
