@@ -27,7 +27,6 @@ public class DraftServices {
     private DraftDataObject draftDataObject;
 
     public DraftServices() {
-        System.out.println("DraftServices constructor");
     }
     
    public TreeMap<String,ArrayList<PlayerModel>> getTeamObject(int teamNumber) {
@@ -59,11 +58,8 @@ public class DraftServices {
     }
 
     public List<PlayerModel> startDraft(String teamName, int draftSize, int desiredDraftPosition, DraftDataObject draftDataObject, DraftedTeamsDataObject draftedTeamsDataObject) {
-        System.out.println("DraftServices startDraft");
         this.draftDataObject = draftDataObject;
         this.draftedTeamsDataObject = draftedTeamsDataObject;
-        System.out.println(this.draftDataObject);
-        System.out.println(this.draftedTeamsDataObject);
         return this.draftDataObject.startDraft(teamName, draftSize, desiredDraftPosition);
     }
 

@@ -42,6 +42,7 @@ public class DraftHandler {
 			PlayerModel playerPicked = this.nextDraftPick(currTeam,this.currRoundPick);
 			playerPicked.setSpotDrafted(this.currRound+"."+this.currRoundPick);
 			playerPicked.setTeamDraftedBy(currTeam.getTeamName());
+			currTeam.addPlayer(playerPicked.getPosition(),playerPicked);
 			computerDraftLog.add(playerPicked);				
 			this.checkForChangesInDraftEnv();
 		}
@@ -101,12 +102,12 @@ public class DraftHandler {
 				return getNextFocredPosstion(currTeam, TightEndPlayerModel.POSITIONSHORTHANDLE,nextPick);
 			}
 		}
-		else if (currTeam.getTeamSize() == 13) {
+		else if (currTeam.getTeamSize() == 12) {
 			if (currTeam.getTeamTreeMap().get(KickerPlayerModel.POSITIONSHORTHANDLE).isEmpty()) {
 				return getNextFocredPosstion(currTeam, KickerPlayerModel.POSITIONSHORTHANDLE,nextPick);
 			}
 		}
-		else if (currTeam.getTeamSize() == 14) {
+		else if (currTeam.getTeamSize() == 13) {
 			if (currTeam.getTeamTreeMap().get(DefensePlayerModel.POSITIONSHORTHANDLE).isEmpty()) {
 				return getNextFocredPosstion(currTeam, DefensePlayerModel.POSITIONSHORTHANDLE,nextPick);
 			}
@@ -175,7 +176,6 @@ public class DraftHandler {
 		else {
 			this.currRoundPick++;
 		}
-		System.out.println(this.currRound+"."+this.currRoundPick  + " - nextUserPick: " + this.nextUserPickRound  + "." + this.nextUserPick);
 	}
 
 	private boolean checkForEndOfDraft() {

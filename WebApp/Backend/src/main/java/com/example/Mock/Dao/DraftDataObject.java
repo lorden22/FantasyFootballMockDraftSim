@@ -17,7 +17,6 @@ public class DraftDataObject implements DraftDao {
     private MockDraftDriver mockDraft;
 
     public DraftDataObject() {
-        System.out.println("DraftDataObject created");
         this.mockDraft = new MockDraftDriver();
     }
 

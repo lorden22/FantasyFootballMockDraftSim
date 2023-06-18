@@ -30,7 +30,6 @@ public class DraftController {
     private HashMap<String,DraftServices> allDraftServices;
 
     public DraftController() {
-        System.out.println("DraftController constructor");
         this.allDraftServices = new HashMap<String,DraftServices>();
     }
     

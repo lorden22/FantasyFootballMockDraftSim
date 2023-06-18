@@ -22,7 +22,6 @@ public class DraftedTeamsDataObject implements TeamsDao {
 
 
     public DraftedTeamsDataObject() {
-        System.out.println("DraftedTeamsDataObject created");
     }
 
     public void updateTeams(List<TeamModel> teaList) {
