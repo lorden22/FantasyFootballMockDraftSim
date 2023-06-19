@@ -1,4 +1,4 @@
-package com.example.Mock.Dao;
+package com.example.Mock.DAO;
 
 import java.util.ArrayList;
 import java.util.List;

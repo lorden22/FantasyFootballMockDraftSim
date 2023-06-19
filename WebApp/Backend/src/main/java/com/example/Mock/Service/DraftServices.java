@@ -15,8 +15,8 @@ import org.springframework.boot.origin.SystemEnvironmentOrigin;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
-import com.example.Mock.Dao.DraftDataObject;
-import com.example.Mock.Dao.DraftedTeamsDataObject;
+import com.example.Mock.DAO.DraftDataObject;
+import com.example.Mock.DAO.DraftedTeamsDataObject;
 import com.example.Mock.StartingClasses.PlayerModel;
 
 @Service

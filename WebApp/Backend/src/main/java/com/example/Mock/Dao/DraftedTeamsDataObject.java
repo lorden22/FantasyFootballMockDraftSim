@@ -1,4 +1,4 @@
-package com.example.Mock.Dao;
+package com.example.Mock.DAO;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -16,7 +16,7 @@ import com.example.Mock.StartingClasses.TeamModel;
 
 @Repository
 @Scope(value="prototype")
-public class DraftedTeamsDataObject implements TeamsDao {
+public class DraftedTeamsDataObject implements TeamsDAO {
     private List<TeamModel> teamsDB;
     private List<PlayerModel> playersLeftDB;
 
