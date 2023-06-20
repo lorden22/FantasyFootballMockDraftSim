@@ -249,3 +249,31 @@ function deleteTeam() {
         })
     location.reload();
 }
+
+async function addUser() {
+    var username = document.getElementsByName("username")[0].value
+    var password = document.getElementsByName("password")[0].value
+
+    console.log(username + " " + password);
+
+    var checkUserRes = await 
+    fetch("http://localhost:8080/api/users/checkUser/?userName="+username, {
+        method: 'GET',
+    })
+    var checkUserData = await checkUserRes.json()
+    console.log(checkUserData);
+    if (checkUserData == true)
+        alert("Username already taken. Try again.")
+    else {
+        var addUser = await 
+        fetch("http://localhost:8080/api/users/addUser/?userName="+username+"&password="+password, {
+            method: 'PUT',
+        })
+        var addUserRes = await addUser.json()
+        console.log(addUserRes);
+    }
+}
+
+
+
+

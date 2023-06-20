@@ -39,6 +39,7 @@ public class UserDataObject implements UserDAO {
         digest.update(this.salt.getBytes());
         byte[] hash = digest.digest(attemptedPassword.getBytes());
         String attemptedHashPassword = bypeArrayToString(hash);
+        System.out.println(attemptedHashPassword + " " + this.hashPassword);
         return attemptedHashPassword.equals(this.hashPassword);
     }
 
