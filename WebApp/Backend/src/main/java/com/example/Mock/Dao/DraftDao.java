@@ -3,7 +3,7 @@ package com.example.Mock.DAO;
 import java.util.List;
 import com.example.Mock.StartingClasses.PlayerModel;
 
-public interface DraftDao {
+public interface DraftDAO {
     public List<PlayerModel> startDraft(String teamName, int draftSize, int desiredDraftPosition);
     public List<PlayerModel> getPlayersLeft();
     public List<PlayerModel> simComputerPicks();

@@ -12,7 +12,7 @@ import com.example.Mock.StartingClasses.PlayerModel;
 
 @Repository
 @Scope(value="prototype")
-public class DraftDataObject implements DraftDao {
+public class DraftDataObject implements DraftDAO {
 
     private MockDraftDriver mockDraft;
 
