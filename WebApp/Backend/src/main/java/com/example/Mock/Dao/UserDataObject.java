@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 @Scope(value = "prototype")
-public class UserDataObject implements UserDAO {
+public class UserDataObject implements UserDAO  {
 
     private String username;
     private String hashPassword;
