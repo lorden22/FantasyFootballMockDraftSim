@@ -37,79 +37,87 @@ public class DraftController {
     
     @GetMapping(path="/getTeamObject/")
     public TreeMap<String,ArrayList<PlayerModel>> getTeamObject(
-        @RequestParam("teamName") String teamName,
-        @RequestParam("teamNumber") int teamNummber) {
-            return this.allDraftServices.get(teamName).getTeamObject(teamNummber);
+        @RequestParam("username") String username,
+        @RequestParam("teamnumber") int teamNummber) {
+            return this.allDraftServices.get(username).getTeamObject(teamNummber);
     }
 
     @GetMapping(path="/getTeamString/")
     public String getTeamString(
-        @RequestParam("teamName") String teamName,
+        @RequestParam("username") String username,
         @RequestParam("teamNumber") int teamNummber) {
-       return this.allDraftServices.get(teamName).getTeamString(teamNummber);
+       return this.allDraftServices.get(username).getTeamString(teamNummber);
     }
 
     @GetMapping(path="/getPlayersLeft/") 
     public List<PlayerModel> getPlayersLeft(
-        @RequestParam("teamName") String teamName) {
-        return this.allDraftServices.get(teamName).getPlayersLeft();
+        @RequestParam("username") String username) {
+        return this.allDraftServices.get(username).getPlayersLeft();
     }
 
     @GetMapping(path="/getPlayerDrafted/")
     public List<PlayerModel> getPlayerDrafted(
-        @RequestParam("teamName") String teamName) {
-            this.allDraftServices.get(teamName).getPlayersDraftedRanked().sort(null);
-            return this.allDraftServices.get(teamName).getPlayersDraftedRanked();
+        @RequestParam("username") String username) {
+            this.allDraftServices.get(username).getPlayersDraftedRanked().sort(null);
+            return this.allDraftServices.get(username).getPlayersDraftedRanked();
     }
 
     @PostMapping(path="/startDraft/")
     public List<PlayerModel> startDraft(
-       @RequestParam("teamName") String teamName, 
+        @RequestParam("username") String username,
+        @RequestParam("teamName") String teamName, 
         @RequestParam("draftSize") int draftSize, 
         @RequestParam("draftPosition") int draftPositios,
         @Autowired DraftServices draftServices,
         @Autowired DraftDataObject draftDataObject,
         @Autowired DraftedTeamsDataObject draftedTeamsDataObject) {
-            this.allDraftServices.put(teamName, draftServices);
-            return this.allDraftServices.get(teamName).startDraft(teamName, draftSize, draftPositios, draftDataObject, draftedTeamsDataObject);
+            this.allDraftServices.put(username, draftServices);
+            return this.allDraftServices.get(username).startDraft(teamName, draftSize, draftPositios, draftDataObject, draftedTeamsDataObject);
 
     }
 
     @PostMapping(path="/simTo/")
     public List<PlayerModel> simtTo(
-        @RequestParam("teamName") String teamName) {
-            return this.allDraftServices.get(teamName).simTo();
+        @RequestParam("username") String username) {
+            return this.allDraftServices.get(username).simTo();
     }
 
     @GetMapping(path="/getCurrRound/")
     public int getCurrRound(
-        @RequestParam("teamName") String teamName) {
-            return this.allDraftServices.get(teamName).getCurrRound();
+        @RequestParam("username") String username) {
+            return this.allDraftServices.get(username).getCurrRound();
     }
 
     @GetMapping(path="/getCurrPick/")
     public int getCurrPick(
-        @RequestParam("teamName") String teamName) {
-            return this.allDraftServices.get(teamName).getCurrPick();
+        @RequestParam("username") String username) {
+            return this.allDraftServices.get(username).getCurrPick();
     }
 
     @GetMapping(path="/getNextUserPick/")
     public int getNextUserPick(
-        @RequestParam("teamName") String teamName) {
-            return this.allDraftServices.get(teamName).getNextUserPick();
+        @RequestParam("username") String username) {
+            return this.allDraftServices.get(username).getNextUserPick();
     }
 
     @PostMapping(path="/userDraftPlayer/")
     public List<PlayerModel> userDraftPick(
-        @RequestParam("teamName") String teamName,
+        @RequestParam("username") String username,
         @RequestParam("playerIndex") int playerIndex) {
-            return this.allDraftServices.get(teamName).userDraftPick(playerIndex);
+            return this.allDraftServices.get(username).userDraftPick(playerIndex);
     }
 
     @DeleteMapping(path="/deleteThisDraft/")
-        public void deleteThisDraft(
-            @RequestParam("teamName") String teamName) {
-                this.allDraftServices.remove(teamName);
+    public void deleteThisDraft(
+        @RequestParam("username") String username) {
+            this.allDraftServices.remove(username);
+    }
+
+    @GetMapping(path="/checkForDraft/") 
+    public boolean checkForDraft(
+        @RequestParam("username") String username) {
+            return this.allDraftServices.containsKey(username);
     }
 }
+
     

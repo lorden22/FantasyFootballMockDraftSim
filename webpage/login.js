@@ -40,5 +40,3 @@ async function attemptLogin() {
     else
         alert("Login failed. Try different credentials.")
 }
-
-// Path: webpage/login.js

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>2022 FootballMockDraft Home</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" href="styles.css">
+        <script text="text/javascript" src="draftpage.js"></script>
+    </head>
+
+    <!--onload check if user has a draft in progress
+        Render one button for start or two for resume or delete of new draft
+        Edit existing html with username cookies, transfer from login to homepage to draftpage
+        Edit draftpage to remove draft panel, either adding to this page or
+        Creating another html page for getting info
+        Add bootstrap to this page and login page
+        create javascript for resuming draft and deleteing draft after homepage 
+        selection(api developemtn if needed
+    -->    
+
+    <body onload="checkUserDraftEnv()">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-12" style="text-align: center">
+                    <h1> 2022 Fantasy Football Mock Draft Home Page</h1>
+                </div>
+            </div>
+            <div class="row" id="homepageDraftController">
+        
+
+            </div>    
+            <div class="row" id="draftFormDiv">
+                <div class="col-sm-12" style="text-align: center">
+                    <p>Fill out the info below to start a draft</p>
+                    <div id="getDraftInfo">
+                        <form id="getDraftForm">
+                            <p>Team Name: <input type="text" id="teamNameInput"></p>
+                            <p>Number of Teams To Draft Against: <input type="text" id="sizeOfTeamsInput"></p>
+                            <p>Enter Your Desired Draft Position: <input type="text" id="draftPositionInput"></p>
+                            <input type="button" value="Start Draft" onClick="startDraft()">
+                        </form>
+                    </div>
+                </div>
+            </div>
+         </div>  
+    </body>
+  </html>  
