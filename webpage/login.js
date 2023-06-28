@@ -1,3 +1,6 @@
+import { getCookie, deleteCookie} from "./cookies.js";
+console.log("cookies.js imported");
+
 async function addUser() {
     var username = document.getElementsByName("username")[0].value
     var password = document.getElementsByName("password")[0].value
@@ -35,8 +38,24 @@ async function attemptLogin() {
 
     if (attemptLoginData == true) {
         alert("Login successful.")
+        document.cookie = "username="+username;
         window.location.href = "draftpage.html"
     }
     else
         alert("Login failed. Try different credentials.")
+}
+
+async function checkUserForDraftHistory() {
+    var username = getCo
+    var checkUserRes = await 
+    fetch("http://localhost:8080/api/login/checkUser/?username="+username, {
+        method: 'GET',
+    })
+    var checkUserData = await checkUserRes.json()
+
+    if (checkUserData == false)
+        alert("You must be logged in to view your draft history.")
+    else {
+        window.location.href = "draftHistory.html"
+    }
 }

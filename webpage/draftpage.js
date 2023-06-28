@@ -1,22 +1,18 @@
-// Purpose: Javascript for the draft page
-function getCookie(cname) {
-    let name = cname + "=";
-    let decodedCookie = decodeURIComponent(document.cookie);
-    let ca = decodedCookie.split(';');
-    for(let i = 0; i <ca.length; i++) {
-        let c = ca[i];
-        while (c.charAt(0) == ' ') {
-        c = c.substring(1);
-        }
-        if (c.indexOf(name) == 0) {
-            console.log(c.substring(name.length, c.length))
-            return c.substring(name.length, c.length)
-        }
+function loadUserName() {
+    console.log("UserName = " + getCookie("username"))
+    if(getCookie("username") == "") {
+        alert("You must be logged in to view this page.")
+        window.location.href = "loginpage.html"
     }
-    console.log("No cookie found")
-    return "";
+    else {
+        document.getElementById("userName").innerHTML = "Welcome " + getCookie("username")
+    }
 }
-    
+
+async function checkForUserDraftHistory() {
+    console.log("Need to add");
+}
+
 async function getCurrRound() {
     var res = await fetch("http://localhost:8080/api/teams/getCurrRound/?teamName=" + getCookie("teamName"),{
         method: 'GET',

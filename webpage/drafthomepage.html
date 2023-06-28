@@ -1,34 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title>2022 FootballMockDraft Home</title>
         <meta charset="utf-8">
+        <title>Home Page</title>
         <link rel="stylesheet" href="styles.css">
-        <script text="text/javascript" src="draftpage.js"></script>
+        <script src="draftpage.js" type="text/javascript"></script>
+        <script src="cookies.js" type="text/javascript"></script>
+        </script>
     </head>
 
     <!--onload check if user has a draft in progress
         Render one button for start or two for resume or delete of new draft
-        Edit existing html with username cookies, transfer from login to homepage to draftpage
-        Edit draftpage to remove draft panel, either adding to this page or
+        Done - Edit existing html with username cookies, transfer from login to homepage to draftpage
+        Done - Edit draftpage to remove draft panel, either adding to this page or
         Creating another html page for getting info
         Add bootstrap to this page and login page
         create javascript for resuming draft and deleteing draft after homepage 
         selection(api development if needed)
     -->    
 
-    <body onload="checkUserDraftEnv()">
+    <body onload="loadUserName()">
         <div class="container-fluid">
             <div class="row">
                 <div class="col-sm-12" style="text-align: center">
-                    <h1> 2022 Fantasy Football Mock Draft Home Page</h1>
+                    <h1> Welcome <span id="userNameSpan"></span></h1>
+                    <h2>2022 Fantasy Football Mock Draft Home Page</h2>
                 </div>
             </div>
-            <div class="row" id="homepageDraftController">
-        
-
+            <div class="row">
+                <div class="col-sm-12" style="text-align: center">
+                    <p>
+                        <input type="button" value="Resume Last Saved Draft" onClick="selectedResumeLastSavedDraft()">
+                        <input type="button" value="Start New Draft" onClick="selectedStartNewDraft()">
+                        <input type="button" value="View Draft History" onClick="selectedViewDraftHistory()">
+                    </p>    
+                </div>
             </div>    
-            <div class="row" id="draftFormDiv">
+            <div class="row" id="draftFormDiv" style="display: none">
                 <div class="col-sm-12" style="text-align: center">
                     <p>Fill out the info below to start a draft</p>
                     <div id="getDraftInfo">
@@ -41,6 +49,7 @@
                     </div>
                 </div>
             </div>
+
          </div>  
     </body>
   </html>  

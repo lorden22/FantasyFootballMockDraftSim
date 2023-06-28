@@ -1,66 +1,67 @@
 <!DOCTYPE html>
-<head>
-    <lang="en">
-    <title>2022 FootballMockDraft</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" href="styles.css">
-    <script text="text/javascript" src="draftpage.js"></script>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Draft Page</title>
+        <link rel="stylesheet" href="styles.css">
+        <script src="draftpage.js" type="module"></script>
+    
+    </head>
 
-
-</head>
-<body>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-sm-12" style="text-align: center">
-                <h1> 2022 Fantasy Football Mock Draft Sim Draft Page</h1>
+    <body>
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-sm-12" style="text-align: center">
+                    <h1> 2022 Fantasy Football Mock Draft Sim Draft Page</h1>
+                </div>
             </div>
-        </div>
-        <div class="row" id="draftFormDiv">
-            <div class="col-sm-12" style="text-align: center">
-                <p>Fill out the info below to start a draft</p>
-                <div id="getDraftInfo">
-                    <form id="getDraftForm" active="false">
-                        <p>Team Name: <input type="text" id="teamNameInput"></p>
-                        <p>Number of Teams To Draft Against: <input type="text" id="sizeOfTeamsInput"></p>
-                        <p>Enter Your Desired Draft Position: <input type="text" id="draftPositionInput"></p>
-                        <input type="button" value="Start Draft" onClick="startDraft()">
-                    </form>
+            <div class="row" id="draftFormDiv">
+                <div class="col-sm-12" style="text-align: center">
+                    <p>Fill out the info below to start a draft</p>
+                    <div id="getDraftInfo">
+                        <form id="getDraftForm" active="false">
+                            <p>Team Name: <input type="text" id="teamNameInput"></p>
+                            <p>Number of Teams To Draft Against: <input type="text" id="sizeOfTeamsInput"></p>
+                            <p>Enter Your Desired Draft Position: <input type="text" id="draftPositionInput"></p>
+                            <input type="button" value="Start Draft" onClick="startDraft()">
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="row" id="draftProgess">
+                <div class="col-4"  id="playeLeftListCol">
+                    <div id="playerListDiv"> 
+                        <h3 style="text-align: center">Players Left</h3>
+                        <p id="playerListPar"></p> 
+                    </div>
+                </div> 
+                <div class="col-4" id="draftControllerCol">
+                    <div id="draftControllFormCol">
+                        <h3 style="text-align: center">Draft Controls</h3>
+                        <br>
+                        <form id="waitingDraftControllerForm" style="display: none; text-align: center;">
+                        <p>Currently pick is <span id="currRound">1</span>.<span id="currPick">1</span>, <span id=nextPickInfo>your next pick is <span id="nextUserPickRoud">1</span>.<span id="nextUserPick"></span>. 
+                            Click the button below to simulate to your next draft pick.</span></p>
+                        <input type="button" value="Simulate" onClick="simulateToNextPick()">  
+                        </form>
+                        <form id="draftControllerForm" style="display: none; text-align: center;">
+                            <p>It's your turn at pick <span id="currUserPickRound">1</span>.<span id="currUserPickSpot">1</span></p>
+                            <p>Enter number next to player to draft: <input type="text" id="nextDraftPick"></p>
+                            <input type="button" value="Draft Player" onClick="userDraftPlayer()">
+                        </form>
+                        <form id="draftCompleteForm" style="display: none; text-align: center;">
+                            <p>Draft Complete</p>
+                            <input type="button" value="Start New Draft" onClick="reloadPage()">
+                        </form>
+                    </div>
+                </div>
+                <div class="col-4" id="draftLogCol">
+                    <div id="draftLogDiv"> 
+                    <h3 style="text-align: center" >Draft Log</h3>
+                    <p style="text-align: center" id="draftLogPar"></p>
                 </div>
             </div>
         </div>
-        <br>
-        <div class="row" id="draftProgess">
-            <div class="col-4"  id="playeLeftListCol">
-                <div id="playerListDiv"> 
-                    <h3 style="text-align: center">Players Left</h3>
-                    <p id="playerListPar"></p> 
-                </div>
-            </div> 
-            <div class="col-4" id="draftControllerCol">
-                <div id="draftControllFormCol">
-                    <h3 style="text-align: center">Draft Controls</h3>
-                    <br>
-                    <form id="waitingDraftControllerForm" style="display: none; text-align: center;">
-                    <p>Currently pick is <span id="currRound">1</span>.<span id="currPick">1</span>, <span id=nextPickInfo>your next pick is <span id="nextUserPickRoud">1</span>.<span id="nextUserPick"></span>. 
-                        Click the button below to simulate to your next draft pick.</span></p>
-                    <input type="button" value="Simulate" onClick="simulateToNextPick()">  
-                    </form>
-                    <form id="draftControllerForm" style="display: none; text-align: center;">
-                        <p>It's your turn at pick <span id="currUserPickRound">1</span>.<span id="currUserPickSpot">1</span></p>
-                        <p>Enter number next to player to draft: <input type="text" id="nextDraftPick"></p>
-                        <input type="button" value="Draft Player" onClick="userDraftPlayer()">
-                    </form>
-                    <form id="draftCompleteForm" style="display: none; text-align: center;">
-                        <p>Draft Complete</p>
-                        <input type="button" value="Start New Draft" onClick="reloadPage()">
-                    </form>
-                </div>
-            </div>
-            <div class="col-4" id="draftLogCol">
-                <div id="draftLogDiv"> 
-                <h3 style="text-align: center" >Draft Log</h3>
-                <p style="text-align: center" id="draftLogPar"></p>
-            </div>
-        </div>
-    </div>
-</body>
+    </body>
+</html>
