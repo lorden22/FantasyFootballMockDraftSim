@@ -12,4 +12,5 @@ public interface TeamsDAO {
     String getTeamString(int teamNumber);
     List<PlayerModel> getPlayersDraftedRanked();
     List<PlayerModel> getPlayersLeft();
+    
 }

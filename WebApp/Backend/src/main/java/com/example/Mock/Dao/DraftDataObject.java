@@ -48,8 +48,7 @@ public class DraftDataObject implements DraftDAO {
         return this.mockDraft.userDraftPick(pick);
     }
 
-    public void getTeamOject(){
-    }
-    public void getTeamString(){
+    public boolean isDraftOver(){
+        return this.mockDraft.isDraftOver();
     }
 }

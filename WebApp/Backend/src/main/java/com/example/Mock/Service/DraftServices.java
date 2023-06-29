@@ -23,11 +23,14 @@ import com.example.Mock.StartingClasses.PlayerModel;
 @Scope(value="prototype")
 public class DraftServices {
 
+    private HashMap<DraftDataObject, DraftedTeamsDataObject> allPastDrafts;
     private DraftedTeamsDataObject draftedTeamsDataObject;
     private DraftDataObject draftDataObject;
 
     public DraftServices() {
+        this.allPastDrafts = new HashMap<DraftDataObject, DraftedTeamsDataObject>();
     }
+
     
    public TreeMap<String,ArrayList<PlayerModel>> getTeamObject(int teamNumber) {
         return this.draftedTeamsDataObject.getTeamObject(teamNumber);
@@ -69,5 +72,23 @@ public class DraftServices {
 
     public List<PlayerModel> userDraftPick(int pick){
         return this.draftDataObject.userDraftPick(pick);
+    }
+
+    public boolean isDraftOver(){
+        return this.draftDataObject.isDraftOver();
+    }
+
+    public boolean checkForPastDrafts() {
+        return !this.allPastDrafts.isEmpty();
+    }
+
+    public boolean deleteThisDraft() {
+        this.draftedTeamsDataObject = null;
+        this.draftDataObject = null;
+        return checkForDraft();    
+    }
+
+    public boolean checkForDraft() {
+        return (this.draftedTeamsDataObject != null || this.draftDataObject != null);
     }
 }

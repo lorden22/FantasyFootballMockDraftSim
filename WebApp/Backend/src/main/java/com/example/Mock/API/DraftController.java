@@ -72,6 +72,7 @@ public class DraftController {
         @Autowired DraftDataObject draftDataObject,
         @Autowired DraftedTeamsDataObject draftedTeamsDataObject) {
             this.allDraftServices.put(username, draftServices);
+            System.out.println("username: " + username + " - has draftServices: " + this.allDraftServices.containsKey(username) + " - " + this.allDraftServices);
             return this.allDraftServices.get(username).startDraft(teamName, draftSize, draftPositios, draftDataObject, draftedTeamsDataObject);
 
     }
@@ -107,16 +108,29 @@ public class DraftController {
             return this.allDraftServices.get(username).userDraftPick(playerIndex);
     }
 
-    @DeleteMapping(path="/deleteThisDraft/")
-    public void deleteThisDraft(
+    @PostMapping(path="/deleteThisDraft/")
+    public boolean deleteThisDraft(
         @RequestParam("username") String username) {
-            this.allDraftServices.remove(username);
+            return this.allDraftServices.get(username).deleteThisDraft();
     }
 
-    @GetMapping(path="/checkForDraft/") 
+    @GetMapping(path="/checkForCurrentDrafts/")
     public boolean checkForDraft(
         @RequestParam("username") String username) {
-            return this.allDraftServices.containsKey(username);
+            if (this.allDraftServices.containsKey(username)) {
+                return this.allDraftServices.get(username).checkForDraft();
+            }
+            return false;
+    }
+
+    @GetMapping(path="/checkForPastDrafts/")
+    public boolean checkForPastDrafts(
+        @RequestParam("username") String username) {
+            if (this.allDraftServices.containsKey(username)) {
+                System.out.println("Checking for past drafts: " + username + " - " + this.allDraftServices.get(username).checkForPastDrafts());
+                return this.allDraftServices.get(username).checkForPastDrafts();
+            }
+            return false;
     }
 }
 

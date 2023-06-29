@@ -11,7 +11,5 @@ public interface DraftDAO {
     public int getCurrRound();
     public int getCurrPick();
     public int getNextUserPick();
-    public void getTeamOject();
-    public void getTeamString();
-
+    public boolean isDraftOver();
 }

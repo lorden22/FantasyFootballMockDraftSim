@@ -18,7 +18,7 @@ public class MockDraftDriver {
 	}
 
 	public void createdDraftEnv(String teamName, int draftSize, int desiredDraftPosition){
-		File playerStatFile = new File("WebApp/Backend/src/main/java/com/example/Mock/StartingClasses/WebScraping/PlayerData.txt");
+		File playerStatFile = new File("2022FantasyFootBallMockDraftSim\\WebApp\\Backend\\src\\main\\java\\com\\example\\Mock\\StartingClasses\\WebScraping\\PlayerData.txt");
 		TreeMap<String,ArrayList<Object>> allPlayers = new TreeMap<String,ArrayList<Object>>();
 		
 		try {
@@ -131,5 +131,9 @@ public class MockDraftDriver {
 		}
 		else pick = (rank % totalDraftPicksInRound) / 100.0;
 		return round+pick;
+	}
+
+	public boolean isDraftOver() {
+		return this.draftHandler.isDraftOver();
 	}
 }

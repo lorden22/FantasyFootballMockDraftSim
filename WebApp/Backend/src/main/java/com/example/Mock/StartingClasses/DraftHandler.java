@@ -12,9 +12,11 @@ public class DraftHandler {
 	private int currRound;
 	private int nextUserPick;
 	private int nextUserPickRound;
+	private boolean isDraftOver;
 	
 	public DraftHandler(ArrayList<PlayerModel> startingPlayers, int numTeams, String userTeamName, String desiredDraftPickString) {
 		this.playersLeft = startingPlayers;
+		this.isDraftOver = false;
 		this.randomNumGen = new VaribleOddsPicker();
 		this.teams = new ArrayList<TeamModel>();
 		this.currRoundPick = 1;
@@ -48,6 +50,7 @@ public class DraftHandler {
 		}
 		if (checkForEndOfDraft()) {
 			computerDraftLog.add(new PlayerModel(null, null, null,0,0,0));
+			this.isDraftOver = true;
 		}
 		return computerDraftLog;
 	}
@@ -67,6 +70,7 @@ public class DraftHandler {
 		}
 		if (checkForEndOfDraft()) {
 			userDraftLog.add(new PlayerModel(null, null, null,0,0,0));
+			this.isDraftOver = true;
 		}
 		return userDraftLog;
 	}
@@ -89,6 +93,10 @@ public class DraftHandler {
 
 	public int getNextUserPick() {
 		return this.nextUserPick;
+	}
+
+	public boolean isDraftOver() {
+		return this.isDraftOver;
 	}
 
 	private PlayerModel makeComputerDraftCertainPooss(TeamModel currTeam, int nextPick) {
