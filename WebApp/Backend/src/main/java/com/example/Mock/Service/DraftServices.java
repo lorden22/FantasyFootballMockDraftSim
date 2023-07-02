@@ -44,6 +44,10 @@ public class DraftServices {
         return this.draftDataObject.getPlayersLeft();
     }
 
+    public List<PlayerModel> getDraftedPlayers() {
+        return this.draftDataObject.getDraftedPlayers();
+    }
+
     public int getCurrRound() {
         return this.draftDataObject.getCurrRound();
     }

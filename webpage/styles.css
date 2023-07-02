@@ -21,3 +21,15 @@ body{
 .draftProgressPanel{
     border: 1px solid black;
 }
+
+.scrollable-col{
+    overflow-y: auto;
+    max-height: 98%;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.scrollable-col::-webkit-scrollbar {
+    width: 0.5em;
+}
+

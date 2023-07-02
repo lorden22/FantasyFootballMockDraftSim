@@ -6,6 +6,7 @@ import java.util.Scanner;
 
 public class DraftHandler {
 	private ArrayList<PlayerModel> playersLeft;
+	private ArrayList<PlayerModel> draftLog;
 	private ArrayList<TeamModel> teams;
 	private VaribleOddsPicker randomNumGen;
 	private int currRoundPick;
@@ -16,6 +17,7 @@ public class DraftHandler {
 	
 	public DraftHandler(ArrayList<PlayerModel> startingPlayers, int numTeams, String userTeamName, String desiredDraftPickString) {
 		this.playersLeft = startingPlayers;
+		this.draftLog = new ArrayList<PlayerModel>();
 		this.isDraftOver = false;
 		this.randomNumGen = new VaribleOddsPicker();
 		this.teams = new ArrayList<TeamModel>();
@@ -52,6 +54,7 @@ public class DraftHandler {
 			computerDraftLog.add(new PlayerModel(null, null, null,0,0,0));
 			this.isDraftOver = true;
 		}
+		this.draftLog.addAll(computerDraftLog);
 		return computerDraftLog;
 	}
 
@@ -72,6 +75,7 @@ public class DraftHandler {
 			userDraftLog.add(new PlayerModel(null, null, null,0,0,0));
 			this.isDraftOver = true;
 		}
+		this.draftLog.addAll(userDraftLog);
 		return userDraftLog;
 	}
 
@@ -81,6 +85,10 @@ public class DraftHandler {
 
 	public ArrayList<PlayerModel> retunPlayesLeft() {
 		return this.playersLeft;
+	}
+
+	public ArrayList<PlayerModel> returnDraftLog() {
+		return this.draftLog;
 	}
 
 	public int getCurrRound() {

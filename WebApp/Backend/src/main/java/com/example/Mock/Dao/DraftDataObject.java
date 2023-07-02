@@ -28,6 +28,10 @@ public class DraftDataObject implements DraftDAO {
         return this.mockDraft.returnPlayers();
     }
 
+    public List<PlayerModel> getDraftedPlayers(){
+        return this.mockDraft.returnDraftLog();
+    }
+
     public int getCurrPick(){
         return this.mockDraft.getCurrPick();
     }

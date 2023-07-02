@@ -10,66 +10,65 @@
     </head>
 
     <body class="bg-main text-center" onload="setUpDraft()">
-        <div class="container-fluid">
-            <div class="container-fluid">
-                <div class="row" id="miainHeadingDiv">
-                    <div class="col-sm-12" style="display: flex; justify-content: center; position: relative">
-                        <div id="welcome" class="text-center">
-                            <h1> Welcome <span id="userNameSpan"></span></h1> 
-                        </div>
-                        <div id="logoutButtonDiv" style="position: absolute; right: 0">
-                            <input type="button" id="homePageButton" value="Home Page" onClick="goToHomePage()">    
-                            <input type="button" id="logoutButton" value="Logout" onClick="deleteAllCookies()">
-                        </div>
-                    </div> 
-                </div>
-                <div class="row" id="secondaryHeadingDiv">
-                    <div class="col-sm-12" style="text-align: center">
-                        <h2 class="text-center">2022 Fantasy Football Mock Draft Home Page</h2> 
-                     </div>   
-                </div>
-            
-            <br>
-            <br>
-            <br>
+        <div class="container-fluid" style="height: 100vh;">
+            <div class="row" id="miainHeadingDiv">
+                <div class="col-sm-12" style="display: flex; justify-content: center; position: relative">
+                    <div id="welcome" class="text-center">
+                        <h1> Welcome <span id="userNameSpan"></span></h1> 
+                    </div>
+                    <div id="logoutButtonDiv" style="position: absolute; right: 0">
+                        <input type="button" id="homePageButton" value="Home Page" onClick="goToHomePage()">    
+                        <input type="button" id="logoutButton" value="Logout" onClick="deleteAllCookies()">
+                    </div>
+                </div> 
+            </div>
+            <div class="row" id="secondaryHeadingDiv">
+                <div class="col-sm-12" style="text-align: center">
+                    <h2 class="text-center">2022 Fantasy Football Mock Draft Page</h2> 
+                    </div>   
+            </div>
+        
+        <br>
+        <br>
+        <br>
 
-            <div class="row" id="draftProgess">
-                <div class="col-4"  id="playeLeftListCol">
-                    <div id="playerListDiv"> 
-                        <h3 class="text-center">Players Left</h3>
-                        <p id="playerListPar"></p> 
-                    </div>
-                </div>
-                <div class="col-4" id="draftControllerCol">
-                    <div id="draftControllFormCol">
-                        <h3 class="text-center">Draft Controls</h3>
-                        <br>
-                        <form id="draftNotStartedForm" class="text-center">
-                            <p>Draft has not started yet. Click the button below to start the draft.</p>
-                            <input type="button" value="Start Draft" onClick="startDraftFromDraftPage()">
-                        </form>
-                        <form id="waitingDraftControllerForm" style="display: none" class="text-center">
-                        <p>Currently pick is <span id="currRound">1</span>.<span id="currPick">1</span>, <span id=nextPickInfo>your next pick is <span id="nextUserPickRound">1</span>.<span id="nextUserPick"></span>. 
-                            Click the button below to simulate to your next draft pick.</span></p>
-                        <input type="button" value="Simulate" onClick="simulateToNextPick()">  
-                        </form>
-                        <form id="draftControllerForm" style="display: none" class="text-center">
-                            <p>It's your turn at pick <span id="currUserPickRound">1</span>.<span id="currUserPickSpot">1</span></p>
-                            <p>Enter number next to player to draft: <input type="text" id="nextDraftPick"></p>
-                            <input type="button" value="Draft Player" onClick="userDraftPlayer()">
-                        </form>
-                        <form id="draftCompleteForm" style="display: none" class="text-center">
-                            <p>Draft Complete</p>
-                            <input type="button" value="Home Page" onClick="endOfCurrentDraft()">
-                        </form>
-                    </div>
-                </div>
-                <div class="col-4" id="draftLogCol">
-                    <div id="draftLogDiv"> 
-                    <h3 class="text-center" >Draft Log</h3>
-                    <p class="text-center" id="draftLogPar"></p>
+        <div class="row" id="draftProgess" style="height: 100%;">
+            <div class="col-4 scrollable-col" id="playeLeftListCol" style="height: 100%">
+                <div id="playerListDiv" style="height: 100%;">                    > 
+                    <h3 class="text-center">Players Left</h3>
+                    <p id="playerListPar"></p> 
                 </div>
             </div>
+            <div class="col-4" id="draftControllerCol">
+                <div id="draftControllFormCol">
+                    <h3 class="text-center">Draft Controls</h3>
+                    <br>
+                    <form id="draftNotStartedForm" class="text-center">
+                        <p>Draft has not started yet. Click the button below to start the draft.</p>
+                        <input type="button" value="Start Draft" onClick="startDraftFromDraftPage()">
+                    </form>
+                    <form id="waitingDraftControllerForm" style="display: none" class="text-center">
+                    <p>Currently pick is <span id="currRound">1</span>.<span id="currPick">1</span>, <span id=nextPickInfo>your next pick is <span id="nextUserPickRound">1</span>.<span id="nextUserPick"></span>. 
+                        Click the button below to simulate to your next draft pick.</span></p>
+                    <input type="button" value="Simulate" onClick="simulateToNextPick()">  
+                    </form>
+                    <form id="draftControllerForm" style="display: none" class="text-center">
+                        <p>It's your turn at pick <span id="currUserPickRound">1</span>.<span id="currUserPickSpot">1</span></p>
+                        <p>Enter number next to player to draft: <input type="text" id="nextDraftPick"></p>
+                        <input type="button" value="Draft Player" onClick="userDraftPlayer()">
+                    </form>
+                    <form id="draftCompleteForm" style="display: none" class="text-center">
+                        <p>Draft Complete</p>
+                        <input type="button" value="Home Page" onClick="endOfCurrentDraft()">
+                    </form>
+                </div>
+            </div>
+            <div class="col-4 scrollable-col" id="draftLogCol">
+                <div id="draftLogDiv"> 
+                <h3 class="text-center" >Draft Log</h3>
+                <p class="text-center" id="draftLogPar"></p>
+            </div>
         </div>
-    </body>
+    </div>
+</body>
 </html>

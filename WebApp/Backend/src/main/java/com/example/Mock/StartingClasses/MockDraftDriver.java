@@ -110,6 +110,10 @@ public class MockDraftDriver {
 		return this.draftHandler.retunPlayesLeft();
 	}
 
+	public List<PlayerModel> returnDraftLog() {
+		return this.draftHandler.returnDraftLog();
+	}
+
 	public int getCurrPick() {
 		return this.draftHandler.getCurrPick();
 	}

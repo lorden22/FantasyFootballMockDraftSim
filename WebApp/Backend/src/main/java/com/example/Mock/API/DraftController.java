@@ -55,11 +55,17 @@ public class DraftController {
         return this.allDraftServices.get(username).getPlayersLeft();
     }
 
-    @GetMapping(path="/getPlayerDrafted/")
+    @GetMapping(path="/getUserPlayersDrafted/")
     public List<PlayerModel> getPlayerDrafted(
         @RequestParam("username") String username) {
             this.allDraftServices.get(username).getPlayersDraftedRanked().sort(null);
             return this.allDraftServices.get(username).getPlayersDraftedRanked();
+    }
+
+    @GetMapping(path="/getAllPlayersDrafted/")
+    public List<PlayerModel> getAllPlayersDrafted(
+        @RequestParam("username") String username) {
+            return this.allDraftServices.get(username).getDraftedPlayers();
     }
 
     @PostMapping(path="/startDraft/")

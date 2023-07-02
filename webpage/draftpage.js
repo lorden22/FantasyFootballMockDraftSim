@@ -163,15 +163,16 @@ async function setUpDraft() {
 
             document.getElementById("currPick").innerHTML = currPick
             document.getElementById("nextUserPick").innerHTML = nextUserPick
-            /*document.getElementById("draftLogPar").innerHTML = "Waiting for user input...";*/
-            getPlayerLeft();
         
         }
         else {
             document.getElementById("draftNotStartedForm").style.display = "none";
-            alert("Draft is over. Returning to home page to to start a new draft.");
-            getPlayerLeft();
         }
+        getPlayerLeft();
+        var res = await fetch("http://localhost:8080/api/teams/getAllPlayersDrafted/?username="+getCookie("username"),{
+            method: 'GET',})
+        var data = await res.json();
+        parseDraftLogData(data);s    
     }
     else if (draftType == "new") {
         console.log("Staring New draft");
