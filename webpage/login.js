@@ -35,7 +35,7 @@ async function attemptLogin() {
 
     if (attemptLoginData == true) {
         alert("Login successful.")
-        document.cookie = "username="+username;
+        document.cookie = "username="+username + "; path=/";
         window.location.href = "drafthomepage.html"
     }
     else

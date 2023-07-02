@@ -13,18 +13,26 @@
     <!--
         
         - Draft History Java scirpt, API and HTML
-        - Logged out button, API and, clearing cookies
         - Resume Draft APIs and switcing to draft page
         - Database
     -->    
 
-    <body class="bg-main text-center" onload="checkForUserDraftHistory()">
+    <body class="bg-main" onload="checkForUserDraftHistory()">
         <div class="container-fluid">
-            <div class="row">
+            <div class="row" id="miainHeadingDiv">
+                <div class="col-sm-12" style="display: flex; justify-content: center; position: relative">
+                    <div id="welcome" class="text-center">
+                        <h1> Welcome <span onload="loadUserName()" id="userNameSpan"></span></h1> 
+                    </div>
+                    <div style="position: absolute; right: 0">     
+                        <input type="button" id="logoutButton" value="Logout" onClick="deleteAllCookies()">
+                    </div>
+                </div> 
+            </div>
+            <div class="row" id="secondaryHeadingDiv">
                 <div class="col-sm-12" style="text-align: center">
-                    <h1> Welcome <span onload="loadUserName()" id="userNameSpan"></span></h1>
-                    <h2>2022 Fantasy Football Mock Draft Home Page</h2>
-                </div>
+                    <h2 class="text-center">2022 Fantasy Football Mock Draft Home Page</h2> 
+                 </div>   
             </div>
             <div class="row">
                 <div id="draftModeSelect" class="col-sm-12" style="text-align: center">

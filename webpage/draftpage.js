@@ -5,7 +5,7 @@ function loadUserName() {
         window.location.href = "loginpage.html"
     }
     else {
-        document.getElementById("userNameSpan").innerHTML =getCookie("username")
+        document.getElementById("userNameSpan").innerHTML = getCookie("username")
     }
 }
 
@@ -250,8 +250,8 @@ async function startDraft() {
         var data = await res.json()
         console.log(data)
 
-        document.cookie = "teamName=" + teamName;
-        document.cookie = "drafPosition=" + draftPosition;
+        document.cookie = "teamName=" + teamName + "; path=/";
+        document.cookie = "draftPosition=" + draftPosition + "; path=/";
     }
 }
 
