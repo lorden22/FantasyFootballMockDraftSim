@@ -1,12 +1,9 @@
-function loadUserName() {
-    console.log("UserName = " + getCookie("username"))
-    if(getCookie("username") == "") {
-        alert("You must be logged in to view this page.")
-        window.location.href = "loginpage.html"
-    }
-    else {
-        document.getElementById("userNameSpan").innerHTML = getCookie("username")
-    }
+function goToHomePage() {
+    deleteCookie("draftType");
+    deleteCookie("draftPosition");
+    deleteCookie("teamName");
+    window.location.href = "drafthomepage.html";
+
 }
 
 async function checkForUserDraftHistory() {
@@ -32,6 +29,17 @@ async function checkForUserDraftHistory() {
     }
 }
 
+function loadUserName() {
+    console.log("UserName = " + getCookie("username"))
+    if(getCookie("username") == "") {
+        alert("You must be logged in to view this page.")
+        window.location.href = "loginpage.html"
+    }
+    else {
+        document.getElementById("userNameSpan").innerHTML = getCookie("username")
+    }
+}
+
 async function selectedStartNewDraft() {
     var res = await fetch("http://localhost:8080/api/teams/checkForCurrentDrafts/?username="+getCookie("username"),{
         method: 'GET',})
@@ -47,11 +55,13 @@ async function selectedStartNewDraft() {
     }
 }
 
-function selectedResumeDraft() { 
-
+function selectedResumeLastSavedDraft () { 
+    document.cookie = "draftType=resume;path=/";
+    window.location.href = "draftpage.html";
 }
 
 function selectedViewPastDrafts() {
+
 }
 
 async function selectedDeleteCurrentDraft() {
@@ -64,12 +74,116 @@ async function selectedDeleteCurrentDraft() {
     document.getElementById("deleteDraftButton").style.display = "none";
 }
 
+async function startDraft() {
+
+    function checkStartDraftInput(teamName,draftSize,draftPosition) {
+        if (typeof teamName != "string") {
+            alert(teamName + " - Not a valid string value to name your team. Try again.")
+            return false
+        }
+        if (typeof draftSize != "number" ||
+            !Number.isInteger(draftSize)) {
+                alert(draftSize + " - Not a valid int entered for the draft size. Try again.")
+                return false
+        }
+        if (typeof draftPosition != "number" ||
+            !Number.isInteger(draftPosition) ||
+            draftPosition > draftSize) {
+                alert(draftPosition + " - Not a valid int entered for your starting draft position. Try again.")
+                return false
+        }
+        return true
+    }
+
+    var teamName = document.getElementById("teamNameInput").value
+    var draftSize = document.getElementById("sizeOfTeamsInput").value
+    draftSize = parseInt(draftSize)
+    var draftPosition = document.getElementById("draftPositionInput").value
+    draftPosition = parseInt(draftPosition)
+
+    if (checkStartDraftInput(teamName,draftSize,draftPosition) == true) {
+        var res = await 
+        fetch(("http://localhost:8080/api/teams/startDraft/?username="+getCookie("username")+"&teamName="+teamName+"&draftSize="+draftSize+"&draftPosition="+draftPosition), {
+            method: 'POST',
+        })
+        var data = await res.json()
+        console.log(data)
+
+        document.cookie = "teamName=" + teamName + "; path=/";
+        document.cookie = "draftPosition=" + draftPosition + "; path=/";
+    }
+    document.cookie = "draftType=new; path=/";
+    window.location.href = "draftpage.html"
+
+}
+
+async function endOfCurrentDraft() {
+    var res = await fetch("http://localhost:8080/api/teams/deleteThisDraft/?username="+getCookie("username"),{
+        method: 'POST',})
+    var boolForCurrentDraft = await res.json();
+    console.log(boolForCurrentDraft);    
+    goToHomePage();
+}
+
+async function setUpDraft() {
+    loadUserName();
+
+    var draftType = getCookie("draftType");
+    
+    if (draftType == "resume") {
+
+        var endOfDraft = await endDraft();
+
+        if (endOfDraft == false) {
+
+            document.getElementById("draftNotStartedForm").style.display = "none";
+            document.getElementById("waitingDraftControllerForm").style.display = "block";
+
+            var currPick = await getCurrPick();
+            var nextUserPick =  await getNextUserPick();
+            var currRound = await getCurrRound(); 
+
+            console.log("currPick = " + currPick)
+            console.log("nextUserPick = " + nextUserPick)
+            
+            if (currPick == nextUserPick) {
+                document.getElementById("draftControllerForm").style.display = "block";
+                document.getElementById("waitingDraftControllerForm").style.display = "none";
+                document.getElementById("currUserPickRound").innerHTML = currRound;
+                document.getElementById("currUserPickSpot").innerHTML = currPick;
+                
+            }
+            else {
+                document.getElementById("waitingDraftControllerForm").style.display = "block";
+                document.getElementById("currRound").innerHTML = currRound;
+                document.getElementById("nextUserPickRound").innerHTML = currRound + 1;
+
+
+            }
+
+            document.getElementById("currPick").innerHTML = currPick
+            document.getElementById("nextUserPick").innerHTML = nextUserPick
+            /*document.getElementById("draftLogPar").innerHTML = "Waiting for user input...";*/
+            getPlayerLeft();
+        
+        }
+        else {
+            document.getElementById("draftNotStartedForm").style.display = "none";
+            alert("Draft is over. Returning to home page to to start a new draft.");
+            getPlayerLeft();
+        }
+    }
+    else if (draftType == "new") {
+        console.log("Staring New draft");
+    }
+    else console.log("Error .... draftType = " + draftType);
+}
+
 async function startDraftFromDraftPage(){
     document.getElementById("draftNotStartedForm").style.display = "none";
 
     var draftPosition = getCookie("draftPosition")
 
-    document.getElementById("draftFormDiv").innerHTML = "";
     if (draftPosition == 1) {
         document.getElementById("draftControllerForm").style.display = "block";
         document.getElementById("currPick").innerHTML = await getCurrPick();
@@ -85,10 +199,8 @@ async function startDraftFromDraftPage(){
     getPlayerLeft();
 }
 
-
-
 async function getCurrRound() {
-    var res = await fetch("http://localhost:8080/api/teams/getCurrRound/?teamName=" + getCookie("teamName"),{
+    var res = await fetch("http://localhost:8080/api/teams/getCurrRound/?username=" + getCookie("username"),{
         method: 'GET',
     })
     var data = await res.json()
@@ -97,7 +209,7 @@ async function getCurrRound() {
 }   
 
 async function getCurrPick() {
-    var res = await fetch("http://localhost:8080/api/teams/getCurrPick/?teamName=" + getCookie("teamName"),{
+    var res = await fetch("http://localhost:8080/api/teams/getCurrPick/?username=" + getCookie("username"),{
         method: 'GET',
     })
     var data = await res.json()
@@ -106,7 +218,7 @@ async function getCurrPick() {
 }   
 
 async function getNextUserPick() {
-    var res = await fetch("http://localhost:8080/api/teams/getNextUserPick/?teamName="+getCookie("teamName"),{
+    var res = await fetch("http://localhost:8080/api/teams/getNextUserPick/?username="+getCookie("username"),{
         method: 'GET',
     })
     var data = await res.json()
@@ -115,7 +227,7 @@ async function getNextUserPick() {
 }   
 
 async function getPlayerLeft() {
-    var res = await fetch("http://localhost:8080/api/teams/getPlayersLeft/?teamName="+getCookie("teamName"),{
+    var res = await fetch("http://localhost:8080/api/teams/getPlayersLeft/?username="+getCookie("username"),{
         method: 'GET',
     })
     var data = await res.json()
@@ -166,7 +278,7 @@ async function parseDraftLogData(data) {
     document.getElementById("draftLogPar").innerHTML = updateVal
 }
 
-async function cheackToClearDraftLog() {
+async function checkToClearDraftLog() {
     var currPick = await getCurrPick();
     var currRound = await getCurrRound();
     if (currPick == 1  && currRound == 1) {
@@ -198,67 +310,16 @@ async function changeFormForNextPick() {
     } 
     else {
         document.getElementById("nextUserPick").innerHTML = nextUserPick                
-        document.getElementById("nextUserPickRoud").innerHTML = currRound+1;
+        document.getElementById("nextUserPickRound").innerHTML = currRound+1;
         document.getElementById("currUserPickRound").innerHTML = currRound
         document.getElementById("currUserPickSpot").innerHTML = nextUserPick;
     }
 }
 
-
-async function endDraft() {
-    if( await getCurrRound() >=16) {
-        document.getElementById("draftControllerForm").style.display = "none";
-        document.getElementById("waitingDraftControllerForm").style.display = "none";
-        document.getElementById("draftCompleteForm").style.display = "block"
-        return true;
-    }
-    else return false;
-}
-
-async function startDraft() {
-
-    function checkStartDraftInput(teamName,draftSize,draftPosition) {
-        if (typeof teamName != "string") {
-            alert(teamName + " - Not a valid string value to name your team. Try again.")
-            return false
-        }
-        if (typeof draftSize != "number" ||
-            !Number.isInteger(draftSize)) {
-                alert(draftSize + " - Not a valid int entered for the draft size. Try again.")
-                return false
-        }
-        if (typeof draftPosition != "number" ||
-            !Number.isInteger(draftPosition) ||
-            draftPosition > draftSize) {
-                alert(draftPosition + " - Not a valid int entered for your starting draft position. Try again.")
-                return false
-        }
-        return true
-    }
-
-    var teamName = document.getElementById("teamNameInput").value
-    var draftSize = document.getElementById("sizeOfTeamsInput").value
-    draftSize = parseInt(draftSize)
-    var draftPosition = document.getElementById("draftPositionInput").value
-    draftPosition = parseInt(draftPosition)
-
-    if (checkStartDraftInput(teamName,draftSize,draftPosition) == true) {
-        var res = await 
-        fetch(("http://localhost:8080/api/teams/startDraft/?username="+getCookie("username")+"&teamName="+teamName+"&draftSize="+draftSize+"&draftPosition="+draftPosition), {
-            method: 'POST',
-        })
-        var data = await res.json()
-        console.log(data)
-
-        document.cookie = "teamName=" + teamName + "; path=/";
-        document.cookie = "draftPosition=" + draftPosition + "; path=/";
-    }
-}
-
 async function simulateToNextPick() {
-    await cheackToClearDraftLog();          
+    await checkToClearDraftLog();          
     var res = await
-    fetch("http://localhost:8080/api/teams/simTo/?teamName="+getCookie("teamName"), {
+    fetch("http://localhost:8080/api/teams/simTo/?username="+getCookie("username"), {
             method: 'POST',
         })
     var data = await res.json()
@@ -272,11 +333,11 @@ async function simulateToNextPick() {
 }
 
 async function userDraftPlayer() {
-    await cheackToClearDraftLog();   
+    await checkToClearDraftLog();   
     var playerToDraftIndex = parseInt(document.getElementById("nextDraftPick").value)
 
     var res = await
-    fetch("http://localhost:8080/api/teams/userDraftPlayer/?teamName="+getCookie("teamName")+"&playerIndex="+playerToDraftIndex, {
+    fetch("http://localhost:8080/api/teams/userDraftPlayer/?username="+getCookie("username")+"&playerIndex="+playerToDraftIndex, {
             method: 'POST',
         })
     var data = await res.json()
@@ -288,22 +349,14 @@ async function userDraftPlayer() {
     if (await endDraft() == false) {
         await changeFormForNextPick();
     }
-}     
-
-function reloadPage() {
-    deleteTeam();
-    document.cookie = "teamName=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-    location.reload();
 }
 
-function deleteTeam() {
-    var teamName = getCookie("teamName")
-    fetch("http://localhost:8080/api/teams/deleteTeam/?teamName="+teamName, {
-            method: 'POST',
-        })
-    location.reload();
+async function endDraft() {
+    if( await getCurrRound() >=16) {
+        document.getElementById("draftControllerForm").style.display = "none";
+        document.getElementById("waitingDraftControllerForm").style.display = "none";
+        document.getElementById("draftCompleteForm").style.display = "block"
+        return true;
+    }
+    else return false;
 }
-
-
-
-

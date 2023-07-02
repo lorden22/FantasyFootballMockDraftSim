@@ -117,7 +117,9 @@ public class DraftController {
     @GetMapping(path="/checkForCurrentDrafts/")
     public boolean checkForDraft(
         @RequestParam("username") String username) {
+            System.out.println("Checking for current drafts: " + username + " - " + this.allDraftServices.containsKey(username));
             if (this.allDraftServices.containsKey(username)) {
+                System.out.println(" - " + this.allDraftServices.get(username).checkForDraft());
                 return this.allDraftServices.get(username).checkForDraft();
             }
             return false;
