@@ -11,7 +11,6 @@ from selenium.common.exceptions import NoSuchElementException
 import time
 
 print("Imports Done")
-
 def setUp():
     #Update Chrome webdriver path below
     PATH = ""

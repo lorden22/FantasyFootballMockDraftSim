@@ -1,8 +1,14 @@
 package com.example.Mock.StartingClasses;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.Scanner;
+
+import javax.print.DocFlavor.STRING;
 
 public class DraftHandler {
 	private ArrayList<PlayerModel> playersLeft;
@@ -14,6 +20,11 @@ public class DraftHandler {
 	private int nextUserPick;
 	private int nextUserPickRound;
 	private boolean isDraftOver;
+	private String userTeamName;
+	private int startingDraftPick;
+	private String draftDate;
+	private String draftTime;
+
 	
 	public DraftHandler(ArrayList<PlayerModel> startingPlayers, int numTeams, String userTeamName, String desiredDraftPickString) {
 		this.playersLeft = startingPlayers;
@@ -24,7 +35,15 @@ public class DraftHandler {
 		this.currRoundPick = 1;
 		this.currRound = 1;
 		this.nextUserPickRound = 1;
-
+		this.userTeamName = userTeamName;
+		this.startingDraftPick = Integer.parseInt(desiredDraftPickString);
+		Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+		DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
+		DateFormat timeFormat = new SimpleDateFormat("hh:mm: aa");
+		this.draftDate = dateFormat.format(cal.getTime());
+		this.draftTime = timeFormat.format(cal.getTime());
+		
 		if(desiredDraftPickString.matches("R") ||
 		desiredDraftPickString.matches("r")) {
 			this.nextUserPick = (int)Math.floor(Math.random() * numTeams) +1;
@@ -105,6 +124,26 @@ public class DraftHandler {
 
 	public boolean isDraftOver() {
 		return this.isDraftOver;
+	}
+
+	public String getUserTeamName() {
+		return this.userTeamName;
+	}
+
+	public int startingDraftPick() {
+		return this.startingDraftPick;
+	}
+
+	public int getDraftSize() {
+		return this.teams.size();
+	}
+
+	public String getDate() {
+		return this.draftDate;
+	}
+
+	public String getTime() {
+		return this.draftTime;
 	}
 
 	private PlayerModel makeComputerDraftCertainPooss(TeamModel currTeam, int nextPick) {

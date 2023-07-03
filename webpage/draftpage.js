@@ -31,13 +31,13 @@ async function checkForUserDraftHistory() {
 
 function loadUserName() {
     console.log("UserName = " + getCookie("username"))
-    if(getCookie("username") == "") {
+    /*if(getCookie("username") == "") {
         alert("You must be logged in to view this page.")
         window.location.href = "loginpage.html"
     }
     else {
         document.getElementById("userNameSpan").innerHTML = getCookie("username")
-    }
+    }*/
 }
 
 async function selectedStartNewDraft() {
@@ -60,8 +60,8 @@ function selectedResumeLastSavedDraft () {
     window.location.href = "draftpage.html";
 }
 
-function selectedViewPastDrafts() {
-
+function selectedViewDraftHistory() {
+    window.location.href = "draftHistory.html";
 }
 
 async function selectedDeleteCurrentDraft() {
@@ -360,4 +360,62 @@ async function endDraft() {
         return true;
     }
     else return false;
+}
+
+async function renderDraftHistoryTable() {
+    var res = await fetch("http://localhost:8080/api/teams/getDraftHistoryMetaData/?username="+getCookie("username"),{
+        method: 'GET',})
+    var data = await res.json()
+    console.log(data)
+    for(var intCurrDraftMetaData in data) {
+        var currDraftMetaDatadata = data[intCurrDraftMetaData]
+        var draftID = currDraftMetaDatadata.draftID;
+
+        var newDraftHisoryRow = document.createElement("tr");
+        newDraftHisoryRow.id = "draftHistoryRow" + draftID;
+
+        var newDraftHisoryRowDraftID = document.createElement("td");
+        newDraftHisoryRowDraftID.id = "draftHistoryRowDraftID" + draftID;
+        newDraftHisoryRowDraftID.innerHTML = draftID;
+
+        var newDraftHisoryRowTeamName = document.createElement("td");
+        newDraftHisoryRowTeamName.id = "draftHistoryRowTeamName" + draftID;
+        newDraftHisoryRowTeamName.innerHTML = currDraftMetaDatadata.teamName;
+
+        var newDraftHisoryRowDraftPosition = document.createElement("td");
+        newDraftHisoryRowDraftPosition.id = "draftHistoryRowDraftPosition" + draftID;
+        newDraftHisoryRowDraftPosition.innerHTML = currDraftMetaDatadata.draftPosition;
+
+        var newDraftHisoryRowDraftSize = document.createElement("td");
+        newDraftHisoryRowDraftSize.id = "draftHistoryRowDraftSize" + draftID;
+        newDraftHisoryRowDraftSize.innerHTML = currDraftMetaDatadata.draftSize;
+
+        var newDraftHisoryRowDraftDate = document.createElement("td");
+        newDraftHisoryRowDraftDate.id = "draftHistoryRowDraftDate" + draftID;
+        newDraftHisoryRowDraftDate.innerHTML = currDraftMetaDatadata.Date;
+
+        var newDraftHisoryRowDraftTime = document.createElement("td");
+        newDraftHisoryRowDraftTime.id = "draftHistoryRowDraftTime" + draftID;
+        newDraftHisoryRowDraftTime.innerHTML = currDraftMetaDatadata.Time;
+
+        var newDraftHisoryRowDraftViewDraft = document.createElement("btn");
+        newDraftHisoryRowDraftViewDraft.id = "draftHistoryRowDraftViewDraft" + draftID;
+        newDraftHisoryRowDraftViewDraft.innerHTML = "View Draft";
+        newDraftHisoryRowDraftViewDraft.onclick = function() {viewDraft(draftID)};
+        newDraftHisoryRowDraftViewDraft.className = "btn btn-primary";
+
+        newDraftHisoryRow.appendChild(newDraftHisoryRowDraftID);
+        newDraftHisoryRow.appendChild(newDraftHisoryRowTeamName);
+        newDraftHisoryRow.appendChild(newDraftHisoryRowDraftPosition);
+        newDraftHisoryRow.appendChild(newDraftHisoryRowDraftSize);
+        newDraftHisoryRow.appendChild(newDraftHisoryRowDraftDate);
+        newDraftHisoryRow.appendChild(newDraftHisoryRowDraftTime);
+        newDraftHisoryRow.appendChild(newDraftHisoryRowDraftViewDraft);
+
+        document.getElementById("draftHistoryTable").appendChild(newDraftHisoryRow);
+    }
+}
+
+function viewDraft(draftID) {
+    alert("Viewing Draft: " + draftID + " - is not yet implemented.")
 }

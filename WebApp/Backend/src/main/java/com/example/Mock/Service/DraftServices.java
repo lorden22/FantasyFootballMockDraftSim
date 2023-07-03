@@ -19,16 +19,21 @@ import com.example.Mock.DAO.DraftDataObject;
 import com.example.Mock.DAO.DraftedTeamsDataObject;
 import com.example.Mock.StartingClasses.PlayerModel;
 
+
 @Service
 @Scope(value="prototype")
 public class DraftServices {
 
-    private HashMap<DraftDataObject, DraftedTeamsDataObject> allPastDrafts;
+    private TreeMap<Integer,DraftedTeamsDataObject> allPastsDraftsTeamsObject;
+    private TreeMap<Integer,DraftDataObject> allPastsDraftsDataObject;
     private DraftedTeamsDataObject draftedTeamsDataObject;
     private DraftDataObject draftDataObject;
+    private int nextDraftID = 1;
 
     public DraftServices() {
-        this.allPastDrafts = new HashMap<DraftDataObject, DraftedTeamsDataObject>();
+        
+        this.allPastsDraftsTeamsObject = new TreeMap<Integer,DraftedTeamsDataObject>();
+        this.allPastsDraftsDataObject = new TreeMap<Integer,DraftDataObject>();
     }
 
     
@@ -67,15 +72,23 @@ public class DraftServices {
     public List<PlayerModel> startDraft(String teamName, int draftSize, int desiredDraftPosition, DraftDataObject draftDataObject, DraftedTeamsDataObject draftedTeamsDataObject) {
         this.draftDataObject = draftDataObject;
         this.draftedTeamsDataObject = draftedTeamsDataObject;
-        return this.draftDataObject.startDraft(teamName, draftSize, desiredDraftPosition);
+        return this.draftDataObject.startDraft(teamName, draftSize, desiredDraftPosition,this.nextDraftID);
     }
 
     public List<PlayerModel> simTo(){
-        return this.draftDataObject.simComputerPicks();
+        List<PlayerModel> players = this.draftDataObject.simComputerPicks();
+        if(this.draftDataObject.isDraftOver()) {
+            saveDraftHistory();
+        }
+        return players; 
     }
 
     public List<PlayerModel> userDraftPick(int pick){
-        return this.draftDataObject.userDraftPick(pick);
+        List<PlayerModel> players = this.draftDataObject.userDraftPick(pick);
+        if(this.draftDataObject.isDraftOver()) {
+            saveDraftHistory();
+        }
+        return players;
     }
 
     public boolean isDraftOver(){
@@ -83,7 +96,7 @@ public class DraftServices {
     }
 
     public boolean checkForPastDrafts() {
-        return !this.allPastDrafts.isEmpty();
+        return !(this.allPastsDraftsDataObject.isEmpty() && this.allPastsDraftsTeamsObject.isEmpty());
     }
 
     public boolean deleteThisDraft() {
@@ -94,5 +107,31 @@ public class DraftServices {
 
     public boolean checkForDraft() {
         return (this.draftedTeamsDataObject != null || this.draftDataObject != null);
+    }
+
+    public HashMap<String,String> returnDraftMetaData(int nextDraftID) {
+         return this.allPastsDraftsDataObject.get(nextDraftID).getDraftMetaData();
+    }
+
+    public List<PlayerModel> returnDraftedPlayers(int nextDraftID) {
+        return this.allPastsDraftsDataObject.get(nextDraftID).getDraftedPlayers();
+    }
+
+    public ArrayList<HashMap<String,String>> getDraftHistoryMetaData() {
+        System.out.println(this.allPastsDraftsDataObject.size());
+        System.out.println(this.allPastsDraftsTeamsObject.size());
+        ArrayList<HashMap<String,String>> allMetaData = new ArrayList<HashMap<String,String>>();
+        for(int currDraftIndex : this.allPastsDraftsDataObject.keySet()) {
+            System.out.println((currDraftIndex));
+            System.out.println(this.allPastsDraftsDataObject.get(currDraftIndex).getDraftMetaData());
+            allMetaData.add(this.allPastsDraftsDataObject.get(currDraftIndex).getDraftMetaData());
+        }
+        return allMetaData;
+    }
+
+    private void saveDraftHistory() {
+        this.allPastsDraftsDataObject.put(this.nextDraftID, this.draftDataObject);
+        this.allPastsDraftsTeamsObject.put(this.nextDraftID, this.draftedTeamsDataObject);
+        this.nextDraftID++;
     }
 }

@@ -1,5 +1,6 @@
 package com.example.Mock.API;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -139,6 +140,12 @@ public class DraftController {
                 return this.allDraftServices.get(username).checkForPastDrafts();
             }
             return false;
+    }
+
+    @GetMapping(path="/getDraftHistoryMetaData/")
+    public ArrayList<HashMap<String,String>>  getDraftHistoryMetaData(
+        @RequestParam("username") String username) {
+            return this.allDraftServices.get(username).getDraftHistoryMetaData();
     }
 }
 
