@@ -3,6 +3,7 @@ package com.example.Mock.DAO;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -70,4 +71,9 @@ public class DraftDataObject implements DraftDAO {
         draftInfo.put("Time", this.mockDraft.getTime());
         return draftInfo; 
     }
+
+    public List<TreeMap<String,ArrayList<PlayerModel>>> getDraftHistoryAllTeamsMap(){
+        return this.mockDraft.getAllTeamsMap();    
+    }
+
 }

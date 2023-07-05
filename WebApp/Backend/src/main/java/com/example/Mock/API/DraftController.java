@@ -24,6 +24,7 @@ import com.example.Mock.DAO.TeamsDAO;
 import com.example.Mock.Service.LoginServices;
 import com.example.Mock.Service.DraftServices;
 import com.example.Mock.StartingClasses.PlayerModel;
+import com.example.Mock.StartingClasses.TeamModel;
 
 @RequestMapping("api/teams")
 @CrossOrigin
@@ -36,31 +37,11 @@ public class DraftController {
         this.allDraftServices = new HashMap<String,DraftServices>();
     }
     
-    @GetMapping(path="/getTeamObject/")
-    public TreeMap<String,ArrayList<PlayerModel>> getTeamObject(
-        @RequestParam("username") String username,
-        @RequestParam("teamnumber") int teamNummber) {
-            return this.allDraftServices.get(username).getTeamObject(teamNummber);
-    }
-
-    @GetMapping(path="/getTeamString/")
-    public String getTeamString(
-        @RequestParam("username") String username,
-        @RequestParam("teamNumber") int teamNummber) {
-       return this.allDraftServices.get(username).getTeamString(teamNummber);
-    }
 
     @GetMapping(path="/getPlayersLeft/") 
     public List<PlayerModel> getPlayersLeft(
         @RequestParam("username") String username) {
         return this.allDraftServices.get(username).getPlayersLeft();
-    }
-
-    @GetMapping(path="/getUserPlayersDrafted/")
-    public List<PlayerModel> getPlayerDrafted(
-        @RequestParam("username") String username) {
-            this.allDraftServices.get(username).getPlayersDraftedRanked().sort(null);
-            return this.allDraftServices.get(username).getPlayersDraftedRanked();
     }
 
     @GetMapping(path="/getAllPlayersDrafted/")
@@ -147,6 +128,20 @@ public class DraftController {
         @RequestParam("username") String username) {
             return this.allDraftServices.get(username).getDraftHistoryMetaData();
     }
+
+    @GetMapping(path="/getDraftHistoryPlayerLog/")
+    public List<PlayerModel> getDraftHistoryPlayerLog(
+        @RequestParam("username") String username,
+        @RequestParam("draftID") int draftID) {
+            return this.allDraftServices.get(username).getDraftHistoryDraftedPlayerLog(draftID);
+    }
+
+    @GetMapping(path="/getDraftHistoryTeamReview/")
+    public List<TreeMap<String,ArrayList<PlayerModel>>> getDraftHistoryTeamReview(
+        @RequestParam("username") String username,
+        @RequestParam("draftID") int draftID) {
+            return this.allDraftServices.get(username).getDraftHistoryAllTeamsMap(draftID);
+    }
 }
 
-    
+     

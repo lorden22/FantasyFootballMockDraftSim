@@ -368,54 +368,84 @@ async function renderDraftHistoryTable() {
     var data = await res.json()
     console.log(data)
     for(var intCurrDraftMetaData in data) {
-        var currDraftMetaDatadata = data[intCurrDraftMetaData]
-        var draftID = currDraftMetaDatadata.draftID;
+        var currDraftMetaData = data[intCurrDraftMetaData]
+        var draftID = currDraftMetaData.draftID;
 
-        var newDraftHisoryRow = document.createElement("tr");
-        newDraftHisoryRow.id = "draftHistoryRow" + draftID;
+        var newDraftHistoryRow = document.createElement("tr");
+        newDraftHistoryRow.id = "draftHistoryRow" + draftID;
 
-        var newDraftHisoryRowDraftID = document.createElement("td");
-        newDraftHisoryRowDraftID.id = "draftHistoryRowDraftID" + draftID;
-        newDraftHisoryRowDraftID.innerHTML = draftID;
+        var newDraftHistoryRowDraftID = document.createElement("td");
+        newDraftHistoryRowDraftID.id = "draftHistoryRowDraftID" + draftID;
+        newDraftHistoryRowDraftID.innerHTML = draftID;
 
-        var newDraftHisoryRowTeamName = document.createElement("td");
-        newDraftHisoryRowTeamName.id = "draftHistoryRowTeamName" + draftID;
-        newDraftHisoryRowTeamName.innerHTML = currDraftMetaDatadata.teamName;
+        var newDraftHistoryRowTeamName = document.createElement("td");
+        newDraftHistoryRowTeamName.id = "draftHistoryRowTeamName" + draftID;
+        newDraftHistoryRowTeamName.innerHTML = currDraftMetaData.teamName;
 
-        var newDraftHisoryRowDraftPosition = document.createElement("td");
-        newDraftHisoryRowDraftPosition.id = "draftHistoryRowDraftPosition" + draftID;
-        newDraftHisoryRowDraftPosition.innerHTML = currDraftMetaDatadata.draftPosition;
+        var newDraftHistoryRowDraftPosition = document.createElement("td");
+        newDraftHistoryRowDraftPosition.id = "draftHistoryRowDraftPosition" + draftID;
+        newDraftHistoryRowDraftPosition.innerHTML = currDraftMetaData.draftPosition;
 
-        var newDraftHisoryRowDraftSize = document.createElement("td");
-        newDraftHisoryRowDraftSize.id = "draftHistoryRowDraftSize" + draftID;
-        newDraftHisoryRowDraftSize.innerHTML = currDraftMetaDatadata.draftSize;
+        var newDraftHistoryRowDraftSize = document.createElement("td");
+        newDraftHistoryRowDraftSize.id = "draftHistoryRowDraftSize" + draftID;
+        newDraftHistoryRowDraftSize.innerHTML = currDraftMetaData.draftSize;
 
-        var newDraftHisoryRowDraftDate = document.createElement("td");
-        newDraftHisoryRowDraftDate.id = "draftHistoryRowDraftDate" + draftID;
-        newDraftHisoryRowDraftDate.innerHTML = currDraftMetaDatadata.Date;
+        var newDraftHistoryRowDraftDate = document.createElement("td");
+        newDraftHistoryRowDraftDate.id = "draftHistoryRowDraftDate" + draftID;
+        newDraftHistoryRowDraftDate.innerHTML = currDraftMetaData.Date;
 
-        var newDraftHisoryRowDraftTime = document.createElement("td");
-        newDraftHisoryRowDraftTime.id = "draftHistoryRowDraftTime" + draftID;
-        newDraftHisoryRowDraftTime.innerHTML = currDraftMetaDatadata.Time;
+        var newDraftHistoryRowDraftTime = document.createElement("td");
+        newDraftHistoryRowDraftTime.id = "draftHistoryRowDraftTime" + draftID;
+        newDraftHistoryRowDraftTime.innerHTML = currDraftMetaData.Time;
 
-        var newDraftHisoryRowDraftViewDraft = document.createElement("btn");
-        newDraftHisoryRowDraftViewDraft.id = "draftHistoryRowDraftViewDraft" + draftID;
-        newDraftHisoryRowDraftViewDraft.innerHTML = "View Draft";
-        newDraftHisoryRowDraftViewDraft.onclick = function() {viewDraft(draftID)};
-        newDraftHisoryRowDraftViewDraft.className = "btn btn-primary";
+        var newDraftHistoryRowDraftViewDraft = document.createElement("btn");
+        newDraftHistoryRowDraftViewDraft.id = "draftHistoryRowDraftViewDraft" + draftID;
+        newDraftHistoryRowDraftViewDraft.innerHTML = "View Draft";
+        newDraftHistoryRowDraftViewDraft.onclick = function() {viewDraft(draftID)};
+        newDraftHistoryRowDraftViewDraft.className = "btn btn-primary";
 
-        newDraftHisoryRow.appendChild(newDraftHisoryRowDraftID);
-        newDraftHisoryRow.appendChild(newDraftHisoryRowTeamName);
-        newDraftHisoryRow.appendChild(newDraftHisoryRowDraftPosition);
-        newDraftHisoryRow.appendChild(newDraftHisoryRowDraftSize);
-        newDraftHisoryRow.appendChild(newDraftHisoryRowDraftDate);
-        newDraftHisoryRow.appendChild(newDraftHisoryRowDraftTime);
-        newDraftHisoryRow.appendChild(newDraftHisoryRowDraftViewDraft);
+        newDraftHistoryRow.appendChild(newDraftHistoryRowDraftID);
+        newDraftHistoryRow.appendChild(newDraftHistoryRowTeamName);
+        newDraftHistoryRow.appendChild(newDraftHistoryRowDraftPosition);
+        newDraftHistoryRow.appendChild(newDraftHistoryRowDraftSize);
+        newDraftHistoryRow.appendChild(newDraftHistoryRowDraftDate);
+        newDraftHistoryRow.appendChild(newDraftHistoryRowDraftTime);
+        newDraftHistoryRow.appendChild(newDraftHistoryRowDraftViewDraft);
 
-        document.getElementById("draftHistoryTable").appendChild(newDraftHisoryRow);
+        document.getElementById("draftHistoryTable").appendChild(newDraftHistoryRow);
     }
 }
 
 function viewDraft(draftID) {
-    alert("Viewing Draft: " + draftID + " - is not yet implemented.")
+    console.log(draftID)
+    document.cookie = "draftIDToView="+draftID;
+    window.location.href = "draftreview.html"
+}
+
+async function renderDraftReviewPage() {
+    loadUserName();
+}
+
+async function renderDraftHistoryPlayerLog() {
+    var res =  await fetch ("http://localhost:8080/api/teams/getDraftHistoryPlayerLog/?username="+getCookie("username")+"&draftID="+parseInt(getCookie("draftIDToView")), {
+        method: 'GET',
+    })
+    var data = await res.json()
+    
+    console.log(data);
+
+    /*document.getElementById("draftHistoryPlayerLog").style.display = "block";
+    document.getElementById("abc123").style.display = "none";
+    alert("Build API");*/
+}
+
+async function renderDraftHistoryTeamReview() {
+    var res = await fetch ("http://localhost:8080/api/teams/getDraftHistoryTeamReview/?username="+getCookie("username")+"&draftID="+parseInt(getCookie("draftIDToView")), {
+        method: 'GET',
+    })
+    var data = await res.json()
+
+    console.log(data);
+
+
 }

@@ -5,12 +5,10 @@ import java.util.List;
 import java.util.TreeMap;
 
 import com.example.Mock.DAO.DraftedTeamsDataObject;
-import com.example.Mock.StartingClasses.PlayerModel;;
+import com.example.Mock.StartingClasses.PlayerModel;
+import com.example.Mock.StartingClasses.TeamModel;;
 
 public interface TeamsDAO {
-    TreeMap<String,ArrayList<PlayerModel>> getTeamObject(int teamNumber);   
-    String getTeamString(int teamNumber);
-    List<PlayerModel> getPlayersDraftedRanked();
-    List<PlayerModel> getPlayersLeft();
-    
+    void updateTeams(List<TeamModel> teamsList);
+    List<TreeMap<String,ArrayList<PlayerModel>>> getAllTeamsTreeMap();
 }

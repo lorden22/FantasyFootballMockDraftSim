@@ -11,6 +11,7 @@ import javax.xml.crypto.dsig.keyinfo.RetrievalMethod;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.amqp.RabbitProperties.Template;
 import org.springframework.boot.origin.SystemEnvironmentOrigin;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
@@ -18,13 +19,13 @@ import org.springframework.stereotype.Service;
 import com.example.Mock.DAO.DraftDataObject;
 import com.example.Mock.DAO.DraftedTeamsDataObject;
 import com.example.Mock.StartingClasses.PlayerModel;
+import com.example.Mock.StartingClasses.TeamModel;
 
 
 @Service
 @Scope(value="prototype")
 public class DraftServices {
 
-    private TreeMap<Integer,DraftedTeamsDataObject> allPastsDraftsTeamsObject;
     private TreeMap<Integer,DraftDataObject> allPastsDraftsDataObject;
     private DraftedTeamsDataObject draftedTeamsDataObject;
     private DraftDataObject draftDataObject;
@@ -32,17 +33,7 @@ public class DraftServices {
 
     public DraftServices() {
         
-        this.allPastsDraftsTeamsObject = new TreeMap<Integer,DraftedTeamsDataObject>();
         this.allPastsDraftsDataObject = new TreeMap<Integer,DraftDataObject>();
-    }
-
-    
-   public TreeMap<String,ArrayList<PlayerModel>> getTeamObject(int teamNumber) {
-        return this.draftedTeamsDataObject.getTeamObject(teamNumber);
-    }
-
-    public String getTeamString(int teamNumber){
-        return this.draftedTeamsDataObject.getTeamString(teamNumber);
     }
 
     public List<PlayerModel> getPlayersLeft() {
@@ -65,10 +56,6 @@ public class DraftServices {
         return this.draftDataObject.getNextUserPick();
     }
     
-    public List<PlayerModel> getPlayersDraftedRanked() {
-        return this.draftedTeamsDataObject.getPlayersDraftedRanked();
-    }
-
     public List<PlayerModel> startDraft(String teamName, int draftSize, int desiredDraftPosition, DraftDataObject draftDataObject, DraftedTeamsDataObject draftedTeamsDataObject) {
         this.draftDataObject = draftDataObject;
         this.draftedTeamsDataObject = draftedTeamsDataObject;
@@ -96,7 +83,7 @@ public class DraftServices {
     }
 
     public boolean checkForPastDrafts() {
-        return !(this.allPastsDraftsDataObject.isEmpty() && this.allPastsDraftsTeamsObject.isEmpty());
+        return !(this.allPastsDraftsDataObject.isEmpty());
     }
 
     public boolean deleteThisDraft() {
@@ -106,7 +93,7 @@ public class DraftServices {
     }
 
     public boolean checkForDraft() {
-        return (this.draftedTeamsDataObject != null || this.draftDataObject != null);
+        return  this.draftDataObject != null;
     }
 
     public HashMap<String,String> returnDraftMetaData(int nextDraftID) {
@@ -119,7 +106,6 @@ public class DraftServices {
 
     public ArrayList<HashMap<String,String>> getDraftHistoryMetaData() {
         System.out.println(this.allPastsDraftsDataObject.size());
-        System.out.println(this.allPastsDraftsTeamsObject.size());
         ArrayList<HashMap<String,String>> allMetaData = new ArrayList<HashMap<String,String>>();
         for(int currDraftIndex : this.allPastsDraftsDataObject.keySet()) {
             System.out.println((currDraftIndex));
@@ -129,9 +115,17 @@ public class DraftServices {
         return allMetaData;
     }
 
+    public List<PlayerModel> getDraftHistoryDraftedPlayerLog(int draftID) {
+        return this.allPastsDraftsDataObject.get(draftID).getDraftedPlayers();
+    }
+
+    public List<TreeMap<String,ArrayList<PlayerModel>>> getDraftHistoryAllTeamsMap(int draftID) {
+        return this.allPastsDraftsDataObject.get(draftID).getDraftHistoryAllTeamsMap();
+    }
+
     private void saveDraftHistory() {
         this.allPastsDraftsDataObject.put(this.nextDraftID, this.draftDataObject);
-        this.allPastsDraftsTeamsObject.put(this.nextDraftID, this.draftedTeamsDataObject);
         this.nextDraftID++;
     }
+
 }

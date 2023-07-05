@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 import java.util.Scanner;
+import java.util.TreeMap;
 
 import javax.print.DocFlavor.STRING;
 
@@ -146,6 +148,14 @@ public class DraftHandler {
 		return this.draftTime;
 	}
 
+	public List<TreeMap<String,ArrayList<PlayerModel>>> getAllTeamsMap() {
+		List<TreeMap<String,ArrayList<PlayerModel>>> allTeamsMap = new ArrayList<TreeMap<String,ArrayList<PlayerModel>>>();
+		for(TeamModel currTeam : this.teams) {
+			allTeamsMap.add(currTeam.getTeamTreeMap());
+		}
+		return allTeamsMap;
+	}
+
 	private PlayerModel makeComputerDraftCertainPooss(TeamModel currTeam, int nextPick) {
 		if(currTeam.getTeamSize() == 8) {
 			if (currTeam.getTeamTreeMap().get(QuarterBackPlayerModel.POSITIONSHORTHANDLE).isEmpty()) {
@@ -235,6 +245,9 @@ public class DraftHandler {
 
 	private boolean checkForEndOfDraft() {
 		if (this.currRound > 15) {
+			for(TeamModel currTeam : this.teams) {
+				System.out.println(currTeam.getTeamTreeMap());
+			}
 			return true;
 		}
 		return false;

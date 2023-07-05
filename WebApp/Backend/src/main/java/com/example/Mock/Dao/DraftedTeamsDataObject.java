@@ -18,43 +18,23 @@ import com.example.Mock.StartingClasses.TeamModel;
 @Scope(value="prototype")
 public class DraftedTeamsDataObject implements TeamsDAO {
     private List<TeamModel> teamsDB;
-    private List<PlayerModel> playersLeftDB;
-
-
     public DraftedTeamsDataObject() {
     }
 
-    public void updateTeams(List<TeamModel> teaList) {
-        this.teamsDB = teaList;
+    public void updateTeams(List<TeamModel> teamsList) {
+        this.teamsDB = teamsList;
     }
 
-    public void updatePlayers(List<PlayerModel> playersLeft) {
-        this.playersLeftDB = playersLeft;
-        this.playersLeftDB.sort(null);
-    }
-
-    public List<PlayerModel> getPlayersDraftedRanked() {
-        ArrayList<PlayerModel> playersDrafted = new ArrayList<PlayerModel>();
+    public List<TreeMap<String,ArrayList<PlayerModel>>> getAllTeamsTreeMap(){
+        List<TreeMap<String,ArrayList<PlayerModel>>> teams = new ArrayList<TreeMap<String,ArrayList<PlayerModel>>>();
         for (TeamModel currTeam : this.teamsDB) {
-            for(String currPostion : currTeam.getTeamTreeMap().keySet()) {
-                playersDrafted.addAll(currTeam.getTeamTreeMap().get(currPostion));
-            }
+            teams.add(currTeam.getTeamTreeMap());
         }
-        playersDrafted.sort(null);
-        return playersDrafted;
+        return teams;
     }
 
-    public List<PlayerModel> getPlayersLeft() {
-        return this.playersLeftDB;
-    }
 
-    @Override
-    public TreeMap<String,ArrayList<PlayerModel>> getTeamObject(int teamNumber) {
-        return this.teamsDB.get(teamNumber).getTeamTreeMap();
-    }
 
-    @Override
-    public String getTeamString(int teamNumber) {
-        return this.teamsDB.get(teamNumber).toString();
-    }
+
+
 }
