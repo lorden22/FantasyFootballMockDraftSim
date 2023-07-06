@@ -100,7 +100,7 @@ public class DraftHandler {
 		return userDraftLog;
 	}
 
-	public ArrayList<TeamModel> returnTeams() {
+	public ArrayList<TeamModel> getTeams() {
 		return this.teams;
 	}
 

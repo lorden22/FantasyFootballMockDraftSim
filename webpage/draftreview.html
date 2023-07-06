@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-    <html lang="en">
+<html lang="en">
     <head>
         <meta charset="utf-8">
         <title>Draft Review</title>
@@ -32,15 +32,16 @@
                 <div class="col-sm-12 text-center">
                     <form id="draftReviewSelecterForm" style="display: inline">
                         <input button type="button" id="draftReviewButton" value="Player Draft Log Review" onClick="renderDraftHistoryPlayerLog()">
-                        <input button type="button" id="draftPageButton" value="Team Review" onClick="renderDraftHistoryTeamReview()">
+                        <input button type="button" id="draftPageButton" value="Team Review" onClick="renderDraftHistoryTeamHistorySelecter()">
                     </form>
                     <input button type="button" id="backButton" style="display: none" value="Back" onClick="resetDraftHistoryPage()">
+                    <p></p>
                 </div>
             </div>
             <div class="row" style="display: none;" id="draftHistoryPlayerLog">
                 <div class="col-sm-12">
                     <div id="draftReviewDiv">
-                        <table id="draftReviewTable" class="table table-striped table-dark">
+                        <table id="draftReviewTable" class="table table-striped table-dark text-center">
                             <thead class="thead-dark sticky-top">
                                         <th scope="col">Round</th>
                                         <th scope="col">Pick</th>
@@ -49,18 +50,41 @@
                                         <th scope="col">Predicted Score</th>
                                         <th scope="col">Team</th> 
                             </thead>
-                            <tbody id="draftReviewTableBody" class="scrollable-col">
+                            <tbody id="draftReviewPlayerLogBody" class="scrollable-col">
                                 <!-- table body content here -->
                             </tbody>
                         </table>
                     </div>
                 </div>
             </div>                       
-            <div class="row">
-                <div id="draftHistoryTeamReview">
+            <div class="row" id="teamHistoryRow">
+                <div class="col-3" id="teamHistorySelecter text-center">
+                    <table id="allTeamsTable" style="display: none;" class="table table-striped table-dark text-center">
+                        <thead class="thead-dark sticky-top">
+                                    <th style="width: 100%;" scope="col">Team</th>
+                                    <th style="width: 100%;" scope="col">View Team</th>     
+                        </thead>
+                        <tbody id="allTeamsTableBody" class="scrollable-col">
+                                <!-- table body content here -->
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-8" id="teamHistoryTeamCol">
+                    <table id="teamHistoryTable"  style="display: none;" class="table table-striped table-dark text-center">
+                        <thead class="thead-dark sticky-top">
+                                    <th scope="col">Depth Chart Position</th>
+                                    <th scope="col">Position</th>
+                                    <th scope="col">Player</th>
+                                    <th scope="col">Position</th>
+                                    <th scope="col">Predicted Score</th> 
+                        </thead>
+                        <tbody id="teamHistoryTableBody" class="scrollable-col">
+                            <!-- table body content here -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
-
+        </div>
     </body>
 </html>    
         

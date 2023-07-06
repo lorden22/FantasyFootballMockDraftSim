@@ -102,10 +102,6 @@ public class MockDraftDriver {
 		return this.draftHandler.userDraftPick(pick);
 	}
 
-	public ArrayList<TeamModel> returnTeams() {
-		return this.draftHandler.returnTeams();
-	}
-
 	public List<PlayerModel> returnPlayers() {
 		return this.draftHandler.retunPlayesLeft();
 	}
@@ -144,6 +140,10 @@ public class MockDraftDriver {
 
 	public String getTime() {
 		return this.draftHandler.getTime();
+	}
+
+	public List<TeamModel> getTeams() {
+		return this.draftHandler.getTeams();
 	}
 
 	private static double getADP(int totalDraftPicksInRound, double rank) { 

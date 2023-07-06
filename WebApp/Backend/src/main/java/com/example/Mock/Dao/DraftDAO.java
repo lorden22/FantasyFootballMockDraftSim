@@ -3,11 +3,13 @@ package com.example.Mock.DAO;
 import java.util.HashMap;
 import java.util.List;
 import com.example.Mock.StartingClasses.PlayerModel;
+import com.example.Mock.StartingClasses.TeamModel;
 
 public interface DraftDAO {
     public List<PlayerModel> startDraft(String teamName, int draftSize, int desiredDraftPosition, int draftID);
     public List<PlayerModel> getPlayersLeft();
     public List<PlayerModel> getDraftedPlayers();
+    public List<TeamModel> getTeams();
     public List<PlayerModel> simComputerPicks();
     public List<PlayerModel> userDraftPick(int pick); 
     public int getCurrRound();

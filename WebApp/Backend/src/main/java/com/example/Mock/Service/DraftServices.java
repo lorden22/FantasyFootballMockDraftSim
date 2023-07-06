@@ -27,12 +27,10 @@ import com.example.Mock.StartingClasses.TeamModel;
 public class DraftServices {
 
     private TreeMap<Integer,DraftDataObject> allPastsDraftsDataObject;
-    private DraftedTeamsDataObject draftedTeamsDataObject;
     private DraftDataObject draftDataObject;
     private int nextDraftID = 1;
 
     public DraftServices() {
-        
         this.allPastsDraftsDataObject = new TreeMap<Integer,DraftDataObject>();
     }
 
@@ -56,9 +54,8 @@ public class DraftServices {
         return this.draftDataObject.getNextUserPick();
     }
     
-    public List<PlayerModel> startDraft(String teamName, int draftSize, int desiredDraftPosition, DraftDataObject draftDataObject, DraftedTeamsDataObject draftedTeamsDataObject) {
+    public List<PlayerModel> startDraft(String teamName, int draftSize, int desiredDraftPosition, DraftDataObject draftDataObject) {
         this.draftDataObject = draftDataObject;
-        this.draftedTeamsDataObject = draftedTeamsDataObject;
         return this.draftDataObject.startDraft(teamName, draftSize, desiredDraftPosition,this.nextDraftID);
     }
 
@@ -87,7 +84,6 @@ public class DraftServices {
     }
 
     public boolean deleteThisDraft() {
-        this.draftedTeamsDataObject = null;
         this.draftDataObject = null;
         return checkForDraft();    
     }
@@ -121,6 +117,10 @@ public class DraftServices {
 
     public List<TreeMap<String,ArrayList<PlayerModel>>> getDraftHistoryAllTeamsMap(int draftID) {
         return this.allPastsDraftsDataObject.get(draftID).getDraftHistoryAllTeamsMap();
+    }
+
+    public List<TeamModel> getDraftHistoryTeamList(int draftID) {
+        return this.allPastsDraftsDataObject.get(draftID).getTeams();
     }
 
     private void saveDraftHistory() {

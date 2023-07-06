@@ -429,7 +429,7 @@ async function renderDraftReviewPage() {
 }
 
 async function renderDraftHistoryPlayerLog() {
-    var res =  await fetch ("http://localhost:8080/api/teams/getDraftHistoryPlayerLog/?username="+getCookie("username")+"&draftID="+parseInt(getCookie("draftIDToView")), {
+    var res =  await fetch ("http://localhost:8080/api/teams/getDraftHistoryPlayerLog/?username="+getCookie("username")+"&draftID="+getCookie("draftIDToView"), {
         method: 'GET',
     })
     var data = await res.json()
@@ -479,26 +479,81 @@ async function renderDraftHistoryPlayerLog() {
         newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogPlayerScore);
         newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogPlayerTeam);
 
-        document.getElementById("draftReviewTableBody").appendChild(newDraftHistoryPlayerLogRow);
+        document.getElementById("draftReviewPlayerLogBody").appendChild(newDraftHistoryPlayerLogRow);
     }
     document.getElementById("backButton").style.display = "inline";
 
 }
 
-async function renderDraftHistoryTeamReview() {
-    var res = await fetch ("http://localhost:8080/api/teams/getDraftHistoryTeamReview/?username="+getCookie("username")+"&draftID="+parseInt(getCookie("draftIDToView")), {
+async function renderDraftHistoryTeamHistorySelecter() {
+
+    var res = await fetch ("http://localhost:8080/api/teams/getDraftHistoryTeamList/?username="+getCookie("username")+"&draftID="+getCookie("draftIDToView"), {
         method: 'GET',
     })
-    var data = await res.json()
 
+    var data = await res.json()
     console.log(data);
 
+    for(var intCurrTeam in data) {
+        var currTeam = data[intCurrTeam];
 
+        var currTeamRow = document.createElement("tr");
+        currTeamRow.id = "draftHistoryTeamRow" + intCurrTeam;
+
+        var currTeamName = document.createElement("td");
+        currTeamName.id = "draftHistoryTeamName" + intCurrTeam;
+        currTeamName.innerHTML = currTeam.teamName;
+
+        var currTeamViewButton = document.createElement("btn");
+        currTeamViewButton.id = "draftHistoryViewButton" + intCurrTeam;
+        currTeamViewButton.innerHTML = "View Team";
+        currTeamViewButton.onclick = function() {viewTeam(this.id.slice(-1))};
+        currTeamViewButton.className = "btn btn-primary";
+        currTeamViewButton.style.margin = "5%";
+        currTeamViewButton.style.padding = "5%";
+
+        currTeamRow.appendChild(currTeamName);
+        currTeamRow.appendChild(currTeamViewButton);
+
+        document.getElementById("allTeamsTableBody").appendChild(currTeamRow);
+    }
+    document.getElementById("allTeamsTable").style.display = "block";
+    document.getElementById("draftReviewSelecterForm").style.display = "none";
+    document.getElementById("backButton").style.display = "inline";
+}
+
+async function viewTeam(teamID) {
+    var res = await fetch ("http://localhost:8080/api/teams/getDraftHistoryTeamReview/?username="+getCookie("username")+"&draftID="+getCookie("draftIDToView")+"&teamIndex="+teamID, {
+        method: 'GET',
+    })
+
+    var data = await res.json()
+    console.log(data);
+
+    for(var currPositonInt in data) {
+        var currPositon = data[currPositon];
+
+        console.log(currPositon);
+
+        for(var currPlayerInt in currPositon) {
+            var currPlayer = currPositon[currPlayer];
+
+            console.log(currPlayer);
+
+        }
+    }
 }
 
 function resetDraftHistoryPage() {
     document.getElementById("draftHistoryPlayerLog").style.display = "none";
-    document.getElementById("draftHistoryTeamReview").style.display = "none";
+    document.getElementById("draftReviewPlayerLogBody").innerHTML = "";
+
+
+    document.getElementById("allTeamsTable").style.display = "none";
+    document.getElementById("allTeamsTableBody").innerHTML = "";
+
+    document.getElementById("teamHistoryTable").style.display = "none";
+    document.getElementById("teamHistoryTableBody").innerHTML = "";
 
     document.getElementById("draftReviewSelecterForm").style.display = "block";
     document.getElementById("backButton").style.display = "none";

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import com.example.Mock.StartingClasses.MockDraftDriver;
 import com.example.Mock.StartingClasses.PlayerModel;
+import com.example.Mock.StartingClasses.TeamModel;
 import com.fasterxml.jackson.databind.util.JSONPObject;
 
 @Repository
@@ -35,6 +36,10 @@ public class DraftDataObject implements DraftDAO {
 
     public List<PlayerModel> getDraftedPlayers(){
         return this.mockDraft.returnDraftLog();
+    }
+
+    public List<TeamModel> getTeams(){
+        return this.mockDraft.getTeams();
     }
 
     public int getCurrPick(){

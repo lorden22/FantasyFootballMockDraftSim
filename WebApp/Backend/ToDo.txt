@@ -1,5 +1,5 @@
 - Render Team Draft History
-- Better bootsrap layout/html layouy
+- Better bootstrap layout/html layout
 - Refactor code html class names
 - Fix draft order bug
 - Session based login

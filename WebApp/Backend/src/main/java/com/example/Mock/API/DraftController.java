@@ -57,11 +57,10 @@ public class DraftController {
         @RequestParam("draftSize") int draftSize, 
         @RequestParam("draftPosition") int draftPositios,
         @Autowired DraftServices draftServices,
-        @Autowired DraftDataObject draftDataObject,
-        @Autowired DraftedTeamsDataObject draftedTeamsDataObject) {
+        @Autowired DraftDataObject draftDataObject) {
             this.allDraftServices.put(username, draftServices);
             System.out.println("username: " + username + " - has draftServices: " + this.allDraftServices.containsKey(username) + " - " + this.allDraftServices);
-            return this.allDraftServices.get(username).startDraft(teamName, draftSize, draftPositios, draftDataObject, draftedTeamsDataObject);
+            return this.allDraftServices.get(username).startDraft(teamName, draftSize, draftPositios, draftDataObject);
 
     }
 
@@ -136,12 +135,23 @@ public class DraftController {
             return this.allDraftServices.get(username).getDraftHistoryDraftedPlayerLog(draftID);
     }
 
-    @GetMapping(path="/getDraftHistoryTeamReview/")
-    public List<TreeMap<String,ArrayList<PlayerModel>>> getDraftHistoryTeamReview(
+    @GetMapping(path="/getDraftHistoryTeamList/")
+    public List<TeamModel> getDraftHistoryTeamList(
         @RequestParam("username") String username,
         @RequestParam("draftID") int draftID) {
-            return this.allDraftServices.get(username).getDraftHistoryAllTeamsMap(draftID);
+            return this.allDraftServices.get(username).getDraftHistoryTeamList(draftID);
     }
+
+
+    @GetMapping(path="/getDraftHistoryTeamReview/")
+    public TreeMap<String,ArrayList<PlayerModel>> getDraftHistoryTeamReview(
+        @RequestParam("username") String username,
+        @RequestParam("draftID") int draftID,
+        @RequestParam("teamIndex") int teamIndex) {
+            List<TreeMap<String,ArrayList<PlayerModel>>> allTreeMaps = this.allDraftServices.get(username).getDraftHistoryAllTeamsMap(draftID);
+            return allTreeMaps.get(teamIndex);
+    }
+
 }
 
      
