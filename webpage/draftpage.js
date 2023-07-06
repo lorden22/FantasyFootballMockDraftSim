@@ -423,7 +423,9 @@ function viewDraft(draftID) {
 }
 
 async function renderDraftReviewPage() {
+
     loadUserName();
+    document.getElementById("backButton").style.display = "none";
 }
 
 async function renderDraftHistoryPlayerLog() {
@@ -434,9 +436,53 @@ async function renderDraftHistoryPlayerLog() {
     
     console.log(data);
 
-    /*document.getElementById("draftHistoryPlayerLog").style.display = "block";
-    document.getElementById("abc123").style.display = "none";
-    alert("Build API");*/
+    document.getElementById("draftHistoryPlayerLog").style.display = "block";
+    document.getElementById("draftReviewSelecterForm").style.display = "none";
+
+    for(var intCurrDraftLog in data.slice(0, data.length-1)) {
+        var currPlayerDraftLog = data[intCurrDraftLog]
+        
+        var newDraftHistoryPlayerLogRow = document.createElement("tr");
+        newDraftHistoryPlayerLogRow.id = "draftHistoryPlayerLogRow" + intCurrDraftLog;
+
+        var newDraftHistoryPlayerLogSpot = currPlayerDraftLog.spotDrafted;
+        var roundPickArray = newDraftHistoryPlayerLogSpot.split(".");
+
+        var newDraftHistoryPlayerLogRound = document.createElement("td");
+        newDraftHistoryPlayerLogRound.id = "draftHistoryPlayerLogRound" + intCurrDraftLog;
+        newDraftHistoryPlayerLogRound.innerHTML = roundPickArray[0];
+
+        var newDraftHistoryPlayerLogPick = document.createElement("td");
+        newDraftHistoryPlayerLogPick.id = "draftHistoryPlayerLogPick" + intCurrDraftLog;
+        newDraftHistoryPlayerLogPick.innerHTML = roundPickArray[1];
+
+        var newDraftHistoryPlayerLogPlayerName = document.createElement("td");
+        newDraftHistoryPlayerLogPlayerName.id = "draftHistoryPlayerLogPlayerName" + intCurrDraftLog;
+        newDraftHistoryPlayerLogPlayerName.innerHTML = currPlayerDraftLog.fullName;
+
+        var newDraftHistoryPlayerLogPlayerPosition = document.createElement("td");
+        newDraftHistoryPlayerLogPlayerPosition.id = "draftHistoryPlayerLogPlayerPosition" + intCurrDraftLog;
+        newDraftHistoryPlayerLogPlayerPosition.innerHTML = currPlayerDraftLog.position;
+
+        var newDraftHistoryPlayerLogPlayerScore = document.createElement("td");
+        newDraftHistoryPlayerLogPlayerScore.id = "draftHistoryPlayerLogPlayerScored" + intCurrDraftLog;
+        newDraftHistoryPlayerLogPlayerScore.innerHTML = currPlayerDraftLog.predictedScore;
+
+        var newDraftHistoryPlayerLogPlayerTeam = document.createElement("td");
+        newDraftHistoryPlayerLogPlayerTeam.id = "draftHistoryPlayerLogPlayerTeam" + intCurrDraftLog;
+        newDraftHistoryPlayerLogPlayerTeam.innerHTML = currPlayerDraftLog.teamDraftedBy;
+
+        newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogRound);
+        newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogPick);
+        newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogPlayerName);
+        newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogPlayerPosition);
+        newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogPlayerScore);
+        newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogPlayerTeam);
+
+        document.getElementById("draftReviewTableBody").appendChild(newDraftHistoryPlayerLogRow);
+    }
+    document.getElementById("backButton").style.display = "inline";
+
 }
 
 async function renderDraftHistoryTeamReview() {
@@ -448,4 +494,12 @@ async function renderDraftHistoryTeamReview() {
     console.log(data);
 
 
+}
+
+function resetDraftHistoryPage() {
+    document.getElementById("draftHistoryPlayerLog").style.display = "none";
+    document.getElementById("draftHistoryTeamReview").style.display = "none";
+
+    document.getElementById("draftReviewSelecterForm").style.display = "block";
+    document.getElementById("backButton").style.display = "none";
 }

@@ -33,3 +33,8 @@ body{
     width: 0.5em;
 }
 
+.sticky-header {
+    position: sticky;
+    top: 0;
+}
+  

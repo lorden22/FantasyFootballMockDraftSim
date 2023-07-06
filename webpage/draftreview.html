@@ -28,44 +28,39 @@
                     <h2 class="text-center">2022 Fantasy Football Mock Draft Review</h2> 
                 </div>
             </div>
-            <div class="row" id="abc123">
+            <div class="row">
                 <div class="col-sm-12 text-center">
-                    <form style="display: inline">
+                    <form id="draftReviewSelecterForm" style="display: inline">
                         <input button type="button" id="draftReviewButton" value="Player Draft Log Review" onClick="renderDraftHistoryPlayerLog()">
                         <input button type="button" id="draftPageButton" value="Team Review" onClick="renderDraftHistoryTeamReview()">
                     </form>
+                    <input button type="button" id="backButton" style="display: none" value="Back" onClick="resetDraftHistoryPage()">
                 </div>
             </div>
             <div class="row" style="display: none;" id="draftHistoryPlayerLog">
-                <div class="col-sm-12" style="text-align: center">
+                <div class="col-sm-12">
                     <div id="draftReviewDiv">
                         <table id="draftReviewTable" class="table table-striped table-dark">
-                            <thead>
-                                <tr>
-                                    <th scope="col">Round</th>
-                                    <th scope="col">Pick</th>
-                                    <th scope="col">Player</th>
-                                    <th scope="col">Position</th>
-                                    <th scope="col">Team</th>
-                                    <th scope="col">Bye</th>
-                                    <th scope="col">Overall Rank</th>
-                                    <th scope="col">Position Rank</th>
-                                    <th scope="col">Positional Rank</th>
-                                    <th scope="col">Tier</th>
-                                    <th scope="col">Drafted By</th>
-                                </tr>
+                            <thead class="thead-dark sticky-top">
+                                        <th scope="col">Round</th>
+                                        <th scope="col">Pick</th>
+                                        <th scope="col">Player</th>
+                                        <th scope="col">Position</th>
+                                        <th scope="col">Predicted Score</th>
+                                        <th scope="col">Team</th> 
                             </thead>
-                            <tbody id="draftReviewTableBody">
+                            <tbody id="draftReviewTableBody" class="scrollable-col">
+                                <!-- table body content here -->
                             </tbody>
                         </table>
                     </div>
                 </div>
-            </div>
+            </div>                       
             <div class="row">
-                <div id="teamReviewDiff">
-
+                <div id="draftHistoryTeamReview">
                 </div>
             </div>
 
     </body>
+</html>    
         
