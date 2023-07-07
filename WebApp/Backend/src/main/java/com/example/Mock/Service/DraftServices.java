@@ -53,6 +53,10 @@ public class DraftServices {
     public int getNextUserPick(){
         return this.draftDataObject.getNextUserPick();
     }
+
+    public int getNextUserPickRound() {
+        return this.draftDataObject.getNextUserPickRound();
+    }
     
     public List<PlayerModel> startDraft(String teamName, int draftSize, int desiredDraftPosition, DraftDataObject draftDataObject) {
         this.draftDataObject = draftDataObject;
@@ -124,8 +128,9 @@ public class DraftServices {
     }
 
     private void saveDraftHistory() {
-        this.allPastsDraftsDataObject.put(this.nextDraftID, this.draftDataObject);
+        this.allPastsDraftsDataObject.put(this.nextDraftID-1, this.draftDataObject);
         this.nextDraftID++;
+        System.out.println("Draft History Saved - Draft ID: " + (this.nextDraftID));
     }
 
 }

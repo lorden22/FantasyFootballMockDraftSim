@@ -14,9 +14,12 @@ import com.example.Mock.StartingClasses.PlayerModel;
 import com.example.Mock.StartingClasses.TeamModel;
 import com.fasterxml.jackson.databind.util.JSONPObject;
 
+
+
+
 @Repository
 @Scope(value="prototype")
-public class DraftDataObject implements DraftDAO {
+public class DraftDataObject {
 
     private MockDraftDriver mockDraft;
     private int draftID;
@@ -25,11 +28,13 @@ public class DraftDataObject implements DraftDAO {
         this.mockDraft = new MockDraftDriver();
     }
 
+
     public List<PlayerModel> startDraft(String teamName, int draftSize, int desiredDraftPosition, int draftID){
         this.mockDraft.createdDraftEnv(teamName, draftSize, desiredDraftPosition);
         this.draftID = draftID;
         return this.getPlayersLeft();
     }
+
     public List<PlayerModel> getPlayersLeft(){
         return this.mockDraft.returnPlayers();
     }
@@ -52,6 +57,10 @@ public class DraftDataObject implements DraftDAO {
 
     public int getNextUserPick(){
         return this.mockDraft.getNextUserPick();
+    }
+
+    public int getNextUserPickRound(){
+        return this.mockDraft.getNextUserPickRound();
     }
 
     public List<PlayerModel> simComputerPicks(){

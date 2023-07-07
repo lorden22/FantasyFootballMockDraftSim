@@ -17,6 +17,16 @@ async function addUser() {
             method: 'PUT',
         })
         var addUserRes = await addUser.json()
+        
+        var setUpUserRes = await fetch("http://localhost:8080/api/teams/initaizeUserAccountSetup/?username="+username, {
+            method: 'POST',
+        })
+
+        var setUpUserData = await setUpUserRes.json()
+
+        console.log(addUserRes);
+        console.log(setUpUserData);
+
         alert("Account created. Please login.")
         window.location.href = "loginpage.html"
     }

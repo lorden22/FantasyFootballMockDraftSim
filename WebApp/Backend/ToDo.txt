@@ -1,6 +1,6 @@
-- Render Team Draft History
+- fix bug with user drafted players not being added
+- fix bug with draft review page
 - Better bootstrap layout/html layout
 - Refactor code html class names
-- Fix draft order bug
 - Session based login
 - Database

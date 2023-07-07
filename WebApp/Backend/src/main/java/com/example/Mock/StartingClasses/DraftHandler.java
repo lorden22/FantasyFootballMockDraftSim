@@ -42,7 +42,7 @@ public class DraftHandler {
 		Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
 		DateFormat dateFormat = new SimpleDateFormat("MM/dd/yyyy");
-		DateFormat timeFormat = new SimpleDateFormat("hh:mm: aa");
+		DateFormat timeFormat = new SimpleDateFormat("hh:mm aa");
 		this.draftDate = dateFormat.format(cal.getTime());
 		this.draftTime = timeFormat.format(cal.getTime());
 		
@@ -122,6 +122,10 @@ public class DraftHandler {
 
 	public int getNextUserPick() {
 		return this.nextUserPick;
+	}
+
+	public int getNextUserPickRound() {
+		return this.nextUserPickRound;
 	}
 
 	public boolean isDraftOver() {
@@ -247,6 +251,9 @@ public class DraftHandler {
 		if (this.currRound > 15) {
 			for(TeamModel currTeam : this.teams) {
 				System.out.println(currTeam.getTeamTreeMap());
+			}
+			if(this.teams.get(0).getTeamName() != "Test Team 1") {
+				Collections.reverse(this.teams);
 			}
 			return true;
 		}

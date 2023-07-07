@@ -225,7 +225,16 @@ async function getNextUserPick() {
     var data = await res.json()
     console.log(data)
     return data;
-}   
+}
+
+async function getNextUserPickRound() {
+    var res = await fetch("http://localhost:8080/api/teams/getNextUserPickRound/?username="+getCookie("username"),{
+        method: 'GET',
+    })
+    var data = await res.json()
+    console.log(data)
+    return data;
+}
 
 async function getPlayerLeft() {
     var res = await fetch("http://localhost:8080/api/teams/getPlayersLeft/?username="+getCookie("username"),{
@@ -291,9 +300,11 @@ async function changeFormForNextPick() {
     var nextDraftPick = await getCurrPick();
     var currRound = await getCurrRound();
     var nextUserPick = await getNextUserPick();
+    var nextUserPickRound = await getNextUserPickRound();
     console.log(currRound + "." + nextDraftPick + " - " + nextUserPick)
 
-    if (nextDraftPick == nextUserPick) {
+
+    if (nextDraftPick == nextUserPick && nextUserPickRound == currRound) {
         document.getElementById("waitingDraftControllerForm").style.display = "none";
         document.getElementById("draftControllerForm").style.display = "block";
     }
@@ -305,8 +316,8 @@ async function changeFormForNextPick() {
     document.getElementById("currPick").innerHTML =  nextDraftPick
     document.getElementById("currRound").innerHTML = currRound
 
-    if (currRound >= 15 && nextDraftPick > nextUserPick){
-        document.getElementById("nextPickInfo").innerHTML = "The Draft will end at the end of this round. " +
+    if (currRound >= 15 && nextUserPickRound >= 16) {
+        document.getElementById("nextPickInfo").innerHTML = "the draft will end at the end of this round. " +
             "Press the button below to end the draft."
     } 
     else {
@@ -523,6 +534,107 @@ async function renderDraftHistoryTeamHistorySelecter() {
 }
 
 async function viewTeam(teamID) {
+
+    function findStarterIndex(players) {
+        var starterIndex = 0;
+
+        if(players.length > 1) {
+            for(var intCurrPlayer in players) {
+                var currPlayer = players[intCurrPlayer];
+
+                if(currPlayer.predictedScore > players[starterIndex].predictedScore) {
+                    starterIndex = intCurrPlayer;
+                }
+            }
+        }
+        return starterIndex
+    }
+
+    function findBenchedPlayers(players) {
+
+        for(var intCurrPlayer in players) {
+            var currPlayer = players[intCurrPlayer];
+
+            var newBenchRow = document.createElement("tr");
+            newBenchRow.id = "benchRow" + intCurrPlayer;
+
+            var newBenchDepthChartPosition = document.createElement("td");
+            newBenchDepthChartPosition.id = "depthChartPositionBench" + intCurrPlayer;
+            newBenchDepthChartPosition.innerHTML = "Bench";
+
+            var newBenchPosition = document.createElement("td");
+            newBenchPosition.id =  "benchPosition" + intCurrPlayer
+            newBenchPosition.innerHTML = currPlayer.position;
+
+            var newBenchPlayerName = document.createElement("td");
+            newBenchPlayerName.id = "benchPlayerName" + intCurrPlayer;
+            newBenchPlayerName.innerHTML = currPlayer.fullName;
+
+            var newBenchPredictedScore = document.createElement("td");
+            newBenchPredictedScore.id = "benchPredictedScore" + intCurrPlayer;
+            newBenchPredictedScore.innerHTML = currPlayer.predictedScore;
+
+            var newBenchAvgADP = document.createElement("td");
+            newBenchAvgADP.id = "benchAvgADP" + intCurrPlayer;
+            newBenchAvgADP.innerHTML = currPlayer.avgADP;
+
+            var newBenchSpotDrafted = document.createElement("td");
+            newBenchSpotDrafted.id = "benchSpotDrafted" + intCurrPlayer;
+            newBenchSpotDrafted.innerHTML = currPlayer.spotDrafted;
+
+            newBenchRow.appendChild(newBenchDepthChartPosition);
+            newBenchRow.appendChild(newBenchPosition);
+            newBenchRow.appendChild(newBenchPlayerName);
+            newBenchRow.appendChild(newBenchPredictedScore);
+            newBenchRow.appendChild(newBenchAvgADP);
+            newBenchRow.appendChild(newBenchSpotDrafted);
+
+            document.getElementById("teamHistoryTableBody").appendChild(newBenchRow);
+        }
+     }
+
+    function createDataRowForStarter(stringPosition, starterIndex, playersPositon) {
+        var startPlayer = playersPositon[starterIndex];
+
+        var newStarterRow = document.createElement("tr");
+        newStarterRow.id = "starterRow" + stringPosition;
+
+        var newStarterDepthChartPosition = document.createElement("td");
+        newStarterDepthChartPosition.id = "depthChartPositionStarter" + stringPosition;
+        newStarterDepthChartPosition.innerHTML = "Starter";
+
+        var newStarterPosition = document.createElement("td");
+        newStarterPosition.id =  "staterPosition" + stringPosition
+        newStarterPosition.innerHTML = stringPosition;
+
+        var newStarterPlayerName = document.createElement("td");
+        newStarterPlayerName.id = "starterPlayerName" + stringPosition;
+        newStarterPlayerName.innerHTML = playersPositon[starterIndex].fullName;
+
+        var newStarterPredictedScore = document.createElement("td");
+        newStarterPredictedScore.id = "starterPredictedScore" + stringPosition;
+        newStarterPredictedScore.innerHTML = playersPositon[starterIndex].predictedScore;
+
+        var newStarterAvgADP = document.createElement("td");
+        newStarterAvgADP.id = "starterAvgADP" + stringPosition;
+        newStarterAvgADP.innerHTML = playersPositon[starterIndex].avgADP;
+
+        var newStarterspotDrafted = document.createElement("td");
+        newStarterspotDrafted.id = "starteSpotDrafted" + stringPosition;
+        newStarterspotDrafted.innerHTML = playersPositon[starterIndex].spotDrafted;
+
+        newStarterRow.appendChild(newStarterDepthChartPosition);
+        newStarterRow.appendChild(newStarterPosition);
+        newStarterRow.appendChild(newStarterPlayerName);
+        newStarterRow.appendChild(newStarterPredictedScore);
+        newStarterRow.appendChild(newStarterAvgADP);
+        newStarterRow.appendChild(newStarterspotDrafted);
+
+        return newStarterRow;
+    }
+
+    document.getElementById("teamHistoryTableBody").innerHTML = "";
+
     var res = await fetch ("http://localhost:8080/api/teams/getDraftHistoryTeamReview/?username="+getCookie("username")+"&draftID="+getCookie("draftIDToView")+"&teamIndex="+teamID, {
         method: 'GET',
     })
@@ -530,18 +642,44 @@ async function viewTeam(teamID) {
     var data = await res.json()
     console.log(data);
 
-    for(var currPositonInt in data) {
-        var currPositon = data[currPositon];
+    var postionOrder = ["QB", "RB", "WR", "TE", "Flex" ,"K", "DEF"];
 
-        console.log(currPositon);
+    for(var intCurrPosition in postionOrder) {
+        console.log(intCurrPosition);
+        var currPosition = postionOrder[intCurrPosition];
+        console.log(currPosition);
+        var starterAmount = 1;
 
-        for(var currPlayerInt in currPositon) {
-            var currPlayer = currPositon[currPlayer];
+        if(currPosition == "RB" ||
+            currPosition == "WR") {
+                starterAmount = 2;
+        }
 
-            console.log(currPlayer);
+        for(var intCurrStarter = 0; intCurrStarter < starterAmount; intCurrStarter++) {
+            if (currPosition == "Flex") {
+                var currPositionPlayers = data["RB"].concat(data["WR"]).concat(data["TE"]);
+            }
+            else { 
+                var currPositionPlayers = data[currPosition];
+            }
+            console.log(currPositionPlayers);
+            var currStarterIndex = findStarterIndex(currPositionPlayers);
+            console.log(currStarterIndex);
+            var currStarter = currPositionPlayers[currStarterIndex];
+            console.log(currStarter);
+            var currStarterRow = createDataRowForStarter(currPosition, currStarterIndex, currPositionPlayers);
+            console.log(currStarterRow);
+            document.getElementById("teamHistoryTableBody").appendChild(currStarterRow);
 
+            data[currStarter.position].splice(currStarterIndex, 1);
+            console.log(data[currPosition]);
         }
     }
+    var benchPlayers = data["QB"].concat(data["RB"]).concat(data["WR"]).concat(data["TE"]).concat(data["K"]).concat(data["DEF"]);
+    console.log(benchPlayers);
+    findBenchedPlayers(benchPlayers);
+        
+    document.getElementById("teamHistoryTable").style.display = "block";
 }
 
 function resetDraftHistoryPage() {
@@ -558,3 +696,5 @@ function resetDraftHistoryPage() {
     document.getElementById("draftReviewSelecterForm").style.display = "block";
     document.getElementById("backButton").style.display = "none";
 }
+
+

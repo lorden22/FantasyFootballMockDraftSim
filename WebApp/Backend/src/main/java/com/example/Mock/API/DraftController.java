@@ -37,6 +37,13 @@ public class DraftController {
         this.allDraftServices = new HashMap<String,DraftServices>();
     }
     
+    @PostMapping(path="/initaizeUserAccountSetup")
+    public boolean initaizeUserAccountSetup(
+        @RequestParam("username") String username,
+        @Autowired DraftServices draftServices) {
+            this.allDraftServices.put(username, draftServices);
+            return true;
+        }
 
     @GetMapping(path="/getPlayersLeft/") 
     public List<PlayerModel> getPlayersLeft(
@@ -56,9 +63,7 @@ public class DraftController {
         @RequestParam("teamName") String teamName, 
         @RequestParam("draftSize") int draftSize, 
         @RequestParam("draftPosition") int draftPositios,
-        @Autowired DraftServices draftServices,
         @Autowired DraftDataObject draftDataObject) {
-            this.allDraftServices.put(username, draftServices);
             System.out.println("username: " + username + " - has draftServices: " + this.allDraftServices.containsKey(username) + " - " + this.allDraftServices);
             return this.allDraftServices.get(username).startDraft(teamName, draftSize, draftPositios, draftDataObject);
 
@@ -86,6 +91,12 @@ public class DraftController {
     public int getNextUserPick(
         @RequestParam("username") String username) {
             return this.allDraftServices.get(username).getNextUserPick();
+    }
+
+    @GetMapping(path="/getNextUserPickRound/")
+    public int getNextUserPickRound(
+        @RequestParam("username") String username) {
+            return this.allDraftServices.get(username).getNextUserPickRound();
     }
 
     @PostMapping(path="/userDraftPlayer/")
