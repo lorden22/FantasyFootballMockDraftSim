@@ -2,8 +2,8 @@ function goToHomePage() {
     deleteCookie("draftType");
     deleteCookie("draftPosition");
     deleteCookie("teamName");
+    deleteCookie("draftIDToView");
     window.location.href = "drafthomepage.html";
-
 }
 
 async function checkForUserDraftHistory() {
@@ -31,13 +31,13 @@ async function checkForUserDraftHistory() {
 
 function loadUserName() {
     console.log("UserName = " + getCookie("username"))
-    /*if(getCookie("username") == "") {
+    if(getCookie("username") == "") {
         alert("You must be logged in to view this page.")
         window.location.href = "loginpage.html"
     }
     else {
         document.getElementById("userNameSpan").innerHTML = getCookie("username")
-    }*/
+    }
 }
 
 async function selectedStartNewDraft() {
@@ -374,13 +374,11 @@ async function endDraft() {
 }
 
 async function renderDraftHistoryTable() {
-    var res = await fetch("http://localhost:8080/api/teams/getDraftHistoryMetaData/?username="+getCookie("username"),{
-        method: 'GET',})
-    var data = await res.json()
-    console.log(data)
-    for(var intCurrDraftMetaData in data) {
-        var currDraftMetaData = data[intCurrDraftMetaData]
+    
+    function createRow (currDraftRowMetaData) {
+        console.log(currDraftMetaData)
         var draftID = currDraftMetaData.draftID;
+        console.log(draftID)
 
         var newDraftHistoryRow = document.createElement("tr");
         newDraftHistoryRow.id = "draftHistoryRow" + draftID;
@@ -425,12 +423,23 @@ async function renderDraftHistoryTable() {
 
         document.getElementById("draftHistoryTable").appendChild(newDraftHistoryRow);
     }
+
+    var res = await fetch("http://localhost:8080/api/teams/getDraftHistoryMetaData/?username="+getCookie("username"),{
+        method: 'GET',})
+    var data = await res.json()
+    console.log(data)
+
+    for(var intCurrDraftMetaData in data) {
+        var currDraftMetaData = data[intCurrDraftMetaData]
+
+        createRow(currDraftMetaData);
+    }
 }
 
 function viewDraft(draftID) {
     console.log(draftID)
-    document.cookie = "draftIDToView="+draftID;
-    window.location.href = "draftreview.html"
+    document.cookie = "draftIDToView="+draftID + ";path=/";
+    window.location.href = "draftreview.html";
 }
 
 async function renderDraftReviewPage() {
@@ -594,43 +603,46 @@ async function viewTeam(teamID) {
      }
 
     function createDataRowForStarter(stringPosition, starterIndex, playersPositon) {
-        var startPlayer = playersPositon[starterIndex];
+            var newStarterRow = document.createElement("tr");
+            newStarterRow.id = "starterRow" + stringPosition;
 
-        var newStarterRow = document.createElement("tr");
-        newStarterRow.id = "starterRow" + stringPosition;
+            var newStarterDepthChartPosition = document.createElement("td");
+            newStarterDepthChartPosition.id = "depthChartPositionStarter" + stringPosition;
+            newStarterDepthChartPosition.innerHTML = "Starter";
 
-        var newStarterDepthChartPosition = document.createElement("td");
-        newStarterDepthChartPosition.id = "depthChartPositionStarter" + stringPosition;
-        newStarterDepthChartPosition.innerHTML = "Starter";
+            var newStarterPosition = document.createElement("td");
+            newStarterPosition.id =  "staterPosition" + stringPosition
+            newStarterPosition.innerHTML = stringPosition;
 
-        var newStarterPosition = document.createElement("td");
-        newStarterPosition.id =  "staterPosition" + stringPosition
-        newStarterPosition.innerHTML = stringPosition;
+            newStarterRow.appendChild(newStarterDepthChartPosition);
+            newStarterRow.appendChild(newStarterPosition);
+        
+        if (playersPositon.length > 0) {
+            var startPlayer = playersPositon[starterIndex];
 
-        var newStarterPlayerName = document.createElement("td");
-        newStarterPlayerName.id = "starterPlayerName" + stringPosition;
-        newStarterPlayerName.innerHTML = playersPositon[starterIndex].fullName;
+            var newStarterPlayerName = document.createElement("td");
+            newStarterPlayerName.id = "starterPlayerName" + stringPosition;
+            newStarterPlayerName.innerHTML = playersPositon[starterIndex].fullName;
 
-        var newStarterPredictedScore = document.createElement("td");
-        newStarterPredictedScore.id = "starterPredictedScore" + stringPosition;
-        newStarterPredictedScore.innerHTML = playersPositon[starterIndex].predictedScore;
+            var newStarterPredictedScore = document.createElement("td");
+            newStarterPredictedScore.id = "starterPredictedScore" + stringPosition;
+            newStarterPredictedScore.innerHTML = playersPositon[starterIndex].predictedScore;
 
-        var newStarterAvgADP = document.createElement("td");
-        newStarterAvgADP.id = "starterAvgADP" + stringPosition;
-        newStarterAvgADP.innerHTML = playersPositon[starterIndex].avgADP;
+            var newStarterAvgADP = document.createElement("td");
+            newStarterAvgADP.id = "starterAvgADP" + stringPosition;
+            newStarterAvgADP.innerHTML = playersPositon[starterIndex].avgADP;
 
-        var newStarterspotDrafted = document.createElement("td");
-        newStarterspotDrafted.id = "starteSpotDrafted" + stringPosition;
-        newStarterspotDrafted.innerHTML = playersPositon[starterIndex].spotDrafted;
+            var newStarterspotDrafted = document.createElement("td");
+            newStarterspotDrafted.id = "starteSpotDrafted" + stringPosition;
+            newStarterspotDrafted.innerHTML = playersPositon[starterIndex].spotDrafted;
 
-        newStarterRow.appendChild(newStarterDepthChartPosition);
-        newStarterRow.appendChild(newStarterPosition);
-        newStarterRow.appendChild(newStarterPlayerName);
-        newStarterRow.appendChild(newStarterPredictedScore);
-        newStarterRow.appendChild(newStarterAvgADP);
-        newStarterRow.appendChild(newStarterspotDrafted);
-
-        return newStarterRow;
+            newStarterRow.appendChild(newStarterPosition);
+            newStarterRow.appendChild(newStarterPlayerName);
+            newStarterRow.appendChild(newStarterPredictedScore);
+            newStarterRow.appendChild(newStarterAvgADP);
+            newStarterRow.appendChild(newStarterspotDrafted);
+        }
+        return  newStarterRow;  
     }
 
     document.getElementById("teamHistoryTableBody").innerHTML = "";
@@ -671,8 +683,10 @@ async function viewTeam(teamID) {
             console.log(currStarterRow);
             document.getElementById("teamHistoryTableBody").appendChild(currStarterRow);
 
-            data[currStarter.position].splice(currStarterIndex, 1);
-            console.log(data[currPosition]);
+            if(currStarter != null) {
+                data[currStarter.position].splice(currStarterIndex, 1);
+                console.log(data[currPosition]);
+            }
         }
     }
     var benchPlayers = data["QB"].concat(data["RB"]).concat(data["WR"]).concat(data["TE"]).concat(data["K"]).concat(data["DEF"]);

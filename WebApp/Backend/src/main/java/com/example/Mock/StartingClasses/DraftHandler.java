@@ -65,7 +65,10 @@ public class DraftHandler {
 		while (!(this.currRoundPick== this.nextUserPick && this.currRound == this.nextUserPickRound) && this.currRound <= 15) {
 			TeamModel currTeam = this.teams.get(this.currRoundPick-1);
 			PlayerModel playerPicked = this.nextDraftPick(currTeam,this.currRoundPick);
-			playerPicked.setSpotDrafted(this.currRound+"."+this.currRoundPick);
+			if(this.currRoundPick + "".length() == 1 && this.teams.size() > 9) {
+				playerPicked.setSpotDrafted(this.currRound+".0"+this.currRoundPick);
+			}
+			else playerPicked.setSpotDrafted(this.currRound+"."+this.currRoundPick);
 			playerPicked.setTeamDraftedBy(currTeam.getTeamName());
 			currTeam.addPlayer(playerPicked.getPosition(),playerPicked);
 			computerDraftLog.add(playerPicked);				
@@ -84,9 +87,13 @@ public class DraftHandler {
 		for (TeamModel currTeam: this.teams) {
 			if (currTeam.isUserTeam()) {
 				PlayerModel playerPicked = this.nextDraftPick(currTeam, pick);
-				playerPicked.setSpotDrafted(this.currRound+"."+this.currRoundPick);
+				if(this.currRoundPick + "".length() == 1 && this.teams.size() > 9) {
+					playerPicked.setSpotDrafted(this.currRound+".0"+this.currRoundPick);
+				}
+				else playerPicked.setSpotDrafted(this.currRound+"."+this.currRoundPick);
 				playerPicked.setTeamDraftedBy(currTeam.getTeamName());
 				userDraftLog.add(playerPicked);
+				currTeam.addPlayer(playerPicked.getPosition(),playerPicked);
 				this.findUserNextDraftPick(this.teams);
 				this.checkForChangesInDraftEnv();
 				break;

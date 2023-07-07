@@ -97,11 +97,11 @@ public class DraftServices {
     }
 
     public HashMap<String,String> returnDraftMetaData(int nextDraftID) {
-         return this.allPastsDraftsDataObject.get(nextDraftID).getDraftMetaData();
+         return this.allPastsDraftsDataObject.get(nextDraftID-1).getDraftMetaData();
     }
 
     public List<PlayerModel> returnDraftedPlayers(int nextDraftID) {
-        return this.allPastsDraftsDataObject.get(nextDraftID).getDraftedPlayers();
+        return this.allPastsDraftsDataObject.get(nextDraftID-1).getDraftedPlayers();
     }
 
     public ArrayList<HashMap<String,String>> getDraftHistoryMetaData() {
@@ -116,15 +116,15 @@ public class DraftServices {
     }
 
     public List<PlayerModel> getDraftHistoryDraftedPlayerLog(int draftID) {
-        return this.allPastsDraftsDataObject.get(draftID).getDraftedPlayers();
+        return this.allPastsDraftsDataObject.get(draftID-1).getDraftedPlayers();
     }
 
     public List<TreeMap<String,ArrayList<PlayerModel>>> getDraftHistoryAllTeamsMap(int draftID) {
-        return this.allPastsDraftsDataObject.get(draftID).getDraftHistoryAllTeamsMap();
+        return this.allPastsDraftsDataObject.get(draftID-1).getDraftHistoryAllTeamsMap();
     }
 
     public List<TeamModel> getDraftHistoryTeamList(int draftID) {
-        return this.allPastsDraftsDataObject.get(draftID).getTeams();
+        return this.allPastsDraftsDataObject.get(draftID-1).getTeams();
     }
 
     private void saveDraftHistory() {
