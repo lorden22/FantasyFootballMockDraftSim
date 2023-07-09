@@ -1,3 +1,19 @@
+function loadGifWhileRenderPage(functionToLoad) {
+    setTimeout(function() {
+        document.getElementById("loading-container").style.display = "none";
+        document.getElementById("content-container").style.display = "block";
+    }, 300);
+    functionToLoad();
+}
+
+function loadGifWhileBigPageChange(functionToLoad) {
+    document.getElementById("loading-container").style.display =  setTimeout(function() {
+        document.getElementById("loading-container").style.display = "none";
+        document.getElementById("content-container").style.display = "block";
+    }, 50);
+    functionToLoad();
+}
+
 function goToHomePage() {
     deleteCookie("draftType");
     deleteCookie("draftPosition");
@@ -50,8 +66,8 @@ async function selectedStartNewDraft() {
         alert("You already have a draft in progress. Please resume that draft or delete it before starting a new one.")
     }
     else {
-    document.getElementById("draftModeSelect").style.display = "none";
-    document.getElementById("draftFormDiv").style.display = "block";
+    document.getElementById("draftModeSelectContainer").style.display = "none";
+    document.getElementById("draftFormContainer").style.display = "block";
     }
 }
 
@@ -172,7 +188,7 @@ async function setUpDraft() {
         var res = await fetch("http://localhost:8080/api/teams/getAllPlayersDrafted/?username="+getCookie("username"),{
             method: 'GET',})
         var data = await res.json();
-        parseDraftLogData(data);s    
+        parseDraftLogData(data);   
     }
     else if (draftType == "new") {
         console.log("Staring New draft");
@@ -423,6 +439,8 @@ async function renderDraftHistoryTable() {
 
         document.getElementById("draftHistoryTable").appendChild(newDraftHistoryRow);
     }
+
+    loadUserName();
 
     var res = await fetch("http://localhost:8080/api/teams/getDraftHistoryMetaData/?username="+getCookie("username"),{
         method: 'GET',})

@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Home Page</title>
+        <!--bootstrap--> <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+        <link rel="stylesheet" href="styles.css">
+        <script src="draftpage.js" type="text/javascript"></script>
+        <script src="cookies.js" type="text/javascript"></script>
+    </head>
+    <body onload="loadGifWhileRenderPage(checkForUserDraftHistory)">
+        <div class="container-fluid">
+            <div class="loading-container" id="loading-container" class="width-max vertical-max">
+                <div class="row width-max vertical-max">
+                    <div class="col-sm-12 text-center">
+                        <img class="dead-center" src="output-onlinegiftools.gif" alt="Loading" />
+                    </div>
+                </div>
+            </div>
+            <div id="content-container" style="display: none;">
+                <div class="row">
+                    <div class="col-sm-12 main-heading-container text-center">
+                    <h1>Welcome <span id="userNameSpan"></span></h1> 
+                    <div class="heading-button-container">
+                        <input type="button" class="logout-back-button" value="Logout" onClick="deleteAllCookies()">
+                    </div>
+                    </div>
+                </div>
+                <div class="row" class="secondary-heading-container">
+                    <div class="col-sm-12 text-center">
+                        <h2>2022 Fantasy Football Mock Draft Page</h2> 
+                    </div>   
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 text-center">
+                        <div id="draftModeSelectContainer" class="draft-mode-selectContainer">
+                            <p>
+                                <input type="button" id="resumeDraftButton" value="Resume Last Saved Draft" onClick="selectedResumeLastSavedDraft()" class="draft-mode-button hide">
+                                <input type="button" id="startDraftButton" value="Start New Draft" onClick="selectedStartNewDraft()" class="draft-mode-button">
+                                <input type="button" id="historalDraftButton" value="View Draft History" onClick="selectedViewDraftHistory()" class="draft-mode-button hide">
+                                <input type="button" id="deleteDraftButton" value="Delete Draft" onClick="selectedDeleteCurrentDraft()" class="draft-mode-button hide">
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12 text-center draft-form-container hide" id="draftFormContainer">
+                        <p>Fill out the info below to start a draft</p>
+                        <form class="get-draft-form">
+                            <p id="teamNamePar">Team Name: <input type="text" id="teamNameInput" placeholder="Chicago Bears"></p>
+                            <p>Number of Teams To Draft Against: <input type="text" id="sizeOfTeamsInput" placeholder="12"></p>
+                            <p>Enter Your Desired Draft Position: <input type="text" id="draftPositionInput" placeholder="3"></p>
+                            <input type="button" value="Start Draft" onClick="startDraft()">
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
