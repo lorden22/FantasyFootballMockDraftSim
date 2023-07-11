@@ -1,12 +1,13 @@
 package com.example.Mock.DAO;
 
-import com.example.Mock.DAO.UserDAO;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Repository;
+
+import com.example.Mock.DAO.UserDAO;
     
 
 @Repository

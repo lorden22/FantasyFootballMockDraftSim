@@ -18,7 +18,7 @@ public class MockDraftDriver {
 	}
 
 	public void createdDraftEnv(String teamName, int draftSize, int desiredDraftPosition){
-		File playerStatFile = new File("2022FootballMockDraftSimulator/WebApp/Backend/src/main/java/com/example/Mock/StartingClasses/WebScraping/PlayerData.txt");
+		File playerStatFile = new File("FantasyFootballMockDraftSim/WebApp/Backend/src/main/java/com/example/Mock/StartingClasses/WebScraping/PlayerData.txt");
 		TreeMap<String,ArrayList<Object>> allPlayers = new TreeMap<String,ArrayList<Object>>();
 		
 		try {
