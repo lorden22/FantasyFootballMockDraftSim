@@ -1,4 +1,8 @@
 
+html {
+    position: relative;
+}
+
 /* Universal */
 .vertical-max{
     height: 100%;
@@ -145,11 +149,15 @@ body {
   
   .main-heading-container h1 {
     text-align: center;
+    overflow-x: hidden;
+    width: 350px;
   }
   
   .heading-button-container {
     position: absolute;
     right: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   .back-button-heading{
@@ -295,11 +303,11 @@ body {
     z-index: 9999;
   }
 
-  .dead-center
-    {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
+.dead-center
+{
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
 

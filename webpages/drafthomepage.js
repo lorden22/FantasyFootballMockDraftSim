@@ -98,11 +98,3 @@ async function startDraft() {
     window.location.href = "draftpage.html"
 
 }
-
-async function endOfCurrentDraft() {
-    var res = await fetch("http://localhost:8080/api/teams/deleteThisDraft/?username="+getCookie("username"),{
-        method: 'POST',})
-    var boolForCurrentDraft = await res.json();
-    console.log(boolForCurrentDraft);    
-    goToHomePage(); 
-}
