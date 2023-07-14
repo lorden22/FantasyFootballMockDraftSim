@@ -232,6 +232,7 @@ async function viewTeam(teamID) {
     function createDataRowForStarter(stringPosition, starterIndex, playersPositon) {
             var newStarterRow = document.createElement("tr");
             newStarterRow.id = "starterRow" + stringPosition;
+            newStarterRow.style.width = "100%";
 
             var newStarterDepthChartPosition = document.createElement("td");
             newStarterDepthChartPosition.id = "depthChartPositionStarter" + stringPosition;
@@ -250,6 +251,7 @@ async function viewTeam(teamID) {
             var newStarterPlayerName = document.createElement("td");
             newStarterPlayerName.id = "starterPlayerName" + stringPosition;
             newStarterPlayerName.innerHTML = playersPositon[starterIndex].fullName;
+
 
             var newStarterPredictedScore = document.createElement("td");
             newStarterPredictedScore.id = "starterPredictedScore" + stringPosition;

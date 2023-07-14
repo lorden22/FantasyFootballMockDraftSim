@@ -49,11 +49,12 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
+    padding: 20px;
 }
 
 .container-fluid {
-    padding: 50px;
     height: 100vh;
+    padding: 20px;
 }
 
 /* Login and Register Pages */
@@ -149,8 +150,7 @@ body {
   
   .main-heading-container h1 {
     text-align: center;
-    overflow-x: hidden;
-    width: 350px;
+    max-width: 50%;
   }
   
   .heading-button-container {
@@ -253,7 +253,7 @@ body {
 }
 
 .get-draft-form input[type="text"] {
-    width: 50%;
+    width: 40%;
     padding: 10px;
     border: 1px solid #ced4da;
     border-radius: 3px;
@@ -261,8 +261,8 @@ body {
 }
 
 .get-draft-form input[type="text"][id="teamNameInput"] {
-    width: 55%;
-    margin-left: 5%;
+    width: 42%;
+    margin-left: 1%;
     padding: 10px;
     border: 1px solid #ced4da;
     border-radius: 3px;
@@ -311,3 +311,8 @@ body {
     transform: translate(-50%, -50%);
 }
 
+/* Other */
+
+#nextDraftPick {
+    max-width: 100%
+}
