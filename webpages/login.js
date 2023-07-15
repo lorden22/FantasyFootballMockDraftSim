@@ -44,8 +44,19 @@ async function attemptLogin() {
     var attemptLoginData = await attemptLoginRes.json()
 
     if (attemptLoginData == true) {
+
+        var generateSessionID = await fetch("http://localhost:8080/api/login/generateSessionID/?username="+username, {
+            method: 'GET',
+        })
+
+        console.log(generateSessionID)
+        var generateSessionIDData = await generateSessionID.text()
+
+
+        console.log(generateSessionIDData)
         alert("Login successful.")
         document.cookie = "username="+username + "; path=/";
+        document.cookie = "sessionID="+generateSessionIDData + "; path=/";
         window.location.href = "drafthomepage.html"
     }
     else

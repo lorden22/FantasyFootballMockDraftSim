@@ -1,59 +1,88 @@
 async function checkForUserDraftHistory() {
+    if(await authenticateSession() == true) {
+        loadUserName();
 
-    loadUserName();
+        var res = await fetch("http://localhost:8080/api/teams/checkForCurrentDrafts/?username="+getCookie("username"),{
+            method: 'GET',})
+        var boolForCurrentDraft = await res.json()
+        console.log("current draft - " + boolForCurrentDraft)
 
-    var res = await fetch("http://localhost:8080/api/teams/checkForCurrentDrafts/?username="+getCookie("username"),{
-        method: 'GET',})
-    var boolForCurrentDraft = await res.json()
-    console.log("current draft - " + boolForCurrentDraft)
+        var res = await fetch("http://localhost:8080/api/teams/checkForPastDrafts/?username="+getCookie("username"),{
+            method: 'GET',})
+        var boolPastDrafts = await res.json()
+        console.log("past drafts - " + boolPastDrafts)
 
-    var res = await fetch("http://localhost:8080/api/teams/checkForPastDrafts/?username="+getCookie("username"),{
-        method: 'GET',})
-    var boolPastDrafts = await res.json()
-    console.log("past drafts - " + boolPastDrafts)
-
-    if (boolForCurrentDraft == true) {
-        document.getElementById("resumeDraftButton").style.display = "inline-block";
-        document.getElementById("deleteDraftButton").style.display = "inline-block";
+        if (boolForCurrentDraft == true) {
+            document.getElementById("resumeDraftButton").style.display = "inline-block";
+            document.getElementById("deleteDraftButton").style.display = "inline-block";
+        }
+        if (boolPastDrafts == true) {
+            document.getElementById("historalDraftButton").style.display = "inline-block";
+        }
     }
-    if (boolPastDrafts == true) {
-        document.getElementById("historalDraftButton").style.display = "inline-block";
+    else {
+        console.log("User not logged in. Redirecting to login page.")
+        deleteAllCookies();
     }
 }
 
 
 async function selectedStartNewDraft() {
-    var res = await fetch("http://localhost:8080/api/teams/checkForCurrentDrafts/?username="+getCookie("username"),{
-        method: 'GET',})
-    var boolForCurrentDraft = await res.json();
-    console.log(boolForCurrentDraft)
+    if(await authenticateSession() == true) {
+        var res = await fetch("http://localhost:8080/api/teams/checkForCurrentDrafts/?username="+getCookie("username"),{
+            method: 'GET',})
+        var boolForCurrentDraft = await res.json();
+        console.log(boolForCurrentDraft)
 
-    if (boolForCurrentDraft == true) {
-        alert("You already have a draft in progress. Please resume that draft or delete it before starting a new one.")
+        if (boolForCurrentDraft == true) {
+            alert("You already have a draft in progress. Please resume that draft or delete it before starting a new one.")
+        }
+        else {
+        document.getElementById("draftModeSelectContainer").style.display = "none";
+        document.getElementById("draftFormContainer").style.display = "block";
+        }
     }
     else {
-    document.getElementById("draftModeSelectContainer").style.display = "none";
-    document.getElementById("draftFormContainer").style.display = "block";
+        console.log("User not logged in. Redirecting to login page.")
+        deleteAllCookies();
     }
 }
 
-function selectedResumeLastSavedDraft () { 
-    document.cookie = "draftType=resume;path=/";
-    window.location.href = "draftpage.html";
+async function selectedResumeLastSavedDraft () { 
+    if(await authenticateSession() == true) {
+        document.cookie = "draftType=resume;path=/";
+        window.location.href = "draftpage.html";
+    }
+    else {
+        console.log("User not logged in. Redirecting to login page.")
+        deleteAllCookies();
+    }
 }
 
-function selectedViewDraftHistory() {
-    window.location.href = "draftHistory.html";
+async function selectedViewDraftHistory() {
+    if(await authenticateSession() == true) {
+        window.location.href = "draftHistory.html";
+    }
+    else {
+        console.log("User not logged in. Redirecting to login page.")
+        deleteAllCookies();
+    }
 }
 
 async function selectedDeleteCurrentDraft() {
-    var res = await fetch("http://localhost:8080/api/teams/deleteThisDraft/?username="+getCookie("username"),{   
-        method: 'POST',})
-    var boolForCurrentDraft = await res.json();
-    console.log(boolForCurrentDraft);
-    alert("Draft deleted. You may now start a new draft.")
-    document.getElementById("resumeDraftButton").style.display = "none";
-    document.getElementById("deleteDraftButton").style.display = "none";
+    if(await authenticateSession() == true) {
+        var res = await fetch("http://localhost:8080/api/teams/deleteThisDraft/?username="+getCookie("username"),{   
+            method: 'POST',})
+        var boolForCurrentDraft = await res.json();
+        console.log(boolForCurrentDraft);
+        alert("Draft deleted. You may now start a new draft.")
+        document.getElementById("resumeDraftButton").style.display = "none";
+        document.getElementById("deleteDraftButton").style.display = "none";
+    }
+    else {
+        console.log("User not logged in. Redirecting to login page.")
+        deleteAllCookies();
+    }
 }
 
 async function startDraft() {
@@ -77,24 +106,30 @@ async function startDraft() {
         return true
     }
 
-    var teamName = document.getElementById("teamNameInput").value
-    var draftSize = document.getElementById("sizeOfTeamsInput").value
-    draftSize = parseInt(draftSize)
-    var draftPosition = document.getElementById("draftPositionInput").value
-    draftPosition = parseInt(draftPosition)
+    if(await authenticateSession() == true) {
 
-    if (checkStartDraftInput(teamName,draftSize,draftPosition) == true) {
-        var res = await 
-        fetch(("http://localhost:8080/api/teams/startDraft/?username="+getCookie("username")+"&teamName="+teamName+"&draftSize="+draftSize+"&draftPosition="+draftPosition), {
-            method: 'POST',
-        })
-        var data = await res.json()
-        console.log(data)
+        var teamName = document.getElementById("teamNameInput").value
+        var draftSize = document.getElementById("sizeOfTeamsInput").value
+        draftSize = parseInt(draftSize)
+        var draftPosition = document.getElementById("draftPositionInput").value
+        draftPosition = parseInt(draftPosition)
 
-        document.cookie = "teamName=" + teamName + "; path=/";
-        document.cookie = "draftPosition=" + draftPosition + "; path=/";
+        if (checkStartDraftInput(teamName,draftSize,draftPosition) == true) {
+            var res = await 
+            fetch(("http://localhost:8080/api/teams/startDraft/?username="+getCookie("username")+"&teamName="+teamName+"&draftSize="+draftSize+"&draftPosition="+draftPosition), {
+                method: 'POST',
+            })
+            var data = await res.json()
+            console.log(data)
+
+            document.cookie = "teamName=" + teamName + "; path=/";
+            document.cookie = "draftPosition=" + draftPosition + "; path=/";
+        }
+        document.cookie = "draftType=new; path=/";
+        window.location.href = "draftpage.html"
     }
-    document.cookie = "draftType=new; path=/";
-    window.location.href = "draftpage.html"
-
+    else {
+        console.log("User not logged in. Redirecting to login page.")
+        deleteAllCookies();
+    }
 }

@@ -24,7 +24,7 @@ function deleteCookie(cname) {
     console.log(cname + " = " + getCookie(cname));
 }
 
-function deleteAllCookies() {
+async function deleteAllCookies() {
     console.log(document.cookie);
     var cookies = document.cookie.split(";");
     console.log("Spliting cookies - " + cookies);
@@ -41,6 +41,4 @@ function deleteAllCookies() {
     }
 
     alert("Logged out of " + userName + "'s account.");
-
-    window.location.href = "loginpage.html";
 }

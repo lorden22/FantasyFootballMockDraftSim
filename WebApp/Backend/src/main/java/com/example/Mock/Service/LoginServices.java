@@ -44,13 +44,40 @@ public class LoginServices{
         return false;
     }
 
-    public boolean authenticateUser(String username, String password) throws NoSuchAlgorithmException {
+    public boolean authenticateUserPassword(String username, String password) throws NoSuchAlgorithmException {
         for(UserDataObject user : users) {
-            if(user.getUsername().equals(username) && user.authenticateUser(password)) {
+            if(user.getUsername().equals(username) && user.authenticateUserPassword(password)) {
                 return true;
             }
         }
         return false;
     }
 
+    public boolean authenticateUserSessionID(String username, String sessionID) throws NoSuchAlgorithmException {
+        for(UserDataObject user : users) {
+            if(user.getUsername().equals(username) && user.authenticateSessionID(sessionID)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public String generateSessionID(String username) throws NoSuchAlgorithmException {
+        for(UserDataObject user : users) {
+            if(user.getUsername().equals(username)) {
+                return user.generateSessionID();
+            }
+        }
+        return null;
+    }
+
+    public boolean logout(String username, String sessionID) {
+        for(UserDataObject user : users) {
+            if(user.getUsername().equals(username) && user.authenticateSessionID(sessionID)) {
+                user.logout();
+                return true;
+            }
+        }
+        return false;
+    }
 }

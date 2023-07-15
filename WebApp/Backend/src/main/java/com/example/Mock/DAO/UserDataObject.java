@@ -17,6 +17,7 @@ public class UserDataObject implements UserDAO  {
     private String username;
     private String hashPassword;
     private String salt;
+    private String latestSessionID;
 
     public UserDataObject(String username, String passwordText) throws NoSuchAlgorithmException {
         this.username = username;
@@ -33,7 +34,7 @@ public class UserDataObject implements UserDAO  {
         this.hashPassword = bypeArrayToString(hash);
     }
 
-    public boolean authenticateUser(String attemptedPassword) throws NoSuchAlgorithmException {
+    public boolean authenticateUserPassword(String attemptedPassword) throws NoSuchAlgorithmException {
         MessageDigest digest;
         digest = MessageDigest.getInstance("SHA-256");
         digest.reset();
@@ -44,8 +45,29 @@ public class UserDataObject implements UserDAO  {
         return attemptedHashPassword.equals(this.hashPassword);
     }
 
+    public boolean authenticateSessionID(String attemptedSessionID) {
+        return attemptedSessionID.equals(this.latestSessionID);
+    }
+
+    public String generateSessionID() {
+        SecureRandom random = new SecureRandom();
+        byte[] bytes = new byte[16];
+        random.nextBytes(bytes);
+        this.latestSessionID = bypeArrayToString(bytes);
+        return this.latestSessionID;
+    }
+
     public String getUsername() {
         return this.username;
+    }
+
+     public String getSessionID() {
+        return this.latestSessionID;
+    }
+
+    public boolean logout() {
+        this.latestSessionID = null;
+        return true;
     }
 
     private static String bypeArrayToString(byte[] bytes) {

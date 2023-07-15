@@ -7,9 +7,9 @@ import java.security.NoSuchAlgorithmException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+@RestController
 @RequestMapping("api/login")
 @CrossOrigin
-@RestController
 public class LoginController {
 
     private final LoginServices loginServices;
@@ -38,9 +38,27 @@ public class LoginController {
 
     @GetMapping(path = "/attemptLogin/")
     public boolean attemptLogin(@RequestParam("username") String username, @RequestParam("password") String password) throws NoSuchAlgorithmException {
-        boolean log = loginServices.authenticateUser(username, password);
+        boolean log = loginServices.authenticateUserPassword(username, password);
         System.out.println(log + " " + username + " " + password);
         return log;
     }
+
+    @GetMapping(path = "/attemptSession/")
+    public boolean attemptedSessionID(@RequestParam("username") String username, @RequestParam("sessionID") String sessionID) throws NoSuchAlgorithmException {
+        boolean log = loginServices.authenticateUserSessionID(username, sessionID);
+        System.out.println(log + " " + username + " " + sessionID);
+        return log;
+    }
+
+    @GetMapping(path = "/generateSessionID/") 
+    public String generateSessionID(@RequestParam("username") String username) throws NoSuchAlgorithmException {
+        return loginServices.generateSessionID(username);
+    }
+
+    @PostMapping(path = "/logout/")
+    public boolean logout(@RequestParam("username") String username, @RequestParam("sessionID") String sessionID) {
+        return loginServices.logout(username, sessionID);
+    }
+
 }
 

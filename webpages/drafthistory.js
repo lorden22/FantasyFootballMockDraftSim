@@ -48,125 +48,146 @@ async function renderDraftHistoryTable() {
 
         document.getElementById("draftHistoryTable").appendChild(newDraftHistoryRow);
     }
+    if(await authenticateSession() == true) {
 
-    loadUserName();
+        loadUserName();
 
-    var res = await fetch("http://localhost:8080/api/teams/getDraftHistoryMetaData/?username="+getCookie("username"),{
-        method: 'GET',})
-    var data = await res.json()
-    console.log(data)
+        var res = await fetch("http://localhost:8080/api/teams/getDraftHistoryMetaData/?username="+getCookie("username"),{
+            method: 'GET',})
+        var data = await res.json()
+        console.log(data)
 
-    for(var intCurrDraftMetaData in data) {
-        var currDraftMetaData = data[intCurrDraftMetaData]
+        for(var intCurrDraftMetaData in data) {
+            var currDraftMetaData = data[intCurrDraftMetaData]
 
-        createRow(currDraftMetaData);
+            createRow(currDraftMetaData);
+        }
+    }
+    else {
+        console.log("User not logged in. Redirecting to login page.")
+        deleteAllCookies();
     }
 }
 
-function viewDraft(draftID) {
-    console.log(draftID)
+async function viewDraft(draftID) {
     document.cookie = "draftIDToView="+draftID + ";path=/";
     window.location.href = "draftreview.html";
 }
 
 async function renderDraftReviewPage() {
-
-    loadUserName();
-    document.getElementById("backButton").style.display = "none";
+    if(await authenticateSession() == true) {
+        loadUserName();
+        document.getElementById("backButton").style.display = "none";
+    }
+    else {
+        console.log("User not logged in. Redirecting to login page.")
+        deleteAllCookies();
+    }
 }
 
 async function renderDraftHistoryPlayerLog() {
-    var res =  await fetch ("http://localhost:8080/api/teams/getDraftHistoryPlayerLog/?username="+getCookie("username")+"&draftID="+getCookie("draftIDToView"), {
-        method: 'GET',
-    })
-    var data = await res.json()
-    
-    console.log(data);
-
-    document.getElementById("draftHistoryPlayerLog").style.display = "block";
-    document.getElementById("draftReviewSelecterForm").style.display = "none";
-
-    for(var intCurrDraftLog in data.slice(0, data.length-1)) {
-        var currPlayerDraftLog = data[intCurrDraftLog]
+    if(await authenticateSession() == true) {
+        var res =  await fetch ("http://localhost:8080/api/teams/getDraftHistoryPlayerLog/?username="+getCookie("username")+"&draftID="+getCookie("draftIDToView"), {
+            method: 'GET',
+        })
+        var data = await res.json()
         
-        var newDraftHistoryPlayerLogRow = document.createElement("tr");
-        newDraftHistoryPlayerLogRow.id = "draftHistoryPlayerLogRow" + intCurrDraftLog;
+        console.log(data);
 
-        var newDraftHistoryPlayerLogSpot = currPlayerDraftLog.spotDrafted;
-        var roundPickArray = newDraftHistoryPlayerLogSpot.split(".");
+        document.getElementById("draftHistoryPlayerLog").style.display = "block";
+        document.getElementById("draftReviewSelecterForm").style.display = "none";
 
-        var newDraftHistoryPlayerLogRound = document.createElement("td");
-        newDraftHistoryPlayerLogRound.id = "draftHistoryPlayerLogRound" + intCurrDraftLog;
-        newDraftHistoryPlayerLogRound.innerHTML = roundPickArray[0];
+        for(var intCurrDraftLog in data.slice(0, data.length-1)) {
+            var currPlayerDraftLog = data[intCurrDraftLog]
+            
+            var newDraftHistoryPlayerLogRow = document.createElement("tr");
+            newDraftHistoryPlayerLogRow.id = "draftHistoryPlayerLogRow" + intCurrDraftLog;
 
-        var newDraftHistoryPlayerLogPick = document.createElement("td");
-        newDraftHistoryPlayerLogPick.id = "draftHistoryPlayerLogPick" + intCurrDraftLog;
-        newDraftHistoryPlayerLogPick.innerHTML = roundPickArray[1];
+            var newDraftHistoryPlayerLogSpot = currPlayerDraftLog.spotDrafted;
+            var roundPickArray = newDraftHistoryPlayerLogSpot.split(".");
 
-        var newDraftHistoryPlayerLogPlayerName = document.createElement("td");
-        newDraftHistoryPlayerLogPlayerName.id = "draftHistoryPlayerLogPlayerName" + intCurrDraftLog;
-        newDraftHistoryPlayerLogPlayerName.innerHTML = currPlayerDraftLog.fullName;
+            var newDraftHistoryPlayerLogRound = document.createElement("td");
+            newDraftHistoryPlayerLogRound.id = "draftHistoryPlayerLogRound" + intCurrDraftLog;
+            newDraftHistoryPlayerLogRound.innerHTML = roundPickArray[0];
 
-        var newDraftHistoryPlayerLogPlayerPosition = document.createElement("td");
-        newDraftHistoryPlayerLogPlayerPosition.id = "draftHistoryPlayerLogPlayerPosition" + intCurrDraftLog;
-        newDraftHistoryPlayerLogPlayerPosition.innerHTML = currPlayerDraftLog.position;
+            var newDraftHistoryPlayerLogPick = document.createElement("td");
+            newDraftHistoryPlayerLogPick.id = "draftHistoryPlayerLogPick" + intCurrDraftLog;
+            newDraftHistoryPlayerLogPick.innerHTML = roundPickArray[1];
 
-        var newDraftHistoryPlayerLogPlayerScore = document.createElement("td");
-        newDraftHistoryPlayerLogPlayerScore.id = "draftHistoryPlayerLogPlayerScored" + intCurrDraftLog;
-        newDraftHistoryPlayerLogPlayerScore.innerHTML = currPlayerDraftLog.predictedScore;
+            var newDraftHistoryPlayerLogPlayerName = document.createElement("td");
+            newDraftHistoryPlayerLogPlayerName.id = "draftHistoryPlayerLogPlayerName" + intCurrDraftLog;
+            newDraftHistoryPlayerLogPlayerName.innerHTML = currPlayerDraftLog.fullName;
 
-        var newDraftHistoryPlayerLogPlayerTeam = document.createElement("td");
-        newDraftHistoryPlayerLogPlayerTeam.id = "draftHistoryPlayerLogPlayerTeam" + intCurrDraftLog;
-        newDraftHistoryPlayerLogPlayerTeam.innerHTML = currPlayerDraftLog.teamDraftedBy;
+            var newDraftHistoryPlayerLogPlayerPosition = document.createElement("td");
+            newDraftHistoryPlayerLogPlayerPosition.id = "draftHistoryPlayerLogPlayerPosition" + intCurrDraftLog;
+            newDraftHistoryPlayerLogPlayerPosition.innerHTML = currPlayerDraftLog.position;
 
-        newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogRound);
-        newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogPick);
-        newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogPlayerName);
-        newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogPlayerPosition);
-        newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogPlayerScore);
-        newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogPlayerTeam);
+            var newDraftHistoryPlayerLogPlayerScore = document.createElement("td");
+            newDraftHistoryPlayerLogPlayerScore.id = "draftHistoryPlayerLogPlayerScored" + intCurrDraftLog;
+            newDraftHistoryPlayerLogPlayerScore.innerHTML = currPlayerDraftLog.predictedScore;
 
-        document.getElementById("draftReviewPlayerLogBody").appendChild(newDraftHistoryPlayerLogRow);
+            var newDraftHistoryPlayerLogPlayerTeam = document.createElement("td");
+            newDraftHistoryPlayerLogPlayerTeam.id = "draftHistoryPlayerLogPlayerTeam" + intCurrDraftLog;
+            newDraftHistoryPlayerLogPlayerTeam.innerHTML = currPlayerDraftLog.teamDraftedBy;
+
+            newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogRound);
+            newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogPick);
+            newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogPlayerName);
+            newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogPlayerPosition);
+            newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogPlayerScore);
+            newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogPlayerTeam);
+
+            document.getElementById("draftReviewPlayerLogBody").appendChild(newDraftHistoryPlayerLogRow);
+        }
+        document.getElementById("backButton").style.display = "inline";
     }
-    document.getElementById("backButton").style.display = "inline";
-
+    else {
+        console.log("User not logged in. Redirecting to login page.")
+        deleteAllCookies();
+    }
 }
 
 async function renderDraftHistoryTeamHistorySelecter() {
+    if(await authenticateSession() == true){
 
-    var res = await fetch ("http://localhost:8080/api/teams/getDraftHistoryTeamList/?username="+getCookie("username")+"&draftID="+getCookie("draftIDToView"), {
-        method: 'GET',
-    })
+        var res = await fetch ("http://localhost:8080/api/teams/getDraftHistoryTeamList/?username="+getCookie("username")+"&draftID="+getCookie("draftIDToView"), {
+            method: 'GET',
+        })
 
-    var data = await res.json()
-    console.log(data);
+        var data = await res.json()
+        console.log(data);
 
-    for(var intCurrTeam in data) {
-        var currTeam = data[intCurrTeam];
+        for(var intCurrTeam in data) {
+            var currTeam = data[intCurrTeam];
 
-        var currTeamRow = document.createElement("tr");
-        currTeamRow.id = "draftHistoryTeamRow" + intCurrTeam;
+            var currTeamRow = document.createElement("tr");
+            currTeamRow.id = "draftHistoryTeamRow" + intCurrTeam;
 
-        var currTeamName = document.createElement("td");
-        currTeamName.id = "draftHistoryTeamName" + intCurrTeam;
-        currTeamName.innerHTML = currTeam.teamName;
+            var currTeamName = document.createElement("td");
+            currTeamName.id = "draftHistoryTeamName" + intCurrTeam;
+            currTeamName.innerHTML = currTeam.teamName;
 
-        var currTeamViewButton = document.createElement("btn");
-        currTeamViewButton.id = "draftHistoryViewButton" + intCurrTeam;
-        currTeamViewButton.innerHTML = "View Team";
-        currTeamViewButton.onclick = function() {viewTeam(this.id.slice(-1))};
-        currTeamViewButton.className = "btn btn-primary";
-        currTeamViewButton.style.margin = "5%";
-        currTeamViewButton.style.padding = "5%";
+            var currTeamViewButton = document.createElement("btn");
+            currTeamViewButton.id = "draftHistoryViewButton" + intCurrTeam;
+            currTeamViewButton.innerHTML = "View Team";
+            currTeamViewButton.onclick = function() {viewTeam(this.id.slice(-1))};
+            currTeamViewButton.className = "btn btn-primary";
+            currTeamViewButton.style.margin = "5%";
+            currTeamViewButton.style.padding = "5%";
 
-        currTeamRow.appendChild(currTeamName);
-        currTeamRow.appendChild(currTeamViewButton);
+            currTeamRow.appendChild(currTeamName);
+            currTeamRow.appendChild(currTeamViewButton);
 
-        document.getElementById("allTeamsTableBody").appendChild(currTeamRow);
+            document.getElementById("allTeamsTableBody").appendChild(currTeamRow);
+        }
+        document.getElementById("allTeamsTable").style.display = "block";
+        document.getElementById("draftReviewSelecterForm").style.display = "none";
+        document.getElementById("backButton").style.display = "inline";
     }
-    document.getElementById("allTeamsTable").style.display = "block";
-    document.getElementById("draftReviewSelecterForm").style.display = "none";
-    document.getElementById("backButton").style.display = "inline";
+    else {
+        console.log("User not logged in. Redirecting to login page.")
+        deleteAllCookies();
+    }
 }
 
 async function viewTeam(teamID) {
@@ -274,68 +295,81 @@ async function viewTeam(teamID) {
         return  newStarterRow;  
     }
 
-    document.getElementById("teamHistoryTableBody").innerHTML = "";
+    if(await authenticateSession() == true) {
 
-    var res = await fetch ("http://localhost:8080/api/teams/getDraftHistoryTeamReview/?username="+getCookie("username")+"&draftID="+getCookie("draftIDToView")+"&teamIndex="+teamID, {
-        method: 'GET',
-    })
+        document.getElementById("teamHistoryTableBody").innerHTML = "";
 
-    var data = await res.json()
-    console.log(data);
+        var res = await fetch ("http://localhost:8080/api/teams/getDraftHistoryTeamReview/?username="+getCookie("username")+"&draftID="+getCookie("draftIDToView")+"&teamIndex="+teamID, {
+            method: 'GET',
+        })
 
-    var postionOrder = ["QB", "RB", "WR", "TE", "Flex" ,"K", "DEF"];
+        var data = await res.json()
+        console.log(data);
 
-    for(var intCurrPosition in postionOrder) {
-        console.log(intCurrPosition);
-        var currPosition = postionOrder[intCurrPosition];
-        console.log(currPosition);
-        var starterAmount = 1;
+        var postionOrder = ["QB", "RB", "WR", "TE", "Flex" ,"K", "DEF"];
 
-        if(currPosition == "RB" ||
-            currPosition == "WR") {
-                starterAmount = 2;
+        for(var intCurrPosition in postionOrder) {
+            console.log(intCurrPosition);
+            var currPosition = postionOrder[intCurrPosition];
+            console.log(currPosition);
+            var starterAmount = 1;
+
+            if(currPosition == "RB" ||
+                currPosition == "WR") {
+                    starterAmount = 2;
+            }
+
+            for(var intCurrStarter = 0; intCurrStarter < starterAmount; intCurrStarter++) {
+                if (currPosition == "Flex") {
+                    var currPositionPlayers = data["RB"].concat(data["WR"]).concat(data["TE"]);
+                }
+                else { 
+                    var currPositionPlayers = data[currPosition];
+                }
+                console.log(currPositionPlayers);
+                var currStarterIndex = findStarterIndex(currPositionPlayers);
+                console.log(currStarterIndex);
+                var currStarter = currPositionPlayers[currStarterIndex];
+                console.log(currStarter);
+                var currStarterRow = createDataRowForStarter(currPosition, currStarterIndex, currPositionPlayers);
+                console.log(currStarterRow);
+                document.getElementById("teamHistoryTableBody").appendChild(currStarterRow);
+
+                if(currStarter != null) {
+                    data[currStarter.position].splice(currStarterIndex, 1);
+                    console.log(data[currPosition]);
+                }
+            }
         }
-
-        for(var intCurrStarter = 0; intCurrStarter < starterAmount; intCurrStarter++) {
-            if (currPosition == "Flex") {
-                var currPositionPlayers = data["RB"].concat(data["WR"]).concat(data["TE"]);
-            }
-            else { 
-                var currPositionPlayers = data[currPosition];
-            }
-            console.log(currPositionPlayers);
-            var currStarterIndex = findStarterIndex(currPositionPlayers);
-            console.log(currStarterIndex);
-            var currStarter = currPositionPlayers[currStarterIndex];
-            console.log(currStarter);
-            var currStarterRow = createDataRowForStarter(currPosition, currStarterIndex, currPositionPlayers);
-            console.log(currStarterRow);
-            document.getElementById("teamHistoryTableBody").appendChild(currStarterRow);
-
-            if(currStarter != null) {
-                data[currStarter.position].splice(currStarterIndex, 1);
-                console.log(data[currPosition]);
-            }
-        }
+        var benchPlayers = data["QB"].concat(data["RB"]).concat(data["WR"]).concat(data["TE"]).concat(data["K"]).concat(data["DEF"]);
+        console.log(benchPlayers);
+        findBenchedPlayers(benchPlayers);
+            
+        document.getElementById("teamHistoryTable").style.display = "block";
     }
-    var benchPlayers = data["QB"].concat(data["RB"]).concat(data["WR"]).concat(data["TE"]).concat(data["K"]).concat(data["DEF"]);
-    console.log(benchPlayers);
-    findBenchedPlayers(benchPlayers);
-        
-    document.getElementById("teamHistoryTable").style.display = "block";
+    else {
+        console.log("User not logged in. Redirecting to login page.")
+        deleteAllCookies();
+    } 
 }
 
-function resetDraftHistoryPage() {
-    document.getElementById("draftHistoryPlayerLog").style.display = "none";
-    document.getElementById("draftReviewPlayerLogBody").innerHTML = "";
+async function resetDraftHistoryPage() {
+    if(await authenticateSession() == true) {
+        document.getElementById("draftHistoryPlayerLog").style.display = "none";
+        document.getElementById("draftReviewPlayerLogBody").innerHTML = "";
 
 
-    document.getElementById("allTeamsTable").style.display = "none";
-    document.getElementById("allTeamsTableBody").innerHTML = "";
+        document.getElementById("allTeamsTable").style.display = "none";
+        document.getElementById("allTeamsTableBody").innerHTML = "";
 
-    document.getElementById("teamHistoryTable").style.display = "none";
-    document.getElementById("teamHistoryTableBody").innerHTML = "";
+        document.getElementById("teamHistoryTable").style.display = "none";
+        document.getElementById("teamHistoryTableBody").innerHTML = "";
 
-    document.getElementById("draftReviewSelecterForm").style.display = "block";
-    document.getElementById("backButton").style.display = "none";
+        document.getElementById("draftReviewSelecterForm").style.display = "block";
+        document.getElementById("backButton").style.display = "none";
+    }
+    else {
+        console.log("User not logged in. Redirecting to login page.")
+        deleteAllCookies();
+    }
 }
