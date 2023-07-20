@@ -2,20 +2,20 @@ async function setUpDraft() {
     if(await authenticateSession() == true) {
         loadUserName();
 
-        var draftType = getCookie("draftType");
+        let draftType = getCookie("draftType");
         
         if (draftType == "resume") {
 
-            var endOfDraft = await endDraft();
+            let endOfDraft = await endDraft();
 
             if (endOfDraft == false) {
 
                 document.getElementById("draftNotStartedForm").style.display = "none";
                 document.getElementById("waitingDraftControllerForm").style.display = "block";
 
-                var currPick = await getCurrPick();
-                var nextUserPick =  await getNextUserPick();
-                var currRound = await getCurrRound(); 
+                let currPick = await getCurrPick();
+                let nextUserPick =  await getNextUserPick();
+                let currRound = await getCurrRound(); 
 
                 console.log("currPick = " + currPick)
                 console.log("nextUserPick = " + nextUserPick)
@@ -43,9 +43,9 @@ async function setUpDraft() {
                 document.getElementById("draftNotStartedForm").style.display = "none";
             }
             getPlayerLeft();
-            var res = await fetch("http://localhost:8080/api/teams/getAllPlayersDrafted/?username="+getCookie("username"),{
+            let res = await fetch("http://localhost:8080/api/teams/getAllPlayersDrafted/?username="+getCookie("username"),{
                 method: 'GET',})
-            var data = await res.json();
+            let data = await res.json();
             parseDraftLogData(data);   
         }
         else if (draftType == "new") {
@@ -63,7 +63,7 @@ async function startDraftFromDraftPage(){
     if(await authenticateSession() == true) {
         document.getElementById("draftNotStartedForm").style.display = "none";
 
-        var draftPosition = getCookie("draftPosition")
+        let draftPosition = getCookie("draftPosition")
 
         if (draftPosition == 1) {
             document.getElementById("draftControllerForm").style.display = "block";
@@ -86,49 +86,49 @@ async function startDraftFromDraftPage(){
 }
 
 async function getCurrRound() {
-    var res = await fetch("http://localhost:8080/api/teams/getCurrRound/?username=" + getCookie("username"),{
+    let res = await fetch("http://localhost:8080/api/teams/getCurrRound/?username=" + getCookie("username"),{
         method: 'GET',
     })
-    var data = await res.json()
+    let data = await res.json()
     console.log(data)
     return data;
 }   
 
 async function getCurrPick() {
-    var res = await fetch("http://localhost:8080/api/teams/getCurrPick/?username=" + getCookie("username"),{
+    let res = await fetch("http://localhost:8080/api/teams/getCurrPick/?username=" + getCookie("username"),{
         method: 'GET',
     })
-    var data = await res.json()
+    let data = await res.json()
     console.log(data)
     return data;
 }   
 
 async function getNextUserPick() {
-    var res = await fetch("http://localhost:8080/api/teams/getNextUserPick/?username="+getCookie("username"),{
+    let res = await fetch("http://localhost:8080/api/teams/getNextUserPick/?username="+getCookie("username"),{
         method: 'GET',
     })
-    var data = await res.json()
+    let data = await res.json()
     console.log(data)
     return data;
 }
 
 async function getNextUserPickRound() {
-    var res = await fetch("http://localhost:8080/api/teams/getNextUserPickRound/?username="+getCookie("username"),{
+    let res = await fetch("http://localhost:8080/api/teams/getNextUserPickRound/?username="+getCookie("username"),{
         method: 'GET',
     })
-    var data = await res.json()
+    let data = await res.json()
     console.log(data)
     return data;
 }
 
 async function getPlayerLeft() {
-    var res = await fetch("http://localhost:8080/api/teams/getPlayersLeft/?username="+getCookie("username"),{
+    let res = await fetch("http://localhost:8080/api/teams/getPlayersLeft/?username="+getCookie("username"),{
         method: 'GET',
     })
-    var data = await res.json()
+    let data = await res.json()
     console.log(data)
-    var returnVal = ""
-    for(var intCurrPlayer in data) {
+    let returnVal = ""
+    for(let intCurrPlayer in data) {
         currPlayer = data[intCurrPlayer]
         returnVal += ((1+Number(intCurrPlayer)) + ". " + currPlayer.fullName + " " +currPlayer.position + " - Predicted Score 2022 = " 
         + currPlayer.predictedScore + ", Avg ADP = " + currPlayer.avgADP + "<br />")
@@ -140,7 +140,7 @@ async function getPlayerLeft() {
 async function updatePlayerListPar(data) {
     if(await authenticateSession() == true) {
         returnVal = ""
-        for(var intCurrPlayer in data) {
+        for(let intCurrPlayer in data) {
             currPlayer = data[intCurrPlayer]
             returnVal += ((1+Number(intCurrPlayer)) + ". " + currPlayer.fullName + ", " +currPlayer.position + " - Predicted Score 2022 = " 
             + currPlayer.predictedScore + ", Avg ADP = " + currPlayer.avgADP + "<br />")
@@ -154,9 +154,9 @@ async function updatePlayerListPar(data) {
 }
 
 async function parseDraftLogData(data) {
-    var updatedDraftLog
-    var currPick = await getCurrPick();
-    var currRound = await getCurrRound()
+    let updatedDraftLog
+    let currPick = await getCurrPick();
+    let currRound = await getCurrRound()
 
     if (currPick == 1 && currRound == 1) {
         document.getElementById("draftLogPar").innerHTML = ""
@@ -164,7 +164,7 @@ async function parseDraftLogData(data) {
     }
     else updateVal = document.getElementById("draftLogPar").innerHTML;
 
-    for(var intCurrPlayer in data) {
+    for(let intCurrPlayer in data) {
         currPlayer = data[intCurrPlayer]
         console.log(currPlayer)
         if (currPlayer.firstName == null) {
@@ -180,18 +180,18 @@ async function parseDraftLogData(data) {
 }
 
 async function checkToClearDraftLog() {
-    var currPick = await getCurrPick();
-    var currRound = await getCurrRound();
+    let currPick = await getCurrPick();
+    let currRound = await getCurrRound();
     if (currPick == 1  && currRound == 1) {
         document.getElementById("draftLogPar").innerHTML = ""
     }
 }
 
 async function changeFormForNextPick() {
-    var nextDraftPick = await getCurrPick();
-    var currRound = await getCurrRound();
-    var nextUserPick = await getNextUserPick();
-    var nextUserPickRound = await getNextUserPickRound();
+    let nextDraftPick = await getCurrPick();
+    let currRound = await getCurrRound();
+    let nextUserPick = await getNextUserPick();
+    let nextUserPickRound = await getNextUserPickRound();
     console.log(currRound + "." + nextDraftPick + " - " + nextUserPick)
 
 
@@ -222,11 +222,11 @@ async function changeFormForNextPick() {
 async function simulateToNextPick() {
     if(await authenticateSession() == true) {
         await checkToClearDraftLog();          
-        var res = await
+        let res = await
         fetch("http://localhost:8080/api/teams/simTo/?username="+getCookie("username"), {
                 method: 'POST',
             })
-        var data = await res.json()
+        let data = await res.json()
 
         await getPlayerLeft();
         parseDraftLogData(data)
@@ -244,13 +244,13 @@ async function simulateToNextPick() {
 async function userDraftPlayer() {
     if(await authenticateSession() == true) {
         await checkToClearDraftLog();   
-        var playerToDraftIndex = parseInt(document.getElementById("nextDraftPick").value)
+        let playerToDraftIndex = parseInt(document.getElementById("nextDraftPick").value)
 
-        var res = await
+        let res = await
         fetch("http://localhost:8080/api/teams/userDraftPlayer/?username="+getCookie("username")+"&playerIndex="+playerToDraftIndex, {
                 method: 'POST',
             })
-        var data = await res.json()
+        let data = await res.json()
         console.log(data)
 
         await getPlayerLeft();
@@ -278,9 +278,9 @@ async function endDraft() {
     
 async function endOfCurrentDraft() {
     if(await authenticateSession() == true) {
-        var res = await fetch("http://localhost:8080/api/teams/deleteThisDraft/?username="+getCookie("username"),{
+        let res = await fetch("http://localhost:8080/api/teams/deleteThisDraft/?username="+getCookie("username"),{
             method: 'POST',})
-        var boolForCurrentDraft = await res.json();
+        let boolForCurrentDraft = await res.json();
         console.log(boolForCurrentDraft);    
         goToHomePage(); 
     }

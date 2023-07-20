@@ -2,37 +2,37 @@ async function renderDraftHistoryTable() {
     
     function createRow (currDraftRowMetaData) {
         console.log(currDraftMetaData)
-        var draftID = currDraftMetaData.draftID;
+        let draftID = currDraftMetaData.draftID;
         console.log(draftID)
 
-        var newDraftHistoryRow = document.createElement("tr");
+        let newDraftHistoryRow = document.createElement("tr");
         newDraftHistoryRow.id = "draftHistoryRow" + draftID;
 
-        var newDraftHistoryRowDraftID = document.createElement("td");
+        let newDraftHistoryRowDraftID = document.createElement("td");
         newDraftHistoryRowDraftID.id = "draftHistoryRowDraftID" + draftID;
         newDraftHistoryRowDraftID.innerHTML = draftID;
 
-        var newDraftHistoryRowTeamName = document.createElement("td");
+        let newDraftHistoryRowTeamName = document.createElement("td");
         newDraftHistoryRowTeamName.id = "draftHistoryRowTeamName" + draftID;
         newDraftHistoryRowTeamName.innerHTML = currDraftMetaData.teamName;
 
-        var newDraftHistoryRowDraftPosition = document.createElement("td");
+        let newDraftHistoryRowDraftPosition = document.createElement("td");
         newDraftHistoryRowDraftPosition.id = "draftHistoryRowDraftPosition" + draftID;
         newDraftHistoryRowDraftPosition.innerHTML = currDraftMetaData.draftPosition;
 
-        var newDraftHistoryRowDraftSize = document.createElement("td");
+        let newDraftHistoryRowDraftSize = document.createElement("td");
         newDraftHistoryRowDraftSize.id = "draftHistoryRowDraftSize" + draftID;
         newDraftHistoryRowDraftSize.innerHTML = currDraftMetaData.draftSize;
 
-        var newDraftHistoryRowDraftDate = document.createElement("td");
+        let newDraftHistoryRowDraftDate = document.createElement("td");
         newDraftHistoryRowDraftDate.id = "draftHistoryRowDraftDate" + draftID;
         newDraftHistoryRowDraftDate.innerHTML = currDraftMetaData.Date;
 
-        var newDraftHistoryRowDraftTime = document.createElement("td");
+        let newDraftHistoryRowDraftTime = document.createElement("td");
         newDraftHistoryRowDraftTime.id = "draftHistoryRowDraftTime" + draftID;
         newDraftHistoryRowDraftTime.innerHTML = currDraftMetaData.Time;
 
-        var newDraftHistoryRowDraftViewDraft = document.createElement("btn");
+        let newDraftHistoryRowDraftViewDraft = document.createElement("btn");
         newDraftHistoryRowDraftViewDraft.id = "draftHistoryRowDraftViewDraft" + draftID;
         newDraftHistoryRowDraftViewDraft.innerHTML = "View Draft";
         newDraftHistoryRowDraftViewDraft.onclick = function() {viewDraft(draftID)};
@@ -52,13 +52,13 @@ async function renderDraftHistoryTable() {
 
         loadUserName();
 
-        var res = await fetch("http://localhost:8080/api/teams/getDraftHistoryMetaData/?username="+getCookie("username"),{
+        let res = await fetch("http://localhost:8080/api/teams/getDraftHistoryMetaData/?username="+getCookie("username"),{
             method: 'GET',})
-        var data = await res.json()
+        let data = await res.json()
         console.log(data)
 
-        for(var intCurrDraftMetaData in data) {
-            var currDraftMetaData = data[intCurrDraftMetaData]
+        for(let intCurrDraftMetaData in data) {
+            let currDraftMetaData = data[intCurrDraftMetaData]
 
             createRow(currDraftMetaData);
         }
@@ -87,46 +87,46 @@ async function renderDraftReviewPage() {
 
 async function renderDraftHistoryPlayerLog() {
     if(await authenticateSession() == true) {
-        var res =  await fetch ("http://localhost:8080/api/teams/getDraftHistoryPlayerLog/?username="+getCookie("username")+"&draftID="+getCookie("draftIDToView"), {
+        let res =  await fetch ("http://localhost:8080/api/teams/getDraftHistoryPlayerLog/?username="+getCookie("username")+"&draftID="+getCookie("draftIDToView"), {
             method: 'GET',
         })
-        var data = await res.json()
+        let data = await res.json()
         
         console.log(data);
 
         document.getElementById("draftHistoryPlayerLog").style.display = "block";
         document.getElementById("draftReviewSelecterForm").style.display = "none";
 
-        for(var intCurrDraftLog in data.slice(0, data.length-1)) {
-            var currPlayerDraftLog = data[intCurrDraftLog]
+        for(let intCurrDraftLog in data.slice(0, data.length-1)) {
+            let currPlayerDraftLog = data[intCurrDraftLog]
             
-            var newDraftHistoryPlayerLogRow = document.createElement("tr");
+            let newDraftHistoryPlayerLogRow = document.createElement("tr");
             newDraftHistoryPlayerLogRow.id = "draftHistoryPlayerLogRow" + intCurrDraftLog;
 
-            var newDraftHistoryPlayerLogSpot = currPlayerDraftLog.spotDrafted;
-            var roundPickArray = newDraftHistoryPlayerLogSpot.split(".");
+            let newDraftHistoryPlayerLogSpot = currPlayerDraftLog.spotDrafted;
+            let roundPickArray = newDraftHistoryPlayerLogSpot.split(".");
 
-            var newDraftHistoryPlayerLogRound = document.createElement("td");
+            let newDraftHistoryPlayerLogRound = document.createElement("td");
             newDraftHistoryPlayerLogRound.id = "draftHistoryPlayerLogRound" + intCurrDraftLog;
             newDraftHistoryPlayerLogRound.innerHTML = roundPickArray[0];
 
-            var newDraftHistoryPlayerLogPick = document.createElement("td");
+            let newDraftHistoryPlayerLogPick = document.createElement("td");
             newDraftHistoryPlayerLogPick.id = "draftHistoryPlayerLogPick" + intCurrDraftLog;
             newDraftHistoryPlayerLogPick.innerHTML = roundPickArray[1];
 
-            var newDraftHistoryPlayerLogPlayerName = document.createElement("td");
+            let newDraftHistoryPlayerLogPlayerName = document.createElement("td");
             newDraftHistoryPlayerLogPlayerName.id = "draftHistoryPlayerLogPlayerName" + intCurrDraftLog;
             newDraftHistoryPlayerLogPlayerName.innerHTML = currPlayerDraftLog.fullName;
 
-            var newDraftHistoryPlayerLogPlayerPosition = document.createElement("td");
+            let newDraftHistoryPlayerLogPlayerPosition = document.createElement("td");
             newDraftHistoryPlayerLogPlayerPosition.id = "draftHistoryPlayerLogPlayerPosition" + intCurrDraftLog;
             newDraftHistoryPlayerLogPlayerPosition.innerHTML = currPlayerDraftLog.position;
 
-            var newDraftHistoryPlayerLogPlayerScore = document.createElement("td");
+            let newDraftHistoryPlayerLogPlayerScore = document.createElement("td");
             newDraftHistoryPlayerLogPlayerScore.id = "draftHistoryPlayerLogPlayerScored" + intCurrDraftLog;
             newDraftHistoryPlayerLogPlayerScore.innerHTML = currPlayerDraftLog.predictedScore;
 
-            var newDraftHistoryPlayerLogPlayerTeam = document.createElement("td");
+            let newDraftHistoryPlayerLogPlayerTeam = document.createElement("td");
             newDraftHistoryPlayerLogPlayerTeam.id = "draftHistoryPlayerLogPlayerTeam" + intCurrDraftLog;
             newDraftHistoryPlayerLogPlayerTeam.innerHTML = currPlayerDraftLog.teamDraftedBy;
 
@@ -150,24 +150,24 @@ async function renderDraftHistoryPlayerLog() {
 async function renderDraftHistoryTeamHistorySelecter() {
     if(await authenticateSession() == true){
 
-        var res = await fetch ("http://localhost:8080/api/teams/getDraftHistoryTeamList/?username="+getCookie("username")+"&draftID="+getCookie("draftIDToView"), {
+        let res = await fetch ("http://localhost:8080/api/teams/getDraftHistoryTeamList/?username="+getCookie("username")+"&draftID="+getCookie("draftIDToView"), {
             method: 'GET',
         })
 
-        var data = await res.json()
+        let data = await res.json()
         console.log(data);
 
-        for(var intCurrTeam in data) {
-            var currTeam = data[intCurrTeam];
+        for(let intCurrTeam in data) {
+            let currTeam = data[intCurrTeam];
 
-            var currTeamRow = document.createElement("tr");
+            let currTeamRow = document.createElement("tr");
             currTeamRow.id = "draftHistoryTeamRow" + intCurrTeam;
 
-            var currTeamName = document.createElement("td");
+            let currTeamName = document.createElement("td");
             currTeamName.id = "draftHistoryTeamName" + intCurrTeam;
             currTeamName.innerHTML = currTeam.teamName;
 
-            var currTeamViewButton = document.createElement("btn");
+            let currTeamViewButton = document.createElement("btn");
             currTeamViewButton.id = "draftHistoryViewButton" + intCurrTeam;
             currTeamViewButton.innerHTML = "View Team";
             currTeamViewButton.onclick = function() {viewTeam(this.id.slice(-1))};
@@ -193,11 +193,11 @@ async function renderDraftHistoryTeamHistorySelecter() {
 async function viewTeam(teamID) {
 
     function findStarterIndex(players) {
-        var starterIndex = 0;
+        let starterIndex = 0;
 
         if(players.length > 1) {
-            for(var intCurrPlayer in players) {
-                var currPlayer = players[intCurrPlayer];
+            for(let intCurrPlayer in players) {
+                let currPlayer = players[intCurrPlayer];
 
                 if(currPlayer.predictedScore > players[starterIndex].predictedScore) {
                     starterIndex = intCurrPlayer;
@@ -209,33 +209,33 @@ async function viewTeam(teamID) {
 
     function findBenchedPlayers(players) {
 
-        for(var intCurrPlayer in players) {
-            var currPlayer = players[intCurrPlayer];
+        for(let intCurrPlayer in players) {
+            let currPlayer = players[intCurrPlayer];
 
-            var newBenchRow = document.createElement("tr");
+            let newBenchRow = document.createElement("tr");
             newBenchRow.id = "benchRow" + intCurrPlayer;
 
-            var newBenchDepthChartPosition = document.createElement("td");
+            let newBenchDepthChartPosition = document.createElement("td");
             newBenchDepthChartPosition.id = "depthChartPositionBench" + intCurrPlayer;
             newBenchDepthChartPosition.innerHTML = "Bench";
 
-            var newBenchPosition = document.createElement("td");
+            let newBenchPosition = document.createElement("td");
             newBenchPosition.id =  "benchPosition" + intCurrPlayer
             newBenchPosition.innerHTML = currPlayer.position;
 
-            var newBenchPlayerName = document.createElement("td");
+            let newBenchPlayerName = document.createElement("td");
             newBenchPlayerName.id = "benchPlayerName" + intCurrPlayer;
             newBenchPlayerName.innerHTML = currPlayer.fullName;
 
-            var newBenchPredictedScore = document.createElement("td");
+            let newBenchPredictedScore = document.createElement("td");
             newBenchPredictedScore.id = "benchPredictedScore" + intCurrPlayer;
             newBenchPredictedScore.innerHTML = currPlayer.predictedScore;
 
-            var newBenchAvgADP = document.createElement("td");
+            let newBenchAvgADP = document.createElement("td");
             newBenchAvgADP.id = "benchAvgADP" + intCurrPlayer;
             newBenchAvgADP.innerHTML = currPlayer.avgADP;
 
-            var newBenchSpotDrafted = document.createElement("td");
+            let newBenchSpotDrafted = document.createElement("td");
             newBenchSpotDrafted.id = "benchSpotDrafted" + intCurrPlayer;
             newBenchSpotDrafted.innerHTML = currPlayer.spotDrafted;
 
@@ -251,15 +251,15 @@ async function viewTeam(teamID) {
      }
 
     function createDataRowForStarter(stringPosition, starterIndex, playersPositon) {
-            var newStarterRow = document.createElement("tr");
+            let newStarterRow = document.createElement("tr");
             newStarterRow.id = "starterRow" + stringPosition;
             newStarterRow.style.width = "100%";
 
-            var newStarterDepthChartPosition = document.createElement("td");
+            let newStarterDepthChartPosition = document.createElement("td");
             newStarterDepthChartPosition.id = "depthChartPositionStarter" + stringPosition;
             newStarterDepthChartPosition.innerHTML = "Starter";
 
-            var newStarterPosition = document.createElement("td");
+            let newStarterPosition = document.createElement("td");
             newStarterPosition.id =  "staterPosition" + stringPosition
             newStarterPosition.innerHTML = stringPosition;
 
@@ -267,22 +267,22 @@ async function viewTeam(teamID) {
             newStarterRow.appendChild(newStarterPosition);
         
         if (playersPositon.length > 0) {
-            var startPlayer = playersPositon[starterIndex];
+            let startPlayer = playersPositon[starterIndex];
 
-            var newStarterPlayerName = document.createElement("td");
+            let newStarterPlayerName = document.createElement("td");
             newStarterPlayerName.id = "starterPlayerName" + stringPosition;
             newStarterPlayerName.innerHTML = playersPositon[starterIndex].fullName;
 
 
-            var newStarterPredictedScore = document.createElement("td");
+            let newStarterPredictedScore = document.createElement("td");
             newStarterPredictedScore.id = "starterPredictedScore" + stringPosition;
             newStarterPredictedScore.innerHTML = playersPositon[starterIndex].predictedScore;
 
-            var newStarterAvgADP = document.createElement("td");
+            let newStarterAvgADP = document.createElement("td");
             newStarterAvgADP.id = "starterAvgADP" + stringPosition;
             newStarterAvgADP.innerHTML = playersPositon[starterIndex].avgADP;
 
-            var newStarterspotDrafted = document.createElement("td");
+            let newStarterspotDrafted = document.createElement("td");
             newStarterspotDrafted.id = "starteSpotDrafted" + stringPosition;
             newStarterspotDrafted.innerHTML = playersPositon[starterIndex].spotDrafted;
 
@@ -299,39 +299,39 @@ async function viewTeam(teamID) {
 
         document.getElementById("teamHistoryTableBody").innerHTML = "";
 
-        var res = await fetch ("http://localhost:8080/api/teams/getDraftHistoryTeamReview/?username="+getCookie("username")+"&draftID="+getCookie("draftIDToView")+"&teamIndex="+teamID, {
+        let res = await fetch ("http://localhost:8080/api/teams/getDraftHistoryTeamReview/?username="+getCookie("username")+"&draftID="+getCookie("draftIDToView")+"&teamIndex="+teamID, {
             method: 'GET',
         })
 
-        var data = await res.json()
+        let data = await res.json()
         console.log(data);
 
-        var postionOrder = ["QB", "RB", "WR", "TE", "Flex" ,"K", "DEF"];
+        let postionOrder = ["QB", "RB", "WR", "TE", "Flex" ,"K", "DEF"];
 
-        for(var intCurrPosition in postionOrder) {
+        for(let intCurrPosition in postionOrder) {
             console.log(intCurrPosition);
-            var currPosition = postionOrder[intCurrPosition];
+            let currPosition = postionOrder[intCurrPosition];
             console.log(currPosition);
-            var starterAmount = 1;
+            let starterAmount = 1;
 
             if(currPosition == "RB" ||
                 currPosition == "WR") {
                     starterAmount = 2;
             }
 
-            for(var intCurrStarter = 0; intCurrStarter < starterAmount; intCurrStarter++) {
+            for(let intCurrStarter = 0; intCurrStarter < starterAmount; intCurrStarter++) {
                 if (currPosition == "Flex") {
-                    var currPositionPlayers = data["RB"].concat(data["WR"]).concat(data["TE"]);
+                    let currPositionPlayers = data["RB"].concat(data["WR"]).concat(data["TE"]);
                 }
                 else { 
-                    var currPositionPlayers = data[currPosition];
+                    let currPositionPlayers = data[currPosition];
                 }
                 console.log(currPositionPlayers);
-                var currStarterIndex = findStarterIndex(currPositionPlayers);
+                let currStarterIndex = findStarterIndex(currPositionPlayers);
                 console.log(currStarterIndex);
-                var currStarter = currPositionPlayers[currStarterIndex];
+                let currStarter = currPositionPlayers[currStarterIndex];
                 console.log(currStarter);
-                var currStarterRow = createDataRowForStarter(currPosition, currStarterIndex, currPositionPlayers);
+                let currStarterRow = createDataRowForStarter(currPosition, currStarterIndex, currPositionPlayers);
                 console.log(currStarterRow);
                 document.getElementById("teamHistoryTableBody").appendChild(currStarterRow);
 
@@ -341,7 +341,7 @@ async function viewTeam(teamID) {
                 }
             }
         }
-        var benchPlayers = data["QB"].concat(data["RB"]).concat(data["WR"]).concat(data["TE"]).concat(data["K"]).concat(data["DEF"]);
+        let benchPlayers = data["QB"].concat(data["RB"]).concat(data["WR"]).concat(data["TE"]).concat(data["K"]).concat(data["DEF"]);
         console.log(benchPlayers);
         findBenchedPlayers(benchPlayers);
             

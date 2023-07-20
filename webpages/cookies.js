@@ -26,12 +26,12 @@ function deleteCookie(cname) {
 
 async function deleteAllCookies() {
     console.log(document.cookie);
-    var cookies = document.cookie.split(";");
+    let cookies = document.cookie.split(";");
     console.log("Spliting cookies - " + cookies);
 
-    var userName;
+    let userName;
 
-    for (var i = 0; i < cookies.length; i++) {
+    for (let i = 0; i < cookies.length; i++) {
         if (cookies[i].split("=")[0] == "username") {
             userName = cookies[i].split("=")[1];
         }

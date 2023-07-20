@@ -1,28 +1,28 @@
 async function addUser() {
-    var username = document.getElementsByName("username")[0].value
-    var password = document.getElementsByName("password")[0].value
+    let username = document.getElementsByName("username")[0].value
+    let password = document.getElementsByName("password")[0].value
 
 
-    var checkUserRes = await 
+    let checkUserRes = await 
     fetch("http://localhost:8080/api/login/checkUser/?username="+username, {
         method: 'GET',
     })
-    var checkUserData = await checkUserRes.json()
+    let checkUserData = await checkUserRes.json()
 
     if (checkUserData == true)
         alert("Username already taken. Try again.")
     else {
-        var addUser = await 
+        let addUser = await 
         fetch("http://localhost:8080/api/login/addUser/?username="+username+"&password="+password, {
             method: 'PUT',
         })
-        var addUserRes = await addUser.json()
+        let addUserRes = await addUser.json()
         
-        var setUpUserRes = await fetch("http://localhost:8080/api/teams/initaizeUserAccountSetup/?username="+username, {
+        let setUpUserRes = await fetch("http://localhost:8080/api/teams/initaizeUserAccountSetup/?username="+username, {
             method: 'POST',
         })
 
-        var setUpUserData = await setUpUserRes.json()
+        let setUpUserData = await setUpUserRes.json()
 
         console.log(addUserRes);
         console.log(setUpUserData);
@@ -33,24 +33,24 @@ async function addUser() {
 }
 
 async function attemptLogin() {
-    var username = document.getElementsByName("username")[0].value
-    var password = document.getElementsByName("password")[0].value
+    let username = document.getElementsByName("username")[0].value
+    let password = document.getElementsByName("password")[0].value
 
-    var attemptLoginRes = await
+    let attemptLoginRes = await
     fetch("http://localhost:8080/api/login/attemptLogin/?username="+username+"&password="+password, {
         method: 'GET',
     })
 
-    var attemptLoginData = await attemptLoginRes.json()
+    let attemptLoginData = await attemptLoginRes.json()
 
     if (attemptLoginData == true) {
 
-        var generateSessionID = await fetch("http://localhost:8080/api/login/generateSessionID/?username="+username, {
+        let generateSessionID = await fetch("http://localhost:8080/api/login/generateSessionID/?username="+username, {
             method: 'GET',
         })
 
         console.log(generateSessionID)
-        var generateSessionIDData = await generateSessionID.text()
+        let generateSessionIDData = await generateSessionID.text()
 
 
         console.log(generateSessionIDData)

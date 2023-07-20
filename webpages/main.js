@@ -34,12 +34,12 @@ function loadUserName() {
 }
 
 async function authenticateSession() {
-    var authenticateSessionRes = await
+    let authenticateSessionRes = await
     fetch("http://localhost:8080/api/login/attemptSession/?username="+getCookie("username")+"&sessionID="+getCookie("sessionID"), {
         method: 'GET',
     })
 
-    var authenticateSessionData = await authenticateSessionRes.json()
+    let authenticateSessionData = await authenticateSessionRes.json()
 
     if (authenticateSessionData == true) {
         console.log("Session authenticated.")
@@ -49,12 +49,12 @@ async function authenticateSession() {
 }
 
 async function logoutServerSide() {
-     var logoutRes = await
+     let logoutRes = await
     fetch("http://localhost:8080/api/login/logout/?username="+getCookie("username")+"&sessionID="+getCookie("sessionID"), {
         method: 'POST',
     })
 
-    var logoutData = await logoutRes.json()
+    let logoutData = await logoutRes.json()
 
     if (logoutData == true) {
         deleteAllCookies();

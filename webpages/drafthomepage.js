@@ -2,14 +2,14 @@ async function checkForUserDraftHistory() {
     if(await authenticateSession() == true) {
         loadUserName();
 
-        var res = await fetch("http://localhost:8080/api/teams/checkForCurrentDrafts/?username="+getCookie("username"),{
+        let res = await fetch("http://localhost:8080/api/teams/checkForCurrentDrafts/?username="+getCookie("username"),{
             method: 'GET',})
-        var boolForCurrentDraft = await res.json()
+        let boolForCurrentDraft = await res.json()
         console.log("current draft - " + boolForCurrentDraft)
 
-        var res = await fetch("http://localhost:8080/api/teams/checkForPastDrafts/?username="+getCookie("username"),{
+        let res = await fetch("http://localhost:8080/api/teams/checkForPastDrafts/?username="+getCookie("username"),{
             method: 'GET',})
-        var boolPastDrafts = await res.json()
+        let boolPastDrafts = await res.json()
         console.log("past drafts - " + boolPastDrafts)
 
         if (boolForCurrentDraft == true) {
@@ -29,9 +29,9 @@ async function checkForUserDraftHistory() {
 
 async function selectedStartNewDraft() {
     if(await authenticateSession() == true) {
-        var res = await fetch("http://localhost:8080/api/teams/checkForCurrentDrafts/?username="+getCookie("username"),{
+        let res = await fetch("http://localhost:8080/api/teams/checkForCurrentDrafts/?username="+getCookie("username"),{
             method: 'GET',})
-        var boolForCurrentDraft = await res.json();
+        let boolForCurrentDraft = await res.json();
         console.log(boolForCurrentDraft)
 
         if (boolForCurrentDraft == true) {
@@ -71,9 +71,9 @@ async function selectedViewDraftHistory() {
 
 async function selectedDeleteCurrentDraft() {
     if(await authenticateSession() == true) {
-        var res = await fetch("http://localhost:8080/api/teams/deleteThisDraft/?username="+getCookie("username"),{   
+        let res = await fetch("http://localhost:8080/api/teams/deleteThisDraft/?username="+getCookie("username"),{   
             method: 'POST',})
-        var boolForCurrentDraft = await res.json();
+        let boolForCurrentDraft = await res.json();
         console.log(boolForCurrentDraft);
         alert("Draft deleted. You may now start a new draft.")
         document.getElementById("resumeDraftButton").style.display = "none";
@@ -108,18 +108,18 @@ async function startDraft() {
 
     if(await authenticateSession() == true) {
 
-        var teamName = document.getElementById("teamNameInput").value
-        var draftSize = document.getElementById("sizeOfTeamsInput").value
+        let teamName = document.getElementById("teamNameInput").value
+        let draftSize = document.getElementById("sizeOfTeamsInput").value
         draftSize = parseInt(draftSize)
-        var draftPosition = document.getElementById("draftPositionInput").value
+        let draftPosition = document.getElementById("draftPositionInput").value
         draftPosition = parseInt(draftPosition)
 
         if (checkStartDraftInput(teamName,draftSize,draftPosition) == true) {
-            var res = await 
+            let res = await 
             fetch(("http://localhost:8080/api/teams/startDraft/?username="+getCookie("username")+"&teamName="+teamName+"&draftSize="+draftSize+"&draftPosition="+draftPosition), {
                 method: 'POST',
             })
-            var data = await res.json()
+            let data = await res.json()
             console.log(data)
 
             document.cookie = "teamName=" + teamName + "; path=/";
