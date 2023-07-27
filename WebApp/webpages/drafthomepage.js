@@ -3,13 +3,14 @@ async function checkForUserDraftHistory() {
         loadUserName();
 
         let res = await fetch("http://localhost:8080/api/teams/checkForCurrentDrafts/?username="+getCookie("username"),{
-            method: 'GET',})
+            method: 'GET'})
         let boolForCurrentDraft = await res.json()
         console.log("current draft - " + boolForCurrentDraft)
 
-        let res = await fetch("http://localhost:8080/api/teams/checkForPastDrafts/?username="+getCookie("username"),{
-            method: 'GET',})
-        let boolPastDrafts = await res.json()
+        let res2 = await fetch("http://localhost:8080/api/teams/checkForPastDrafts/?username="+getCookie("username"),{
+            method: 'GET'})
+        
+        let boolPastDrafts = await res2.json();
         console.log("past drafts - " + boolPastDrafts)
 
         if (boolForCurrentDraft == true) {

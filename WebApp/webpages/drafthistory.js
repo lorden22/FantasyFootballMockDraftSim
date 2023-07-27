@@ -1,8 +1,8 @@
 async function renderDraftHistoryTable() {
     
     function createRow (currDraftRowMetaData) {
-        console.log(currDraftMetaData)
-        let draftID = currDraftMetaData.draftID;
+        console.log(currDraftRowMetaData)
+        let draftID = currDraftRowMetaData.draftID;
         console.log(draftID)
 
         let newDraftHistoryRow = document.createElement("tr");
@@ -14,23 +14,23 @@ async function renderDraftHistoryTable() {
 
         let newDraftHistoryRowTeamName = document.createElement("td");
         newDraftHistoryRowTeamName.id = "draftHistoryRowTeamName" + draftID;
-        newDraftHistoryRowTeamName.innerHTML = currDraftMetaData.teamName;
+        newDraftHistoryRowTeamName.innerHTML = currDraftRowMetaData.teamName;
 
         let newDraftHistoryRowDraftPosition = document.createElement("td");
         newDraftHistoryRowDraftPosition.id = "draftHistoryRowDraftPosition" + draftID;
-        newDraftHistoryRowDraftPosition.innerHTML = currDraftMetaData.draftPosition;
+        newDraftHistoryRowDraftPosition.innerHTML = currDraftRowMetaData.draftPosition;
 
         let newDraftHistoryRowDraftSize = document.createElement("td");
         newDraftHistoryRowDraftSize.id = "draftHistoryRowDraftSize" + draftID;
-        newDraftHistoryRowDraftSize.innerHTML = currDraftMetaData.draftSize;
+        newDraftHistoryRowDraftSize.innerHTML = currDraftRowMetaData.draftSize;
 
         let newDraftHistoryRowDraftDate = document.createElement("td");
         newDraftHistoryRowDraftDate.id = "draftHistoryRowDraftDate" + draftID;
-        newDraftHistoryRowDraftDate.innerHTML = currDraftMetaData.Date;
+        newDraftHistoryRowDraftDate.innerHTML = currDraftRowMetaData.Date;
 
         let newDraftHistoryRowDraftTime = document.createElement("td");
         newDraftHistoryRowDraftTime.id = "draftHistoryRowDraftTime" + draftID;
-        newDraftHistoryRowDraftTime.innerHTML = currDraftMetaData.Time;
+        newDraftHistoryRowDraftTime.innerHTML = currDraftRowMetaData.Time;
 
         let newDraftHistoryRowDraftViewDraft = document.createElement("btn");
         newDraftHistoryRowDraftViewDraft.id = "draftHistoryRowDraftViewDraft" + draftID;
@@ -320,11 +320,13 @@ async function viewTeam(teamID) {
             }
 
             for(let intCurrStarter = 0; intCurrStarter < starterAmount; intCurrStarter++) {
+                let currPositionPlayers;
                 if (currPosition == "Flex") {
-                    let currPositionPlayers = data["RB"].concat(data["WR"]).concat(data["TE"]);
+                    currPositionPlayers = data["RB"].concat(data["WR"]).concat(data["TE"]);
                 }
                 else { 
-                    let currPositionPlayers = data[currPosition];
+                    currPositionPlayers = data[currPosition];
+                    console.log(currPositionPlayers);
                 }
                 console.log(currPositionPlayers);
                 let currStarterIndex = findStarterIndex(currPositionPlayers);
