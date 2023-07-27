@@ -1,1 +1,4 @@
-- Database
+- Intergrate sql Database
+- SSL and https
+- Publish front end to github pages
+- Publish back end to gcp/aws
