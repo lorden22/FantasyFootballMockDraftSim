@@ -1,136 +1,163 @@
+"use strict";
 async function checkForUserDraftHistory() {
-    if(await authenticateSession() == true) {
+    if (await authenticateSession() == true) {
         loadUserName();
-
-        let res = await fetch("http://localhost:8080/api/teams/checkForCurrentDrafts/?username="+getCookie("username"),{
-            method: 'GET'})
-        let boolForCurrentDraft = await res.json()
-        console.log("current draft - " + boolForCurrentDraft)
-
-        let res2 = await fetch("http://localhost:8080/api/teams/checkForPastDrafts/?username="+getCookie("username"),{
-            method: 'GET'})
-        
+        let res = await fetch("http://localhost:8080/api/teams/checkForCurrentDrafts/?username=" + getCookie("username"), {
+            method: 'GET'
+        });
+        let boolForCurrentDraft = await res.json();
+        console.log("current draft - " + boolForCurrentDraft);
+        let res2 = await fetch("http://localhost:8080/api/teams/checkForPastDrafts/?username=" + getCookie("username"), {
+            method: 'GET'
+        });
         let boolPastDrafts = await res2.json();
-        console.log("past drafts - " + boolPastDrafts)
-
+        console.log("past drafts - " + boolPastDrafts);
         if (boolForCurrentDraft == true) {
-            document.getElementById("resumeDraftButton").style.display = "inline-block";
-            document.getElementById("deleteDraftButton").style.display = "inline-block";
+            let resumeDraftButton = document.getElementById("resumeDraftButton");
+            let deleteDraftButton = document.getElementById("deleteDraftButton");
+            if (resumeDraftButton == null || deleteDraftButton == null) {
+                console.log("resumeDraftButton or deleteDraftButton is null. Try again.");
+                return;
+            }
+            else {
+                resumeDraftButton.style.display = "inline-block";
+                deleteDraftButton.style.display = "inline-block";
+            }
         }
         if (boolPastDrafts == true) {
-            document.getElementById("historalDraftButton").style.display = "inline-block";
+            let historalDraftButton = document.getElementById("historalDraftButton");
+            if (historalDraftButton == null) {
+                console.log("historalDraftButton is null. Try again.");
+            }
+            else {
+                historalDraftButton.style.display = "inline-block";
+            }
         }
     }
     else {
-        console.log("User not logged in. Redirecting to login page.")
+        console.log("User not logged in. Redirecting to login page.");
         deleteAllCookies();
     }
 }
-
-
 async function selectedStartNewDraft() {
-    if(await authenticateSession() == true) {
-        let res = await fetch("http://localhost:8080/api/teams/checkForCurrentDrafts/?username="+getCookie("username"),{
-            method: 'GET',})
+    if (await authenticateSession() == true) {
+        let res = await fetch("http://localhost:8080/api/teams/checkForCurrentDrafts/?username=" + getCookie("username"), {
+            method: 'GET',
+        });
         let boolForCurrentDraft = await res.json();
-        console.log(boolForCurrentDraft)
-
+        console.log(boolForCurrentDraft);
         if (boolForCurrentDraft == true) {
-            alert("You already have a draft in progress. Please resume that draft or delete it before starting a new one.")
+            alert("You already have a draft in progress. Please resume that draft or delete it before starting a new one.");
         }
         else {
-        document.getElementById("draftModeSelectContainer").style.display = "none";
-        document.getElementById("draftFormContainer").style.display = "block";
+            let draftModeSelectContainer = document.getElementById("draftModeSelectContainer");
+            let draftFormContainer = document.getElementById("draftFormContainer");
+            if (draftModeSelectContainer == null || draftFormContainer == null) {
+                console.log("draftModeSelectContainer or draftFormContainer is null. Try again.");
+                return;
+            }
+            else {
+                draftModeSelectContainer.style.display = "none";
+                draftFormContainer.style.display = "block";
+            }
         }
     }
     else {
-        console.log("User not logged in. Redirecting to login page.")
+        console.log("User not logged in. Redirecting to login page.");
         deleteAllCookies();
     }
 }
-
-async function selectedResumeLastSavedDraft () { 
-    if(await authenticateSession() == true) {
+async function selectedResumeLastSavedDraft() {
+    if (await authenticateSession() == true) {
         document.cookie = "draftType=resume;path=/";
         window.location.href = "draftpage.html";
     }
     else {
-        console.log("User not logged in. Redirecting to login page.")
+        console.log("User not logged in. Redirecting to login page.");
         deleteAllCookies();
     }
 }
-
 async function selectedViewDraftHistory() {
-    if(await authenticateSession() == true) {
+    if (await authenticateSession() == true) {
         window.location.href = "draftHistory.html";
     }
     else {
-        console.log("User not logged in. Redirecting to login page.")
+        console.log("User not logged in. Redirecting to login page.");
         deleteAllCookies();
     }
 }
-
 async function selectedDeleteCurrentDraft() {
-    if(await authenticateSession() == true) {
-        let res = await fetch("http://localhost:8080/api/teams/deleteThisDraft/?username="+getCookie("username"),{   
-            method: 'POST',})
+    if (await authenticateSession() == true) {
+        let res = await fetch("http://localhost:8080/api/teams/deleteThisDraft/?username=" + getCookie("username"), {
+            method: 'POST',
+        });
         let boolForCurrentDraft = await res.json();
         console.log(boolForCurrentDraft);
-        alert("Draft deleted. You may now start a new draft.")
-        document.getElementById("resumeDraftButton").style.display = "none";
-        document.getElementById("deleteDraftButton").style.display = "none";
+        alert("Draft deleted. You may now start a new draft.");
+        let resumeDraftButton = document.getElementById("resumeDraftButton");
+        let deleteDraftButton = document.getElementById("deleteDraftButton");
+        if (resumeDraftButton == null || deleteDraftButton == null) {
+            console.log("resumeDraftButton or deleteDraftButton is null. Try again.");
+            return;
+        }
+        else {
+            resumeDraftButton.style.display = "none";
+            deleteDraftButton.style.display = "none";
+        }
     }
     else {
-        console.log("User not logged in. Redirecting to login page.")
+        console.log("User not logged in. Redirecting to login page.");
         deleteAllCookies();
     }
 }
-
 async function startDraft() {
-
-    function checkStartDraftInput(teamName,draftSize,draftPosition) {
+    function checkStartDraftInput(teamName, draftSize, draftPosition) {
         if (typeof teamName != "string") {
-            alert(teamName + " - Not a valid string value to name your team. Try again.")
-            return false
+            alert(teamName + " - Not a valid string value to name your team. Try again.");
+            return false;
         }
         if (typeof draftSize != "number" ||
             !Number.isInteger(draftSize)) {
-                alert(draftSize + " - Not a valid int entered for the draft size. Try again.")
-                return false
+            alert(draftSize + " - Not a valid int entered for the draft size. Try again.");
+            return false;
         }
         if (typeof draftPosition != "number" ||
             !Number.isInteger(draftPosition) ||
             draftPosition > draftSize) {
-                alert(draftPosition + " - Not a valid int entered for your starting draft position. Try again.")
-                return false
+            alert(draftPosition + " - Not a valid int entered for your starting draft position. Try again.");
+            return false;
         }
-        return true
+        return true;
     }
-
-    if(await authenticateSession() == true) {
-
-        let teamName = document.getElementById("teamNameInput").value
-        let draftSize = document.getElementById("sizeOfTeamsInput").value
-        draftSize = parseInt(draftSize)
-        let draftPosition = document.getElementById("draftPositionInput").value
-        draftPosition = parseInt(draftPosition)
-
-        if (checkStartDraftInput(teamName,draftSize,draftPosition) == true) {
-            let res = await 
-            fetch(("http://localhost:8080/api/teams/startDraft/?username="+getCookie("username")+"&teamName="+teamName+"&draftSize="+draftSize+"&draftPosition="+draftPosition), {
-                method: 'POST',
-            })
-            let data = await res.json()
-            console.log(data)
-
-            document.cookie = "teamName=" + teamName + "; path=/";
-            document.cookie = "draftPosition=" + draftPosition + "; path=/";
+    if (await authenticateSession() == true) {
+        let teamNameInput = document.getElementById("teamNameInput");
+        let sizeOfTeamsInput = document.getElementById("sizeOfTeamsInput");
+        let draftPositionInput = document.getElementById("draftPositionInput");
+        if (teamNameInput == null || sizeOfTeamsInput == null || draftPositionInput == null) {
+            console.log("teamNameInput or sizeOfTeamsInput or draftPositionInput is null. Try again.");
+            return;
         }
-        document.cookie = "draftType=new; path=/";
-        window.location.href = "draftpage.html"
+        else {
+            let teamName = teamNameInput.value;
+            let draftSizeString = sizeOfTeamsInput.value;
+            let draftPositionString = draftPositionInput.value;
+            let draftSize = parseInt(draftSizeString);
+            let draftPosition = parseInt(draftPositionString);
+            if (checkStartDraftInput(teamName, draftSize, draftPosition) == true) {
+                let res = await fetch(("http://localhost:8080/api/teams/startDraft/?username=" + getCookie("username") + "&teamName=" + teamName + "&draftSize=" + draftSize + "&draftPosition=" + draftPosition), {
+                    method: 'POST',
+                });
+                let data = await res.json();
+                console.log(data);
+                document.cookie = "teamName=" + teamName + "; path=/";
+                document.cookie = "draftPosition=" + draftPositionString + "; path=/";
+            }
+            document.cookie = "draftType=new; path=/";
+            window.location.href = "draftpage.html";
+        }
     }
     else {
-        console.log("User not logged in. Redirecting to login page.")
+        console.log("User not logged in. Redirecting to login page.");
         deleteAllCookies();
     }
 }
