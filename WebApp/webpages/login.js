@@ -8,18 +8,18 @@ async function addUser() {
     }
     let username = userNameEle.value;
     let password = passwordEle.value;
-    let checkUserRes = await fetch("http://localhost:8080/api/login/checkUser/?username=" + username, {
+    let checkUserRes = await fetch("http://localhost:80/api/login/checkUser/?username=" + username, {
         method: 'GET',
     });
     let checkUserData = await checkUserRes.json();
     if (checkUserData == true)
         alert("Username already taken. Try again.");
     else {
-        let addUser = await fetch("http://localhost:8080/api/login/addUser/?username=" + username + "&password=" + password, {
+        let addUser = await fetch("http://localhost:80/api/login/addUser/?username=" + username + "&password=" + password, {
             method: 'PUT',
         });
         let addUserRes = await addUser.json();
-        let setUpUserRes = await fetch("http://localhost:8080/api/teams/initaizeUserAccountSetup/?username=" + username, {
+        let setUpUserRes = await fetch("http://localhost:80/api/teams/initaizeUserAccountSetup/?username=" + username, {
             method: 'POST',
         });
         let setUpUserData = await setUpUserRes.json();
@@ -38,12 +38,12 @@ async function attemptLogin() {
     }
     let username = userNameEle.value;
     let password = passwordEle.value;
-    let attemptLoginRes = await fetch("http://localhost:8080/api/login/attemptLogin/?username=" + username + "&password=" + password, {
+    let attemptLoginRes = await fetch("http://localhost:80/api/login/attemptLogin/?username=" + username + "&password=" + password, {
         method: 'GET',
     });
     let attemptLoginData = await attemptLoginRes.json();
     if (attemptLoginData == true) {
-        let generateSessionID = await fetch("http://localhost:8080/api/login/generateSessionID/?username=" + username, {
+        let generateSessionID = await fetch("http://localhost:80/api/login/generateSessionID/?username=" + username, {
             method: 'GET',
         });
         console.log(generateSessionID);

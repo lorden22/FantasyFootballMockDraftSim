@@ -94,7 +94,7 @@ async function setUpDraft(): Promise < void > {
                 }
             }
             getPlayerLeft();
-            let res = await fetch("http://localhost:8080/api/teams/getAllPlayersDrafted/?username="+getCookie("username"),{
+            let res = await fetch("http://localhost:80/api/teams/getAllPlayersDrafted/?username="+getCookie("username"),{
                 method: 'GET',})
             let data: Player[] = await res.json();
             parseDraftLogData(data);   
@@ -163,7 +163,7 @@ async function startDraftFromDraftPage(){
 }
 
 async function getCurrRound(): Promise<number> {
-    let res = await fetch("http://localhost:8080/api/teams/getCurrRound/?username=" + getCookie("username"),{
+    let res = await fetch("http://localhost:80/api/teams/getCurrRound/?username=" + getCookie("username"),{
         method: 'GET',
     })
     let data: number = await res.json()
@@ -172,7 +172,7 @@ async function getCurrRound(): Promise<number> {
 }   
 
 async function getCurrPick(): Promise<number> {
-    let res = await fetch("http://localhost:8080/api/teams/getCurrPick/?username=" + getCookie("username"),{
+    let res = await fetch("http://localhost:80/api/teams/getCurrPick/?username=" + getCookie("username"),{
         method: 'GET',
     })
     let data: number = await res.json()
@@ -181,7 +181,7 @@ async function getCurrPick(): Promise<number> {
 }   
 
 async function getNextUserPick(): Promise<number> {
-    let res = await fetch("http://localhost:8080/api/teams/getNextUserPick/?username="+getCookie("username"),{
+    let res = await fetch("http://localhost:80/api/teams/getNextUserPick/?username="+getCookie("username"),{
         method: 'GET',
     })
     let data: number = await res.json()
@@ -190,7 +190,7 @@ async function getNextUserPick(): Promise<number> {
 }
 
 async function getNextUserPickRound(): Promise<number> {
-    let res = await fetch("http://localhost:8080/api/teams/getNextUserPickRound/?username="+getCookie("username"),{
+    let res = await fetch("http://localhost:80/api/teams/getNextUserPickRound/?username="+getCookie("username"),{
         method: 'GET',
     })
     let data: number = await res.json()
@@ -199,7 +199,7 @@ async function getNextUserPickRound(): Promise<number> {
 }
 
 async function getPlayerLeft(): Promise<void> {
-    let res = await fetch("http://localhost:8080/api/teams/getPlayersLeft/?username="+getCookie("username"),{
+    let res = await fetch("http://localhost:80/api/teams/getPlayersLeft/?username="+getCookie("username"),{
         method: 'GET',
     })
     let data: Player[] = await res.json()
@@ -220,15 +220,21 @@ async function getPlayerLeft(): Promise<void> {
     }
 }
 
-async function updatePlayerListPar(data) {
+async function updatePlayerListPar(data: Player[]) {
     if(await authenticateSession() == true) {
-        returnVal = ""
+        let returnVal: string = ""
         for(let intCurrPlayer in data) {
-            currPlayer = data[intCurrPlayer]
+            let currPlayer = data[intCurrPlayer]
             returnVal += ((1+Number(intCurrPlayer)) + ". " + currPlayer.fullName + ", " +currPlayer.position + " - Predicted Score 2022 = " 
             + currPlayer.predictedScore + ", Avg ADP = " + currPlayer.avgADP + "<br />")
         }
-        document.getElementById("playerListPar").innerHTML = returnVal
+        let PlayerLeftPar: HTMLParagraphElement | null = document.getElementById("playerListPar") as HTMLParagraphElement | null;
+        if (PlayerLeftPar == null) {
+            console.log("PlayerLeftPar is null. Try again.")
+        }
+        else {
+            PlayerLeftPar.innerHTML = returnVal;
+        }
     }
     else {
         console.log("User not logged in. Redirecting to login page.")
@@ -236,19 +242,34 @@ async function updatePlayerListPar(data) {
     }
 }
 
-async function parseDraftLogData(data) {
-    let updatedDraftLog
+async function parseDraftLogData(data: Player[]) {
+    let updateVal: string
     let currPick = await getCurrPick();
     let currRound = await getCurrRound()
 
     if (currPick == 1 && currRound == 1) {
-        document.getElementById("draftLogPar").innerHTML = ""
-        updateVal = ""
+        let draftLogPar: HTMLParagraphElement | null = document.getElementById("draftLogPar") as HTMLParagraphElement | null;
+        if (draftLogPar == null) {
+            console.log("draftLogPar is null. Try again.")
+            return;
+        }
+        else {
+            draftLogPar.innerHTML = ""
+            updateVal = ""
+        }
     }
-    else updateVal = document.getElementById("draftLogPar").innerHTML;
-
+    else {
+        let draftLogPar: HTMLParagraphElement | null = document.getElementById("draftLogPar") as HTMLParagraphElement | null;
+        if (draftLogPar == null) {
+            console.log("draftLogPar is null. Try again.")
+            return;
+        }
+        else {
+            updateVal = draftLogPar.innerHTML
+        }
+    }
     for(let intCurrPlayer in data) {
-        currPlayer = data[intCurrPlayer]
+        let currPlayer = data[intCurrPlayer]
         console.log(currPlayer)
         if (currPlayer.firstName == null) {
             await endDraft();
@@ -259,14 +280,28 @@ async function parseDraftLogData(data) {
             currPlayer.predictedScore + ", Avg ADP = " + currPlayer.avgADP + "<br />"
         }
     }
-    document.getElementById("draftLogPar").innerHTML = updateVal
+    let draftLogPar: HTMLParagraphElement | null = document.getElementById("draftLogPar") as HTMLParagraphElement | null;
+    if (draftLogPar == null) {
+        console.log("draftLogPar is null. Try again.")
+        return;
+    }
+    else {
+        draftLogPar.innerHTML = updateVal;
+    }
 }
 
 async function checkToClearDraftLog() {
     let currPick = await getCurrPick();
     let currRound = await getCurrRound();
     if (currPick == 1  && currRound == 1) {
-        document.getElementById("draftLogPar").innerHTML = ""
+        let draftLogPar: HTMLParagraphElement | null = document.getElementById("draftLogPar") as HTMLParagraphElement | null;
+        if (draftLogPar == null) {
+            console.log("draftLogPar is null. Try again.")
+            return;
+        }
+        else {
+            draftLogPar.innerHTML = ""
+        }
     }
 }
 
@@ -279,26 +314,64 @@ async function changeFormForNextPick() {
 
 
     if (nextDraftPick == nextUserPick && nextUserPickRound == currRound) {
-        document.getElementById("waitingDraftControllerForm").style.display = "none";
-        document.getElementById("draftControllerForm").style.display = "block";
+        let draftControllerForm: HTMLDivElement | null = document.getElementById("draftControllerForm") as HTMLDivElement | null;
+        let waitingDraftControllerForm: HTMLDivElement | null = document.getElementById("waitingDraftControllerForm") as HTMLDivElement | null;
+        if (draftControllerForm == null || waitingDraftControllerForm == null) {
+            console.log("draftControllerForm or waitingDraftControllerForm is null. Try again.")
+            return;
+        }
+        else {
+            draftControllerForm.style.display = "block";
+            waitingDraftControllerForm.style.display = "none";
+        }
+    }
+    else{
+        let draftControllerForm: HTMLDivElement | null = document.getElementById("draftControllerForm") as HTMLDivElement | null;
+        let waitingDraftControllerForm: HTMLDivElement | null = document.getElementById("waitingDraftControllerForm") as HTMLDivElement | null;
+        if (draftControllerForm == null || waitingDraftControllerForm == null) {
+            console.log("draftControllerForm or waitingDraftControllerForm is null. Try again.")
+            return;
+        }
+        else {
+            draftControllerForm.style.display = "none";
+            waitingDraftControllerForm.style.display = "block";
+        }
+    }
+    let currPickSpan = document.getElementById("currPick") as HTMLSpanElement | null;
+    let currRoundSpan = document.getElementById("currRound") as HTMLSpanElement | null;
+    if(currPickSpan == null || currRoundSpan == null) {
+        console.log("currPickSpan or currRoundSpan is null. Try again.")
+        return;
     }
     else {
-        document.getElementById("waitingDraftControllerForm").style.display = "block";
-        document.getElementById("draftControllerForm").style.display = "none";
+        currPickSpan.innerHTML = String(nextDraftPick);
+        currRoundSpan.innerHTML = String(currRound);
     }
-
-    document.getElementById("currPick").innerHTML =  nextDraftPick
-    document.getElementById("currRound").innerHTML = currRound
 
     if (currRound >= 15 && nextUserPickRound >= 16) {
-        document.getElementById("nextPickInfo").innerHTML = "the draft will end at the end of this round. " +
-            "Press the button below to end the draft."
+        let nextPickInfo = document.getElementById("nextPickInfo") as HTMLSpanElement | null;
+        if (nextPickInfo == null) {
+            console.log("nextUserPickSpan is null. Try again.")
+            return;
+        }
+        else nextPickInfo.innerHTML =  "the draft will end at the end of this round. " +
+        "Press the button below to end the draft."
     } 
     else {
-        document.getElementById("nextUserPick").innerHTML = nextUserPick                
-        document.getElementById("nextUserPickRound").innerHTML = currRound+1;
-        document.getElementById("currUserPickRound").innerHTML = currRound
-        document.getElementById("currUserPickSpot").innerHTML = nextUserPick;
+        let nextUserPickSpan = document.getElementById("nextUserPick") as HTMLSpanElement | null;
+        let nextUserPickRoundSpan = document.getElementById("nextUserPickRound") as HTMLSpanElement | null;
+        let currUserPickRoundSpan = document.getElementById("currUserPickRound") as HTMLSpanElement | null;
+        let currUserPickSpotSpan = document.getElementById("currUserPickSpot") as HTMLSpanElement | null;
+        if (nextUserPickSpan == null || nextUserPickRoundSpan == null || currUserPickRoundSpan == null || currUserPickSpotSpan == null) {
+            console.log("nextUserPickSpan or nextUserPickRoundSpan or currUserPickRoundSpan or currUserPickSpotSpan is null. Try again.")
+            return;
+        }
+        else {
+            nextUserPickSpan.innerHTML = String(nextUserPick);
+            nextUserPickRoundSpan.innerHTML = String(nextUserPickRound);
+            currUserPickRoundSpan.innerHTML = String(currRound);
+            currUserPickSpotSpan.innerHTML = String(nextUserPick);
+        }
     }
 }
 
@@ -306,7 +379,7 @@ async function simulateToNextPick() {
     if(await authenticateSession() == true) {
         await checkToClearDraftLog();          
         let res = await
-        fetch("http://localhost:8080/api/teams/simTo/?username="+getCookie("username"), {
+        fetch("http://localhost:80/api/teams/simTo/?username="+getCookie("username"), {
                 method: 'POST',
             })
         let data = await res.json()
@@ -326,13 +399,19 @@ async function simulateToNextPick() {
 
 async function userDraftPlayer() {
     if(await authenticateSession() == true) {
-        await checkToClearDraftLog();   
-        let playerToDraftIndex = parseInt(document.getElementById("nextDraftPick").value)
-
+        await checkToClearDraftLog();
+        let nextDraftPickSpan = document.getElementById("nextDraftPick") as HTMLInputElement | null;
+        if (nextDraftPickSpan == null) {
+            console.log("nextDraftPickSpan is null. Try again.")
+            return;
+        }
+        else {
+            var playerToDraftIndex = nextDraftPickSpan.value;
+        }
         let res = await
-        fetch("http://localhost:8080/api/teams/userDraftPlayer/?username="+getCookie("username")+"&playerIndex="+playerToDraftIndex, {
-                method: 'POST',
-            })
+        fetch("http://localhost:80/api/teams/userDraftPlayer/?username="+getCookie("username")+"&playerIndex="+playerToDraftIndex, {
+            method: 'POST',
+        })
         let data = await res.json()
         console.log(data)
 
@@ -351,9 +430,18 @@ async function userDraftPlayer() {
 
 async function endDraft() {
     if( await getCurrRound() >=16) {
-        document.getElementById("draftControllerForm").style.display = "none";
-        document.getElementById("waitingDraftControllerForm").style.display = "none";
-        document.getElementById("draftCompleteForm").style.display = "block"
+        let draftControllerForm: HTMLDivElement | null = document.getElementById("draftControllerForm") as HTMLDivElement | null;
+        let waitingDraftControllerForm: HTMLDivElement | null = document.getElementById("waitingDraftControllerForm") as HTMLDivElement | null;
+        let draftCompleteForm: HTMLDivElement | null = document.getElementById("draftCompleteForm") as HTMLDivElement | null;
+        if (draftControllerForm == null || waitingDraftControllerForm == null || draftCompleteForm == null) {
+            console.log("draftControllerForm or waitingDraftControllerForm or draftCompleteForm is null. Try again.")
+            return null;
+        }
+        else {
+            draftControllerForm.style.display = "none";
+            waitingDraftControllerForm.style.display = "none";
+            draftCompleteForm.style.display = "block";
+        }
         return true;
     }
     else return false;
@@ -361,7 +449,7 @@ async function endDraft() {
     
 async function endOfCurrentDraft() {
     if(await authenticateSession() == true) {
-        let res = await fetch("http://localhost:8080/api/teams/deleteThisDraft/?username="+getCookie("username"),{
+        let res = await fetch("http://localhost:80/api/teams/deleteThisDraft/?username="+getCookie("username"),{
             method: 'POST',})
         let boolForCurrentDraft = await res.json();
         console.log(boolForCurrentDraft);    

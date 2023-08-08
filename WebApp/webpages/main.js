@@ -31,9 +31,17 @@ function loadUserName() {
     }
 }
 async function authenticateSession() {
-    let authenticateSessionRes = await fetch("http://localhost:8080/api/login/attemptSession/?username=" + getCookie("username") + "&sessionID=" + getCookie("sessionID"), {
-        method: 'GET',
-    });
+    var authenticateSessionRes;
+    try {
+        authenticateSessionRes = await fetch("http://localhost:80/api/login/attemptSession/?username=" + getCookie("username") + "&sessionID=" + getCookie("sessionID"), {
+            method: 'GET',
+        });
+    }
+    catch {
+        alert("Server is down. Please try again later. Returning to login page.");
+        window.location.href = "loginpage.html";
+        return false;
+    }
     let authenticateSessionData = await authenticateSessionRes.json();
     if (authenticateSessionData == true) {
         console.log("Session authenticated.");
@@ -43,7 +51,7 @@ async function authenticateSession() {
         return false;
 }
 async function logoutServerSide() {
-    let logoutRes = await fetch("http://localhost:8080/api/login/logout/?username=" + getCookie("username") + "&sessionID=" + getCookie("sessionID"), {
+    let logoutRes = await fetch("http://localhost:80/api/login/logout/?username=" + getCookie("username") + "&sessionID=" + getCookie("sessionID"), {
         method: 'POST',
     });
     let logoutData = await logoutRes.json();

@@ -34,12 +34,19 @@ function loadUserName(): void {
     }
 }
 
-async function authenticateSession(): Promise<boolean> {
-    let authenticateSessionRes = await
-    fetch("http://localhost:8080/api/login/attemptSession/?username="+getCookie("username")+"&sessionID="+getCookie("sessionID"), {
-        method: 'GET',
-    })
-
+async function authenticateSession(): Promise<boolean>  {
+    var authenticateSessionRes: Response;
+    try {
+        authenticateSessionRes = await
+        fetch("http://localhost:80/api/login/attemptSession/?username="+getCookie("username")+"&sessionID="+getCookie("sessionID"), {
+            method: 'GET',
+        })
+    }
+    catch {
+        alert("Server is down. Please try again later. Returning to login page.")
+        window.location.href = "loginpage.html"
+        return false
+    }
     let authenticateSessionData: Boolean = await authenticateSessionRes.json()
 
     if (authenticateSessionData == true) {
@@ -51,7 +58,7 @@ async function authenticateSession(): Promise<boolean> {
 
 async function logoutServerSide(): Promise<void> {
      let logoutRes = await
-    fetch("http://localhost:8080/api/login/logout/?username="+getCookie("username")+"&sessionID="+getCookie("sessionID"), {
+    fetch("http://localhost:80/api/login/logout/?username="+getCookie("username")+"&sessionID="+getCookie("sessionID"), {
         method: 'POST',
     })
 

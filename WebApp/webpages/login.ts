@@ -11,7 +11,7 @@ async function addUser(): Promise<void> {
     let password: string = passwordEle.value;
 
     let checkUserRes = await 
-    fetch("http://localhost:8080/api/login/checkUser/?username="+username, {
+    fetch("http://localhost:80/api/login/checkUser/?username="+username, {
         method: 'GET',
     })
     let checkUserData: Boolean = await checkUserRes.json()
@@ -20,12 +20,12 @@ async function addUser(): Promise<void> {
         alert("Username already taken. Try again.")
     else {
         let addUser = await 
-        fetch("http://localhost:8080/api/login/addUser/?username="+username+"&password="+password, {
+        fetch("http://localhost:80/api/login/addUser/?username="+username+"&password="+password, {
             method: 'PUT',
         })
         let addUserRes: Response = await addUser.json()
         
-        let setUpUserRes = await fetch("http://localhost:8080/api/teams/initaizeUserAccountSetup/?username="+username, {
+        let setUpUserRes = await fetch("http://localhost:80/api/teams/initaizeUserAccountSetup/?username="+username, {
             method: 'POST',
         })
 
@@ -52,7 +52,7 @@ async function attemptLogin() {
     let password: string = passwordEle.value;
 
     let attemptLoginRes = await
-    fetch("http://localhost:8080/api/login/attemptLogin/?username="+username+"&password="+password, {
+    fetch("http://localhost:80/api/login/attemptLogin/?username="+username+"&password="+password, {
         method: 'GET',
     })
 
@@ -60,7 +60,7 @@ async function attemptLogin() {
 
     if (attemptLoginData == true) {
 
-        let generateSessionID = await fetch("http://localhost:8080/api/login/generateSessionID/?username="+username, {
+        let generateSessionID = await fetch("http://localhost:80/api/login/generateSessionID/?username="+username, {
             method: 'GET',
         })
 

@@ -2,12 +2,12 @@
 async function checkForUserDraftHistory() {
     if (await authenticateSession() == true) {
         loadUserName();
-        let res = await fetch("http://localhost:8080/api/teams/checkForCurrentDrafts/?username=" + getCookie("username"), {
+        let res = await fetch("http://localhost:80/api/teams/checkForCurrentDrafts/?username=" + getCookie("username"), {
             method: 'GET'
         });
         let boolForCurrentDraft = await res.json();
         console.log("current draft - " + boolForCurrentDraft);
-        let res2 = await fetch("http://localhost:8080/api/teams/checkForPastDrafts/?username=" + getCookie("username"), {
+        let res2 = await fetch("http://localhost:80/api/teams/checkForPastDrafts/?username=" + getCookie("username"), {
             method: 'GET'
         });
         let boolPastDrafts = await res2.json();
@@ -41,7 +41,7 @@ async function checkForUserDraftHistory() {
 }
 async function selectedStartNewDraft() {
     if (await authenticateSession() == true) {
-        let res = await fetch("http://localhost:8080/api/teams/checkForCurrentDrafts/?username=" + getCookie("username"), {
+        let res = await fetch("http://localhost:80/api/teams/checkForCurrentDrafts/?username=" + getCookie("username"), {
             method: 'GET',
         });
         let boolForCurrentDraft = await res.json();
@@ -88,7 +88,7 @@ async function selectedViewDraftHistory() {
 }
 async function selectedDeleteCurrentDraft() {
     if (await authenticateSession() == true) {
-        let res = await fetch("http://localhost:8080/api/teams/deleteThisDraft/?username=" + getCookie("username"), {
+        let res = await fetch("http://localhost:80/api/teams/deleteThisDraft/?username=" + getCookie("username"), {
             method: 'POST',
         });
         let boolForCurrentDraft = await res.json();
@@ -144,7 +144,7 @@ async function startDraft() {
             let draftSize = parseInt(draftSizeString);
             let draftPosition = parseInt(draftPositionString);
             if (checkStartDraftInput(teamName, draftSize, draftPosition) == true) {
-                let res = await fetch(("http://localhost:8080/api/teams/startDraft/?username=" + getCookie("username") + "&teamName=" + teamName + "&draftSize=" + draftSize + "&draftPosition=" + draftPosition), {
+                let res = await fetch(("http://localhost:80/api/teams/startDraft/?username=" + getCookie("username") + "&teamName=" + teamName + "&draftSize=" + draftSize + "&draftPosition=" + draftPosition), {
                     method: 'POST',
                 });
                 let data = await res.json();

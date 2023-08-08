@@ -1,6 +1,15 @@
 "use strict";
+type DraftRowData = {
+    draftID: string;
+    teamName: string;
+    draftPosition: string;
+    draftSize: string;
+    Date: string;
+    Time: string;
+}
+
 async function renderDraftHistoryTable() {
-    function createRow(currDraftRowMetaData) {
+    function createRow(currDraftRowMetaData: DraftRowData) {
         console.log(currDraftRowMetaData);
         let draftID = currDraftRowMetaData.draftID;
         console.log(draftID);
@@ -58,7 +67,8 @@ async function renderDraftHistoryTable() {
         deleteAllCookies();
     }
 }
-async function viewDraft(draftID) {
+
+async function viewDraft(draftID: string) {
     document.cookie = "draftIDToView=" + draftID + ";path=/";
     window.location.href = "draftreview.html";
 }
@@ -143,6 +153,7 @@ async function renderDraftHistoryPlayerLog() {
         deleteAllCookies();
     }
 }
+
 async function renderDraftHistoryTeamHistorySelecter() {
     if (await authenticateSession() == true) {
         let res = await fetch("http://localhost:80/api/teams/getDraftHistoryTeamList/?username=" + getCookie("username") + "&draftID=" + getCookie("draftIDToView"), {
@@ -189,19 +200,31 @@ async function renderDraftHistoryTeamHistorySelecter() {
         deleteAllCookies();
     }
 }
-async function viewTeam(teamID) {
-    function findStarterIndex(players) {
+async function viewTeam(teamID: string) {
+    type Player = {
+        firstName: string,
+        lastName: string,
+        fullName: string,
+        position: string,
+        predictedScore: number,
+        avgADP: number,
+        spotDrafted: number,
+        teamDraftedBy: string,
+    }
+
+    function findStarterIndex(players: Player[]) {
         let highestScore = -1;
         let highestScoreIndex = -1;
         for (let i = 0; i < players.length; i++) {
             if (players[i].predictedScore > highestScore) {
-                highestScore = players[i].predictedScore;
-                highestScoreIndex = i;
+            highestScore = players[i].predictedScore;
+            highestScoreIndex = i;
             }
         }
         return highestScoreIndex;
-    }
-    async function findBenchedPlayers(benchPlayers) {
+        }
+
+    async function findBenchedPlayers(benchPlayers: Player[]) {
         let teamHistoryTableBody = document.getElementById("teamHistoryTableBody");
         if (teamHistoryTableBody == null) {
             console.log("benchPlayerTableBody is null. Try again.");
@@ -240,7 +263,8 @@ async function viewTeam(teamID) {
             }
         }
     }
-    function createDataRowForStarter(stringPosition, starterIndex, playersPositon) {
+
+    function createDataRowForStarter(stringPosition: string, starterIndex: number, playersPositon: Player[]) {
         let newStarterRow = document.createElement("tr");
         newStarterRow.id = "starterRow" + stringPosition;
         newStarterRow.style.width = "100%";
@@ -274,8 +298,9 @@ async function viewTeam(teamID) {
         }
         return newStarterRow;
     }
+
     if (await authenticateSession() == true) {
-        let teamHistoryTableBody = document.getElementById("teamHistoryTableBody");
+        let teamHistoryTableBody = document.getElementById("teamHistoryTableBody")
         if (teamHistoryTableBody == null) {
             console.log("teamHistoryTableBody is null. Try again.");
             return;
@@ -284,7 +309,7 @@ async function viewTeam(teamID) {
             console.log("teamHistoryTableBody is not null. Continue.");
             teamHistoryTableBody.innerHTML = "";
             let res = await fetch(`http://localhost:80/api/teams/getDraftHistoryTeamReview/?username=${getCookie("username")}&draftID=${getCookie("draftIDToView")}&teamIndex=${teamID}`, {
-                method: 'GET',
+            method: 'GET',
             });
             let data = await res.json();
             console.log(data);
@@ -302,7 +327,7 @@ async function viewTeam(teamID) {
                     let currPositionPlayers;
                     if (currPosition == "Flex") {
                         currPositionPlayers = data["RB"].concat(data["WR"]).concat(data["TE"]);
-                    }
+                        }
                     else {
                         currPositionPlayers = data[currPosition];
                         console.log(currPositionPlayers);
@@ -333,10 +358,12 @@ async function viewTeam(teamID) {
         }
     }
     else {
-        console.log("User not logged in. Redirecting to login page.");
-        deleteAllCookies();
+    console.log("User not logged in. Redirecting to login page.");
+    deleteAllCookies();
     }
 }
+
+
 async function resetDraftHistoryPage() {
     if (await authenticateSession() == true) {
         let draftHistoryPlayerLog = document.getElementById("draftHistoryPlayerLog");
@@ -344,11 +371,11 @@ async function resetDraftHistoryPage() {
         let teamHistoryTable = document.getElementById("teamHistoryTable");
         let draftReviewSelecterForm = document.getElementById("draftReviewSelecterForm");
         let backButton = document.getElementById("backButton");
-        if (draftHistoryPlayerLog == null || allTeamsTable == null ||
+        if (draftHistoryPlayerLog == null ||  allTeamsTable == null ||
             teamHistoryTable == null || draftReviewSelecterForm == null || backButton == null) {
-            console.log("draftHistoryPlayerLog or draftReviewPlayerLogBody or allTeamsTable or allTeamsTableBody or teamHistoryTable or teamHistoryTableBody or " +
+                console.log("draftHistoryPlayerLog or draftReviewPlayerLogBody or allTeamsTable or allTeamsTableBody or teamHistoryTable or teamHistoryTableBody or " + 
                 "draftReviewSelecterForm or backButton is null. Try again.");
-            return;
+                return;
         }
         else {
             draftHistoryPlayerLog.style.display = "none";
