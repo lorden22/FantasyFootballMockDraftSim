@@ -33,7 +33,7 @@ CREATE TABLE `drafts` (
   PRIMARY KEY (`draft_id`),
   KEY `fk_username` (`username`),
   CONSTRAINT `fk_username` FOREIGN KEY (`username`) REFERENCES `USERS` (`username`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -62,7 +62,7 @@ CREATE TABLE `players` (
   PRIMARY KEY (`player_rank`),
   KEY `fk_team_name` (`team_name`),
   CONSTRAINT `fk_team_name` FOREIGN KEY (`team_name`) REFERENCES `TEAMS` (`team_name`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -89,7 +89,7 @@ CREATE TABLE `teams` (
   PRIMARY KEY (`team_name`),
   KEY `fk_draft_id` (`draft_id`),
   CONSTRAINT `fk_draft_id` FOREIGN KEY (`draft_id`) REFERENCES `drafts` (`draft_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -114,7 +114,7 @@ CREATE TABLE `USERS` (
   `hash_pass` varchar(256) NOT NULL,
   `recent_session_id` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`username`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
