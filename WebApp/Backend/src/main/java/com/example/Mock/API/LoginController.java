@@ -5,6 +5,7 @@ import com.example.Mock.Service.LoginServices;
 import java.security.NoSuchAlgorithmException;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,10 +14,15 @@ import org.springframework.web.bind.annotation.*;
 public class LoginController {
 
     private final LoginServices loginServices;
+    private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public LoginController(LoginServices loginServices) {
+    public LoginController(LoginServices loginServices, JdbcTemplate jdbcTemplate) {
         this.loginServices = loginServices;
+        this.jdbcTemplate = jdbcTemplate;
+        System.out.println("Hello World");
+        System.out.println(jdbcTemplate.queryForList("SELECT * FROM players"));
+
     }
 
     @GetMapping(path = "/checkUser/")

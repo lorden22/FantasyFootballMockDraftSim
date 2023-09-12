@@ -12,6 +12,7 @@ ADD WebApp/Backend/mockDraft.sql mockDraft.sql
 ADD WebApp/Backend/startup.sh startup.sh
 
 EXPOSE 8080
+EXPOSE 3306
 
-SHELL ["/bin/bash", "-c"]
+
 ENTRYPOINT ["/startup.sh"]
