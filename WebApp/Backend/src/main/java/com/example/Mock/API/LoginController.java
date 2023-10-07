@@ -20,7 +20,7 @@ public class LoginController {
     public LoginController(LoginServices loginServices, JdbcTemplate jdbcTemplate) {
         this.loginServices = loginServices;
         this.jdbcTemplate = jdbcTemplate;
-        System.out.println("Hello World");
+        System.out.println("Database Connection: " + jdbcTemplate.getDataSource().toString());
         System.out.println(jdbcTemplate.queryForList("SELECT * FROM players"));
 
     }
