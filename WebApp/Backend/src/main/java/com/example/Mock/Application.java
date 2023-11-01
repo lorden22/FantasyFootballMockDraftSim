@@ -1,6 +1,7 @@
 package com.example.Mock;
 import java.util.ArrayList;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
@@ -10,8 +11,9 @@ import com.example.Mock.StartingClasses.TeamModel;;
 
 @SpringBootApplication
 public class Application {
-
+	
 	public static void main(String[] args) {
 		SpringApplication.run(Application.class, args);
+		System.out.println("Application Started");
 	}
 }

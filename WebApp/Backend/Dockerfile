@@ -10,8 +10,12 @@ ADD ${JAR_FILE} app.jar
 ADD WebApp/Backend/src/main/java/com/example/Mock/StartingClasses/WebScraping/PlayerData.txt PlayerData.txt
 ADD WebApp/Backend/mockDraft.sql mockDraft.sql
 ADD WebApp/Backend/startup.sh startup.sh
+RUN chmod +x startup.sh
 
 EXPOSE 8080
+EXPOSE 3306
 
-SHELL ["/bin/bash", "-c"]
-ENTRYPOINT ["/startup.sh"]
+
+ENTRYPOINT ["/bin/bash", "/startup.sh"]
+CMD ["sleep", "infinity"]
+

@@ -32,9 +32,11 @@ import com.example.Mock.StartingClasses.TeamModel;
 public class DraftController {
 
     private HashMap<String,DraftServices> allDraftServices;
+    
 
     public DraftController() {
         this.allDraftServices = new HashMap<String,DraftServices>();
+
     }
     
     @PostMapping(path="/initaizeUserAccountSetup")
