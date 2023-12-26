@@ -1,14 +1,13 @@
 async function addUser(): Promise<void> {
-    let userNameEle: HTMLInputElement | null = document.getElementById("username") as HTMLInputElement | null;
-    let passwordEle: HTMLInputElement | null = document.getElementById("password") as HTMLInputElement | null;
-
-    if(userNameEle == null || passwordEle == null) {
+    let userNameEleValue: string | null = (document.getElementById("username") as HTMLInputElement).value || null;
+    let passwordEleValue: string | null = (document.getElementById("password") as HTMLInputElement).value || null;
+    if(userNameEleValue == null || passwordEleValue == null) {
         alert("Username or password is null. Try again.")
         return;
     }
 
-    let username: string = userNameEle.value;
-    let password: string = passwordEle.value;
+    let username: string = userNameEleValue
+    let password: string = passwordEleValue
 
     let checkUserRes = await 
     fetch("http://localhost:80/api/login/checkUser/?username="+username, {
@@ -40,16 +39,15 @@ async function addUser(): Promise<void> {
 }
 
 async function attemptLogin() {
-    let userNameEle: HTMLInputElement | null = document.getElementById("username") as HTMLInputElement | null;
-    let passwordEle: HTMLInputElement | null = document.getElementById("password") as HTMLInputElement | null;
-
-    if(userNameEle == null || passwordEle == null) {
+    let userNameEleValue: string | null = (document.getElementById("username") as HTMLInputElement).value || null;
+    let passwordEleValue: string | null = (document.getElementById("password") as HTMLInputElement).value || null;
+    if(userNameEleValue == null || passwordEleValue == null) {
         alert("Username or password is null. Try again.")
         return;
     }
 
-    let username: string = userNameEle.value;
-    let password: string = passwordEle.value;
+    let username: string = userNameEleValue
+    let password: string = passwordEleValue
 
     let attemptLoginRes = await
     fetch("http://localhost:80/api/login/attemptLogin/?username="+username+"&password="+password, {

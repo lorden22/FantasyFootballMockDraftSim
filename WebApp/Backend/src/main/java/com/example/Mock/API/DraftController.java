@@ -1,9 +1,13 @@
 package com.example.Mock.API;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Scanner;
 import java.util.TreeMap;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.quartz.QuartzDataSource;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 
@@ -32,12 +37,68 @@ import com.example.Mock.StartingClasses.TeamModel;
 public class DraftController {
 
     private HashMap<String,DraftServices> allDraftServices;
+    private JdbcTemplate jdbcTemplate;
     
 
-    public DraftController() {
+    public DraftController(JdbcTemplate jdbcTemplate) {
         this.allDraftServices = new HashMap<String,DraftServices>();
-
+        this.jdbcTemplate = jdbcTemplate;
+        System.out.println("Database Connection: " + this.jdbcTemplate.getDataSource().toString());
+        System.out.println(this.jdbcTemplate.queryForList("SELECT * FROM players"));
+        if(createPlayerDatabase()) {
+            System.out.println("Player Database Created");
+        }
+        else {
+            System.out.println("Player Database Not Created... Check Logs");
+        }
     }
+
+    private boolean createPlayerDatabase() {
+		try {
+			File playerStatFile = new File("/PlayerData.txt");
+			Scanner fileReader = new Scanner(playerStatFile);
+			while(fileReader.hasNextLine()) {
+				String currPlayerStatsString = fileReader.nextLine();
+				String[] currPlayerStatsArray = currPlayerStatsString.split(" ");
+				ArrayList<Object> otherPlayStats = new ArrayList<Object>(0);
+
+				if(currPlayerStatsArray.length < 3) {
+					System.out.println("Error: Player Data File Not Formatted Correctly");
+					return false;
+				}
+				// If the player has a first and last name only, default to index of 2
+				int indexAfterFullName = 2;
+				if (currPlayerStatsArray.length > 5) {
+					indexAfterFullName = 3;
+                }
+                String playerName = "";
+				for (int i = 0; i < indexAfterFullName; i++) {
+					playerName += currPlayerStatsArray[i] + " ";
+				}
+				playerName = playerName.trim();
+
+				for (String nextVal : Arrays.copyOfRange(currPlayerStatsArray, indexAfterFullName, currPlayerStatsArray.length)) {
+					try {
+						otherPlayStats.add(Double.parseDouble(nextVal));
+					} catch (NumberFormatException error) {
+						otherPlayStats.add("" + nextVal);
+					}
+				}
+                this.jdbcTemplate.update("INSERT INTO players (name, position, predicted_score, player_rank) values (?, ?, ?, ?)", playerName, otherPlayStats.get(0), otherPlayStats.get(1), otherPlayStats.get(2));
+			}
+			fileReader.close();
+			return true;
+		}
+
+		catch (FileNotFoundException error) {
+			System.out.println("File Not Found - Check File Name");
+		}
+		catch (Exception error) {
+			System.out.println("Other Error Found - See Below /n ------------------------------------------");
+			error.printStackTrace();
+		}
+		return false;
+	}
     
     @PostMapping(path="/initaizeUserAccountSetup")
     public boolean initaizeUserAccountSetup(

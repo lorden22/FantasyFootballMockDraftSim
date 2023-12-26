@@ -15,6 +15,57 @@ public class MockDraftDriver {
 	private DraftHandler draftHandler;
 
 	public MockDraftDriver() {
+		createPlayerDatabase();
+	}
+
+	public static boolean createPlayerDatabase() {
+		try {
+			File playerStatFile = new File("/PlayerData.txt");
+			Scanner fileReader = new Scanner(playerStatFile);
+			HashMap<String,ArrayList<Object>> allPlayers = new HashMap<String,ArrayList<Object>>();
+			while(fileReader.hasNextLine()) {
+				String currPlayerStatsString = fileReader.nextLine();
+				String[] currPlayerStatsArray = currPlayerStatsString.split(" ");
+				ArrayList<Object> otherPlayStats = new ArrayList<Object>(0);
+
+				if(currPlayerStatsArray.length < 3) {
+					System.out.println("Error: Player Data File Not Formatted Correctly");
+					return false;
+				}
+				// If the player has a first and last name only, default to index of 2
+				int indexAfterFullName = 2;
+				if (currPlayerStatsArray.length > 5) {
+					indexAfterFullName = 3;
+				}
+				String playerName = "";
+				for (int i = 0; i < indexAfterFullName; i++) {
+					playerName += currPlayerStatsArray[i] + " ";
+				}
+				playerName = playerName.trim();
+
+				for (String nextVal : Arrays.copyOfRange(currPlayerStatsArray, indexAfterFullName, currPlayerStatsArray.length)) {
+					try {
+						otherPlayStats.add(Double.parseDouble(nextVal));
+					} catch (NumberFormatException error) {
+						otherPlayStats.add("" + nextVal);
+					}
+				}
+
+			}
+			fileReader.close();
+
+			return true;
+		}
+
+		catch (FileNotFoundException error) {
+			System.out.println("File Not Found - Check File Name");
+		}
+
+		catch (Exception error) {
+			System.out.println("Other Error Found - See Below /n ------------------------------------------");
+			error.printStackTrace();
+		}
+		return false;
 	}
 
 	public void createdDraftEnv(String teamName, int draftSize, int desiredDraftPosition){

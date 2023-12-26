@@ -1,13 +1,13 @@
 "use strict";
 async function addUser() {
-    let userNameEle = document.getElementById("username");
-    let passwordEle = document.getElementById("password");
-    if (userNameEle == null || passwordEle == null) {
+    let userNameEleValue = document.getElementById("username").value || null;
+    let passwordEleValue = document.getElementById("password").value || null;
+    if (userNameEleValue == null || passwordEleValue == null) {
         alert("Username or password is null. Try again.");
         return;
     }
-    let username = userNameEle.value;
-    let password = passwordEle.value;
+    let username = userNameEleValue;
+    let password = passwordEleValue;
     let checkUserRes = await fetch("http://localhost:80/api/login/checkUser/?username=" + username, {
         method: 'GET',
     });
@@ -30,14 +30,14 @@ async function addUser() {
     }
 }
 async function attemptLogin() {
-    let userNameEle = document.getElementById("username");
-    let passwordEle = document.getElementById("password");
-    if (userNameEle == null || passwordEle == null) {
+    let userNameEleValue = document.getElementById("username").value || null;
+    let passwordEleValue = document.getElementById("password").value || null;
+    if (userNameEleValue == null || passwordEleValue == null) {
         alert("Username or password is null. Try again.");
         return;
     }
-    let username = userNameEle.value;
-    let password = passwordEle.value;
+    let username = userNameEleValue;
+    let password = passwordEleValue;
     let attemptLoginRes = await fetch("http://localhost:80/api/login/attemptLogin/?username=" + username + "&password=" + password, {
         method: 'GET',
     });

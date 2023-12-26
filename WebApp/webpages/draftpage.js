@@ -14,7 +14,7 @@ async function setUpDraft() {
                 }
                 else {
                     draftNotStartedForm.style.display = "none";
-                    draftControllerForm.style.display = "block";
+                    draftControllerForm.style.display = "none";
                 }
                 let currPick = await getCurrPick();
                 let nextUserPick = await getNextUserPick();

@@ -56,12 +56,8 @@ CREATE TABLE `players` (
   `player_rank` int NOT NULL,
   `name` varchar(100) NOT NULL,
   `position` varchar(3) NOT NULL,
-  `team_name` varchar(50) DEFAULT NULL,
-  `draft_status` tinyint DEFAULT '0',
-  `predicted_score` decimal(3,2) NOT NULL,
-  PRIMARY KEY (`player_rank`),
-  KEY `fk_team_name` (`team_name`),
-  CONSTRAINT `fk_team_name` FOREIGN KEY (`team_name`) REFERENCES `TEAMS` (`team_name`)
+  `predicted_score` decimal(5,2) NOT NULL,
+  PRIMARY KEY (`player_rank`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -86,6 +82,7 @@ CREATE TABLE `teams` (
   `draft_spot` int NOT NULL,
   `draft_id` int NOT NULL,
   `user_team` tinyint NOT NULL,
+  `team_array` varchar(100) DEFAULT NULL,
   PRIMARY KEY (`team_name`),
   KEY `fk_draft_id` (`draft_id`),
   CONSTRAINT `fk_draft_id` FOREIGN KEY (`draft_id`) REFERENCES `drafts` (`draft_id`)

@@ -39,4 +39,5 @@ function deleteAllCookies(): void {
     console.log("Send this to Delete cookie -  " + cookies[i].split("=")[0]);
     deleteCookie(cookies[i].split("=")[0]);
   }
+  window.location.href = "loginpage.html"
 }
