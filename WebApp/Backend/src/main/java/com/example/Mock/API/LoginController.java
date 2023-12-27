@@ -26,44 +26,44 @@ public class LoginController {
     }
 
     @GetMapping(path = "/checkUser/")
-    public boolean checkUser(@RequestParam("username") String username) {
-        return loginServices.checkUser(username);
+    public boolean checkUser(@RequestParam("username") String username){
+        return loginServices.checkUser(username, this.jdbcTemplate);
     }
 
     @PutMapping(path = "/addUser/")
     public boolean addUser(@RequestParam("username") String username, @RequestParam("password") String password) throws NoSuchAlgorithmException {
-        boolean log = loginServices.addUser(username, password);
+        boolean log = loginServices.addUser(username, password, this.jdbcTemplate);
         System.out.println(log + " " + username + " " + password);
         return log;
     }
 
     @DeleteMapping(path = "/removeUser/")
     public boolean removeUser(@RequestParam("username") String username) {
-        return loginServices.removeUser(username);
+        return loginServices.removeUser(username, this.jdbcTemplate);
     }
 
     @GetMapping(path = "/attemptLogin/")
     public boolean attemptLogin(@RequestParam("username") String username, @RequestParam("password") String password) throws NoSuchAlgorithmException {
-        boolean log = loginServices.authenticateUserPassword(username, password);
+        boolean log = loginServices.authenticateUserPassword(username, password, this.jdbcTemplate);
         System.out.println(log + " " + username + " " + password);
         return log;
     }
 
     @GetMapping(path = "/attemptSession/")
     public boolean attemptedSessionID(@RequestParam("username") String username, @RequestParam("sessionID") String sessionID) throws NoSuchAlgorithmException {
-        boolean log = loginServices.authenticateUserSessionID(username, sessionID);
+        boolean log = loginServices.authenticateUserSessionID(username, sessionID, this.jdbcTemplate);
         System.out.println(log + " " + username + " " + sessionID);
         return log;
     }
 
     @GetMapping(path = "/generateSessionID/") 
     public String generateSessionID(@RequestParam("username") String username) throws NoSuchAlgorithmException {
-        return loginServices.generateSessionID(username);
+        return loginServices.generateSessionID(username, this.jdbcTemplate);
     }
 
     @PostMapping(path = "/logout/")
-    public boolean logout(@RequestParam("username") String username, @RequestParam("sessionID") String sessionID) {
-        return loginServices.logout(username, sessionID);
+    public boolean logout(@RequestParam("username") String username, @RequestParam("sessionID") String sessionID) throws NoSuchAlgorithmException {
+        return loginServices.logout(username, sessionID, this.jdbcTemplate);
     }
 
 }

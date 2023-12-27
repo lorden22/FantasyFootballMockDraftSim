@@ -39,7 +39,6 @@ public class DraftController {
     private HashMap<String,DraftServices> allDraftServices;
     private JdbcTemplate jdbcTemplate;
     
-
     public DraftController(JdbcTemplate jdbcTemplate) {
         this.allDraftServices = new HashMap<String,DraftServices>();
         this.jdbcTemplate = jdbcTemplate;

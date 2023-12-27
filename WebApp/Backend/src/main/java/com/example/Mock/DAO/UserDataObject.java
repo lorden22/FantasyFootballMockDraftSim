@@ -5,6 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
 import org.springframework.context.annotation.Scope;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import com.example.Mock.DAO.UserDAO;
@@ -17,7 +18,7 @@ public class UserDataObject implements UserDAO  {
     private String username;
     private String hashPassword;
     private String salt;
-    private String latestSessionID;
+    //private String latestSessionID;
 
     public UserDataObject(String username, String passwordText) throws NoSuchAlgorithmException {
         this.username = username;
@@ -26,7 +27,7 @@ public class UserDataObject implements UserDAO  {
         byte[] bytes = new byte[16];
         random.nextBytes(bytes);
         this.salt = bypeArrayToString(bytes);
-
+        System.out.println(this.salt);
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         digest.reset();
         digest.update(this.salt.getBytes());
@@ -34,7 +35,7 @@ public class UserDataObject implements UserDAO  {
         this.hashPassword = bypeArrayToString(hash);
     }
 
-    public boolean authenticateUserPassword(String attemptedPassword) throws NoSuchAlgorithmException {
+    /*public boolean authenticateUserPassword(String attemptedPassword) throws NoSuchAlgorithmException {
         MessageDigest digest;
         digest = MessageDigest.getInstance("SHA-256");
         digest.reset();
@@ -69,6 +70,18 @@ public class UserDataObject implements UserDAO  {
         this.latestSessionID = null;
         return true;
     }
+    */
+
+    public boolean addUserToDatabase(JdbcTemplate jdbcTemplate) {
+        try {
+            jdbcTemplate.update("INSERT INTO users (username, hash_pass, salt) VALUES (?, ?, ?)", this.username, this.hashPassword, this.salt);
+            return true;
+        }
+        catch (Exception error) {
+            error.printStackTrace();
+            return false;
+        }
+    }   
 
     private static String bypeArrayToString(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
@@ -77,4 +90,5 @@ public class UserDataObject implements UserDAO  {
         }
         return sb.toString();
     }
+    
 }

@@ -32,7 +32,7 @@ CREATE TABLE `drafts` (
   `date` datetime DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`draft_id`),
   KEY `fk_username` (`username`),
-  CONSTRAINT `fk_username` FOREIGN KEY (`username`) REFERENCES `USERS` (`username`)
+  CONSTRAINT `fk_username` FOREIGN KEY (`username`) REFERENCES `users` (`username`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -99,15 +99,15 @@ LOCK TABLES `teams` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `USERS`
+-- Table structure for table `users`
 --
 
-DROP TABLE IF EXISTS `USERS`;
+DROP TABLE IF EXISTS `users`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
-CREATE TABLE `USERS` (
+CREATE TABLE `users` (
   `username` varchar(50) NOT NULL,
-  `salt` char(16) NOT NULL,
+  `salt` char(32) NOT NULL,
   `hash_pass` varchar(256) NOT NULL,
   `recent_session_id` varchar(256) DEFAULT NULL,
   PRIMARY KEY (`username`)
@@ -115,12 +115,12 @@ CREATE TABLE `USERS` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `USERS`
+-- Dumping data for table `users`
 --
 
-LOCK TABLES `USERS` WRITE;
-/*!40000 ALTER TABLE `USERS` DISABLE KEYS */;
-/*!40000 ALTER TABLE `USERS` ENABLE KEYS */;
+LOCK TABLES `users` WRITE;
+/*!40000 ALTER TABLE `users` DISABLE KEYS */;
+/*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
