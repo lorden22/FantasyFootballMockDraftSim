@@ -177,7 +177,7 @@ async function getPlayerLeft() {
     let returnVal = "";
     for (let intCurrPlayer in data) {
         let currPlayer = data[intCurrPlayer];
-        returnVal += ((1 + Number(intCurrPlayer)) + ". " + currPlayer.fullName + " " + currPlayer.position + " - Predicted Score 2022 = "
+        returnVal += ((1 + Number(intCurrPlayer)) + ". " + currPlayer.fullName + " " + currPlayer.position + " - Predicted Score 2023 = "
             + currPlayer.predictedScore + ", Avg ADP = " + currPlayer.avgADP + "<br />");
     }
     console.log(returnVal);
@@ -194,7 +194,7 @@ async function updatePlayerListPar(data) {
         let returnVal = "";
         for (let intCurrPlayer in data) {
             let currPlayer = data[intCurrPlayer];
-            returnVal += ((1 + Number(intCurrPlayer)) + ". " + currPlayer.fullName + ", " + currPlayer.position + " - Predicted Score 2022 = "
+            returnVal += ((1 + Number(intCurrPlayer)) + ". " + currPlayer.fullName + ", " + currPlayer.position + " - Predicted Score 2023 = "
                 + currPlayer.predictedScore + ", Avg ADP = " + currPlayer.avgADP + "<br />");
         }
         let PlayerLeftPar = document.getElementById("playerListPar");
@@ -243,7 +243,7 @@ async function parseDraftLogData(data) {
             break;
         }
         else {
-            updateVal += currPlayer.spotDrafted + " - " + currPlayer.teamDraftedBy + " picked " + currPlayer.fullName + ", " + currPlayer.position + " - Predicted Score 2022 = " +
+            updateVal += currPlayer.spotDrafted + " - " + currPlayer.teamDraftedBy + " picked " + currPlayer.fullName + ", " + currPlayer.position + " - Predicted Score 2023 = " +
                 currPlayer.predictedScore + ", Avg ADP = " + currPlayer.avgADP + "<br />";
         }
     }

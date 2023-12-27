@@ -1,6 +1,6 @@
 #getRankingsScript.py
 #By:Bryan Lorden
-#08/19/2022
+#08/19/2023
 
 from string import digits
 from tokenize import Name

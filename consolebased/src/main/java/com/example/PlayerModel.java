@@ -70,7 +70,7 @@ public class PlayerModel implements Comparable<PlayerModel>{
 	}
 	
 	public String toString() {
-		return this.firstName + " " + this.lastName + " - Predicted 2022 score = "
+		return this.firstName + " " + this.lastName + " - Predicted 2023 score = "
 		+ this.predictedScore + ", Avg ADP = " + this.avgADP;
 	}
 	

@@ -207,7 +207,7 @@ async function getPlayerLeft(): Promise<void> {
     let returnVal = ""
     for(let intCurrPlayer in data) {
         let currPlayer: Player = data[intCurrPlayer]
-        returnVal += ((1+Number(intCurrPlayer)) + ". " + currPlayer.fullName + " " +currPlayer.position + " - Predicted Score 2022 = " 
+        returnVal += ((1+Number(intCurrPlayer)) + ". " + currPlayer.fullName + " " +currPlayer.position + " - Predicted Score 2023 = " 
         + currPlayer.predictedScore + ", Avg ADP = " + currPlayer.avgADP + "<br />")
     }
     console.log(returnVal)
@@ -225,7 +225,7 @@ async function updatePlayerListPar(data: Player[]) {
         let returnVal: string = ""
         for(let intCurrPlayer in data) {
             let currPlayer = data[intCurrPlayer]
-            returnVal += ((1+Number(intCurrPlayer)) + ". " + currPlayer.fullName + ", " +currPlayer.position + " - Predicted Score 2022 = " 
+            returnVal += ((1+Number(intCurrPlayer)) + ". " + currPlayer.fullName + ", " +currPlayer.position + " - Predicted Score 2023 = " 
             + currPlayer.predictedScore + ", Avg ADP = " + currPlayer.avgADP + "<br />")
         }
         let PlayerLeftPar: HTMLParagraphElement | null = document.getElementById("playerListPar") as HTMLParagraphElement | null;
@@ -276,7 +276,7 @@ async function parseDraftLogData(data: Player[]) {
             break;
         }
         else {
-            updateVal += currPlayer.spotDrafted + " - " + currPlayer.teamDraftedBy + " picked " + currPlayer.fullName + ", " +currPlayer.position + " - Predicted Score 2022 = " +
+            updateVal += currPlayer.spotDrafted + " - " + currPlayer.teamDraftedBy + " picked " + currPlayer.fullName + ", " +currPlayer.position + " - Predicted Score 2023 = " +
             currPlayer.predictedScore + ", Avg ADP = " + currPlayer.avgADP + "<br />"
         }
     }
