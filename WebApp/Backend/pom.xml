@@ -11,8 +11,8 @@
 	<groupId>com.example</groupId>
 	<artifactId>WebBackend</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>2022FantasyFootballMockDraft</name>
-	<description>2022FantasyFootballMockDraft</description>
+	<name>2023FantasyFootballMockDraft</name>
+	<description>2023FantasyFootballMockDraft</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
