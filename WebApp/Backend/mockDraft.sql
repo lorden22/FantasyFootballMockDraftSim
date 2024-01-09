@@ -83,7 +83,7 @@ CREATE TABLE `teams` (
   `draft_id` int NOT NULL,
   `user_team` tinyint NOT NULL,
   `team_array` varchar(100) DEFAULT NULL,
-  PRIMARY KEY (`team_name`),
+  PRIMARY KEY (`team_name`,`draft_id`),
   KEY `fk_draft_id` (`draft_id`),
   CONSTRAINT `fk_draft_id` FOREIGN KEY (`draft_id`) REFERENCES `drafts` (`draft_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

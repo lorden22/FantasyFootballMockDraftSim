@@ -20,6 +20,16 @@ public class PlayerModel implements Comparable<PlayerModel>{
 		this.fullName = this.firstName + " " + this.lastName;
 	}
 
+	public PlayerModel (String firstName, String lastName, String position, double predictedScore, double avgADP) {
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.predictedScore = predictedScore;
+		this.position = position;
+		this.avgADP = avgADP;
+	}
+
+
+
 	public String getFirstName() {
 		return this.firstName;
 	}

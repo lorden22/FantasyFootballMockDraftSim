@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.TreeMap;
 
@@ -127,7 +128,7 @@ public class DraftController {
         @RequestParam("draftPosition") int draftPositios,
         @Autowired DraftDataObject draftDataObject) {
             System.out.println("username: " + username + " - has draftServices: " + this.allDraftServices.containsKey(username) + " - " + this.allDraftServices);
-            return this.allDraftServices.get(username).startDraft(teamName, draftSize, draftPositios, draftDataObject);
+            return this.allDraftServices.get(username).startDraft(username, teamName, draftSize, draftPositios, draftDataObject, this.jdbcTemplate);
 
     }
 
@@ -140,25 +141,25 @@ public class DraftController {
     @GetMapping(path="/getCurrRound/")
     public int getCurrRound(
         @RequestParam("username") String username) {
-            return this.allDraftServices.get(username).getCurrRound();
+            return this.allDraftServices.get(username).getCurrRound(this.jdbcTemplate, username);
     }
 
     @GetMapping(path="/getCurrPick/")
     public int getCurrPick(
         @RequestParam("username") String username) {
-            return this.allDraftServices.get(username).getCurrPick();
+            return this.allDraftServices.get(username).getCurrPick(this.jdbcTemplate, username);
     }
 
     @GetMapping(path="/getNextUserPick/")
     public int getNextUserPick(
         @RequestParam("username") String username) {
-            return this.allDraftServices.get(username).getNextUserPick();
+            return this.allDraftServices.get(username).getNextUserPick(this.jdbcTemplate, username);
     }
 
     @GetMapping(path="/getNextUserPickRound/")
     public int getNextUserPickRound(
         @RequestParam("username") String username) {
-            return this.allDraftServices.get(username).getNextUserPickRound();
+            return this.allDraftServices.get(username).getNextUserPickRound(this.jdbcTemplate, username);
     }
 
     @PostMapping(path="/userDraftPlayer/")
