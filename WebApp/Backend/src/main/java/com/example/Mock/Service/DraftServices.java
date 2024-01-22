@@ -38,8 +38,13 @@ public class DraftServices {
         this.allPastsDraftsDataObject = new TreeMap<Integer,DraftDataObject>();
     }
 
+    public int getUserMostRecentDraftID(JdbcTemplate jdbcTemplate, String username) {
+        return jdbcTemplate.queryForObject("SELECT MAX(draft_id) FROM drafts WHERE username = '" + username + "'", Integer.class);
+    }
+
     public String getUserTeamName(JdbcTemplate jdbcTemplate, String username) {
-        return jdbcTemplate.queryForObject("SELECT team_name FROM teams WHERE username = '" + username + "' AND draft_id = (SELECT MAX(draft_id) FROM drafts)", String.class);
+        int draftID = this.getUserMostRecentDraftID(jdbcTemplate, username);
+        return jdbcTemplate.queryForObject("SELECT team_name FROM teams WHERE user_team = 1 and draft_id = " + draftID , String.class);
     }
 
     public int getDraftSize(JdbcTemplate jdbcTemplate, String username) {
@@ -47,9 +52,10 @@ public class DraftServices {
     }
 
 
-    public int getUserStartingDraftSpot(JdbcTemplate jdbcTemplate, String teamname) {
-        String teamName = this.getUserTeamName(jdbcTemplate, teamname);
-        return jdbcTemplate.queryForObject("SELECT draft_spot FROM teams WHERE team_name = '" + teamName + "' AND draft_id = (SELECT MAX(draft_id) FROM drafts) AND user_team = 1", Integer.class);
+    public int getUserStartingDraftSpot(JdbcTemplate jdbcTemplate, String username) {
+        String teamName = this.getUserTeamName(jdbcTemplate, username);
+        int draftId = this.getUserMostRecentDraftID(jdbcTemplate, username);
+        return jdbcTemplate.queryForObject("SELECT draft_spot FROM teams WHERE team_name = '" + teamName + "' AND draft_id = " + draftId + " AND user_team = 1", Integer.class);
     }
 
     public List<PlayerModel> getPlayersLeft() {
@@ -61,12 +67,14 @@ public class DraftServices {
     }
 
     public int getCurrRound(JdbcTemplate jdbcTemplate, String username) {
-        System.out.println("Current round - " + jdbcTemplate.queryForObject("SELECT curr_round FROM drafts WHERE username = '" + username + "' AND draft_id = (SELECT MAX(draft_id) FROM drafts)", Integer.class));
+        int draftId = this.getUserMostRecentDraftID(jdbcTemplate, username);
+        System.out.println("Current round - " + jdbcTemplate.queryForObject("SELECT curr_round FROM drafts WHERE username = '" + username + "' AND draft_id = " + draftId, Integer.class));
         return this.draftDataObject.getCurrRound();
     }
 
     public int getCurrPick(JdbcTemplate jdbcTemplate, String username) {
-        System.out.println("Current pick - " + jdbcTemplate.queryForObject("SELECT curr_pick FROM drafts WHERE username = '" + username + "' AND draft_id = (SELECT MAX(draft_id) FROM drafts)", Integer.class));
+        int draft_id = this.getUserMostRecentDraftID(jdbcTemplate, username);
+        System.out.println("Current pick - " + jdbcTemplate.queryForObject("SELECT curr_pick FROM drafts WHERE username = '" + username + "' AND draft_id = " + draft_id, Integer.class));
         return this.draftDataObject.getCurrPick();
     }
 
