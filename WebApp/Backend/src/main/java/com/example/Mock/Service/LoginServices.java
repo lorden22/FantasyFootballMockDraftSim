@@ -95,8 +95,6 @@ public class LoginServices{
         System.out.println(attemptedHashPassword + " " + hashPassword);
         return attemptedHashPassword.equals(hashPassword);
 
-        
-
         /*for(UserDataObject user : users) {
             if(user.getUsername().equals(username) && user.authenticateUserPassword(password)) {
                 return true;

@@ -5,7 +5,6 @@ public class VaribleOddsPicker {
 	private int maxPickPossible;
 	
 	public VaribleOddsPicker() {
-
 	}
 	
 	public int newOdds(int sizeOfListOfPontenialPicks) {

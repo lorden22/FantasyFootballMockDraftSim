@@ -15,6 +15,7 @@ mysql -h localhost -P 3306 -u $USER --password="$PASSWORD" -e "CREATE DATABASE $
 mysql -h localhost -P 3306 -u $USER --password="$PASSWORD" $DATABASE < /mockDraft.sql
 mysql -h localhost -P 3306 -u $USER --password="$PASSWORD" -e "SET PASSWORD FOR '$USER'@'localhost' = PASSWORD('$PASSWORD')"
 
-#rap "mysqladmin -h localhost -P 3306 -u $USER --password=\"$PASSWORD\" shutdown" EXIT
+# Example: Update the database by running a specific SQL command
+mysql -h localhost -P 3306 -u $USER --password="$PASSWORD" -D $DATABASE -e "INSERT INTO users (username, salt, hash_pass) VALUES ('a', '7abf883fa820fa5097be8cd2f7013b51', 'ea93af66de80eb734a52a3c8671ed393631dca350cc67ccbdf6e1d3ac21e9bc3');"
 
 java -jar /app.jar

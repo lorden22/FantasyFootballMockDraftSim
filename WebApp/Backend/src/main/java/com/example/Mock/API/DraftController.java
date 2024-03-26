@@ -135,7 +135,7 @@ public class DraftController {
     @PostMapping(path="/simTo/")
     public List<PlayerModel> simtTo(
         @RequestParam("username") String username) {
-            return this.allDraftServices.get(username).simTo();
+            return this.allDraftServices.get(username).simTo(username, this.jdbcTemplate);
     }
 
     @GetMapping(path="/getCurrRound/")
