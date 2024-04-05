@@ -9,17 +9,17 @@ case "${UNAME_OUT}" in
     *)          machine="UNKNOWN:${UNAME_OUT}"
 esac
 
-echo "Running on ${machine}"
-
 if [ "$machine" = "Mac" ]; then
     echo "Running on Mac"
-    cd /Users/bryanlorden/Documents/self-workspace/personal/FantasyFootballMockDraftSim/
+    MAIN_DIR='/Users/bryanlorden/Documents/self-workspace/personal/FantasyFootballMockDraftSim/'
+    cd $MAIN_DIR/WebApp/Backend/
+
 elif [ "$machine" = "Linux" ]; then
     echo "Running on Linux"
-    cd ~/Coding/projects/FantasyFootballMockDraftSim/WebApp/
+    MAIN_DIR='~/Coding/projects/FantasyFootballMockDraftSim/WebApp/'
 elif [ "$machine" = "Cygwin" ] || [ "$machine" = "MinGw" ]; then
     echo "Running on Windows"
-    cd /c/Users/Bryan/Coding/projects/FantasyFootballMockDraftSim
+    MAIN_DIR='/c/Users/Bryan/Coding/projects/FantasyFootballMockDraftSim'
 else
     echo "Running on Unknown"
     echo "Please run this script on a Mac, Linux, or Windows machine"
@@ -28,12 +28,17 @@ else
 fi
 
 # Assuming you're now in the correct project directory, no need to change directories again
-# Let's remove the 'cd' command that was here, as it's not necessary with the above logic
+# Let's remove the 'cd' command that was here, as it's not necessary with the above logicpwd
+
+echo 'Compling new Jar...'
+cd $MAIN_DIR/WebApp/Backend/
+mvn package
 
 echo 'Building backend container...'
+cd $MAIN_DIR
 docker build -f WebApp/Backend/Dockerfile -t app-backend:latest .
 
 echo 'Starting backend server inside container...'
 docker run -p 80:8080 app-backend
-
+ 
 echo 'Backend server started on port 8080'
