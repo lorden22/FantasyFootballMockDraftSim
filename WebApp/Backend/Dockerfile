@@ -15,7 +15,5 @@ RUN chmod +x startup.sh
 EXPOSE 8080
 EXPOSE 3306
 
-
 ENTRYPOINT ["/bin/bash", "/startup.sh"]
-CMD ["sleep", "infinity"]
 

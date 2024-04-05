@@ -37,14 +37,18 @@ import com.example.Mock.StartingClasses.TeamModel;
 @RestController
 public class DraftController {
 
-    private HashMap<String,DraftServices> allDraftServices;
+    private DraftServices draftServices;
     private JdbcTemplate jdbcTemplate;
     
     public DraftController(JdbcTemplate jdbcTemplate) {
-        this.allDraftServices = new HashMap<String,DraftServices>();
+
+        this.draftServices = new DraftServices();
         this.jdbcTemplate = jdbcTemplate;
         System.out.println("Database Connection: " + this.jdbcTemplate.getDataSource().toString());
         System.out.println(this.jdbcTemplate.queryForList("SELECT * FROM players"));
+
+        this.draftServices = new DraftServices(); 
+
         if(createPlayerDatabase()) {
             System.out.println("Player Database Created");
         }
@@ -102,22 +106,20 @@ public class DraftController {
     
     @PostMapping(path="/initaizeUserAccountSetup")
     public boolean initaizeUserAccountSetup(
-        @RequestParam("username") String username,
-        @Autowired DraftServices draftServices) {
-            this.allDraftServices.put(username, draftServices);
+        @RequestParam("username") String username) {
             return true;
         }
 
     @GetMapping(path="/getPlayersLeft/") 
     public List<PlayerModel> getPlayersLeft(
-        @RequestParam("username") String username) {
-        return this.allDraftServices.get(username).getPlayersLeft();
+        @RequestParam("username") String username){
+        return this.draftServices.getPlayersLeft(this.jdbcTemplate, username);
     }
 
     @GetMapping(path="/getAllPlayersDrafted/")
     public List<PlayerModel> getAllPlayersDrafted(
         @RequestParam("username") String username) {
-            return this.allDraftServices.get(username).getDraftedPlayers();
+            return this.draftServices.getDraftedPlayers(this.jdbcTemplate, username);
     }
 
     @PostMapping(path="/startDraft/")
@@ -125,63 +127,62 @@ public class DraftController {
         @RequestParam("username") String username,
         @RequestParam("teamName") String teamName, 
         @RequestParam("draftSize") int draftSize, 
-        @RequestParam("draftPosition") int draftPositios,
+        @RequestParam("draftPosition") int draftPosition,
         @Autowired DraftDataObject draftDataObject) {
-            System.out.println("username: " + username + " - has draftServices: " + this.allDraftServices.containsKey(username) + " - " + this.allDraftServices);
-            return this.allDraftServices.get(username).startDraft(username, teamName, draftSize, draftPositios, draftDataObject, this.jdbcTemplate);
+            return this.draftServices.startDraft(this.jdbcTemplate, username, teamName, draftSize, draftPosition, draftDataObject);
 
     }
 
     @PostMapping(path="/simTo/")
     public List<PlayerModel> simtTo(
         @RequestParam("username") String username) {
-            return this.allDraftServices.get(username).simTo(username, this.jdbcTemplate);
+            return this.draftServices.simTo(this.jdbcTemplate, username);
     }
 
     @GetMapping(path="/getCurrRound/")
     public int getCurrRound(
         @RequestParam("username") String username) {
-            return this.allDraftServices.get(username).getCurrRound(this.jdbcTemplate, username);
+            return this.draftServices.getCurrRound(this.jdbcTemplate, username);
     }
 
     @GetMapping(path="/getCurrPick/")
     public int getCurrPick(
         @RequestParam("username") String username) {
-            return this.allDraftServices.get(username).getCurrPick(this.jdbcTemplate, username);
+            return this.draftServices.getCurrPick(this.jdbcTemplate, username);
     }
 
     @GetMapping(path="/getNextUserPick/")
     public int getNextUserPick(
         @RequestParam("username") String username) {
-            return this.allDraftServices.get(username).getNextUserPick(this.jdbcTemplate, username);
+            return this.draftServices.getNextUserPick(this.jdbcTemplate, username);
     }
 
     @GetMapping(path="/getNextUserPickRound/")
     public int getNextUserPickRound(
         @RequestParam("username") String username) {
-            return this.allDraftServices.get(username).getNextUserPickRound(this.jdbcTemplate, username);
+            return this.draftServices.getNextUserPickRound(this.jdbcTemplate, username);
     }
 
     @PostMapping(path="/userDraftPlayer/")
     public List<PlayerModel> userDraftPick(
         @RequestParam("username") String username,
         @RequestParam("playerIndex") int playerIndex) {
-            return this.allDraftServices.get(username).userDraftPick(playerIndex);
+            return this.draftServices.userDraftPick(this.jdbcTemplate, username, playerIndex);
     }
 
     @PostMapping(path="/deleteThisDraft/")
     public boolean deleteThisDraft(
         @RequestParam("username") String username) {
-            return this.allDraftServices.get(username).deleteThisDraft();
+            return this.draftServices.deleteThisDraft(this.jdbcTemplate, username);
     }
 
     @GetMapping(path="/checkForCurrentDrafts/")
     public boolean checkForDraft(
         @RequestParam("username") String username) {
-            System.out.println("Checking for current drafts: " + username + " - " + this.allDraftServices.containsKey(username));
-            if (this.allDraftServices.containsKey(username)) {
-                System.out.println(" - " + this.allDraftServices.get(username).checkForDraft());
-                return this.allDraftServices.get(username).checkForDraft();
+            System.out.println("Checking for current drafts: " + username + " - " + this.draftServices.checkForCurrentDraft(this.jdbcTemplate, username));
+            if (this.draftServices.checkForCurrentDraft(this.jdbcTemplate, username)) {
+                System.out.println(" - True");
+                return true;
             }
             return false;
     }
@@ -189,9 +190,9 @@ public class DraftController {
     @GetMapping(path="/checkForPastDrafts/")
     public boolean checkForPastDrafts(
         @RequestParam("username") String username) {
-            if (this.allDraftServices.containsKey(username)) {
-                System.out.println("Checking for past drafts: " + username + " - " + this.allDraftServices.get(username).checkForPastDrafts());
-                return this.allDraftServices.get(username).checkForPastDrafts();
+            if (this.draftServices.checkForPastDrafts(this.jdbcTemplate, username)) {
+                System.out.println("Checking for past drafts: " + username + " - True");
+                return true;
             }
             return false;
     }
@@ -199,21 +200,21 @@ public class DraftController {
     @GetMapping(path="/getDraftHistoryMetaData/")
     public ArrayList<HashMap<String,String>>  getDraftHistoryMetaData(
         @RequestParam("username") String username) {
-            return this.allDraftServices.get(username).getDraftHistoryMetaData();
+            return this.draftServices.getDraftHistoryMetaData(this.jdbcTemplate, username);
     }
 
     @GetMapping(path="/getDraftHistoryPlayerLog/")
     public List<PlayerModel> getDraftHistoryPlayerLog(
         @RequestParam("username") String username,
         @RequestParam("draftID") int draftID) {
-            return this.allDraftServices.get(username).getDraftHistoryDraftedPlayerLog(draftID);
+            return this.draftServices.getDraftHistoryDraftedPlayerLog(this.jdbcTemplate, username, draftID);
     }
 
     @GetMapping(path="/getDraftHistoryTeamList/")
     public List<TeamModel> getDraftHistoryTeamList(
         @RequestParam("username") String username,
         @RequestParam("draftID") int draftID) {
-            return this.allDraftServices.get(username).getDraftHistoryTeamList(draftID);
+            return this.draftServices.getDraftHistoryTeamList(this.jdbcTemplate, username, draftID);
     }
 
 
@@ -222,10 +223,8 @@ public class DraftController {
         @RequestParam("username") String username,
         @RequestParam("draftID") int draftID,
         @RequestParam("teamIndex") int teamIndex) {
-            List<TreeMap<String,ArrayList<PlayerModel>>> allTreeMaps = this.allDraftServices.get(username).getDraftHistoryAllTeamsMap(draftID);
+            List<TreeMap<String,ArrayList<PlayerModel>>> allTreeMaps = this.draftServices.getDraftHistoryAllTeamsMap(this.jdbcTemplate, username, draftID);
             return allTreeMaps.get(teamIndex);
     }
 
 }
-
-     

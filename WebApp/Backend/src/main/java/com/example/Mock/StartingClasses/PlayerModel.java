@@ -9,6 +9,7 @@ public class PlayerModel implements Comparable<PlayerModel>{
 	private double allowedReach;
 	private String spotDrafted;
 	private String teamDraftedBy;
+	private double rank;
 	
 	public PlayerModel(String firstName, String lastName, String position, double predictedScore, double avgADP, double positionAllowedReach) {
 		this.firstName = firstName;
@@ -27,6 +28,18 @@ public class PlayerModel implements Comparable<PlayerModel>{
 		this.position = position;
 		this.avgADP = avgADP;
 	}
+
+	public PlayerModel (String name, String position, Double playerRank, double predictedScore, double avgADP) {
+		this.fullName = name;
+		this.setFirstName(name.split(" ")[0]);
+		this.setLastName(name.split(" ")[1]);
+		this.position = position;
+		this.rank = playerRank;
+		this.predictedScore = predictedScore;
+		this.avgADP = avgADP;
+	}
+
+
 
 
 

@@ -41,6 +41,30 @@ public class DraftServices {
         this.allPastsDraftsDataObject = new TreeMap<Integer,DraftDataObject>();
     }
 
+    // checks from main page
+    public boolean checkForCurrentDraft(JdbcTemplate jdbcTemplate, String username) {
+        int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM drafts WHERE username='" + username + "' and complete_status=0",Integer.class);
+        return count >= 1;
+    }
+
+    public boolean checkForPastDrafts(JdbcTemplate jdbcTemplate, String username) {
+        int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM drafts WHERE username='" + username + "' and complete_status=0",Integer.class);
+        return count >= 1;
+    }
+
+    public boolean deleteThisDraft(JdbcTemplate jdbcTemplate, String username) {
+        int draftID = this.getUserMostRecentDraftID(jdbcTemplate, username);
+        jdbcTemplate.update("DELETE FROM drafts WHERE draft_id = " + draftID);
+        jdbcTemplate.update("DELETE FROM teams WHERE draft_id = " + draftID);
+        return this.checkForCurrentDraft(jdbcTemplate, username);
+    }
+
+    // check for draft over
+    public boolean isDraftOver(JdbcTemplate jdbcTemplate){
+        return this.draftDataObject.isDraftOver();
+    }
+
+    // meta data for draft
     public int getUserMostRecentDraftID(JdbcTemplate jdbcTemplate, String username) {
         return jdbcTemplate.queryForObject("SELECT MAX(draft_id) FROM drafts WHERE username = '" + username + "'", Integer.class);
     }
@@ -52,21 +76,6 @@ public class DraftServices {
 
     public int getDraftSize(JdbcTemplate jdbcTemplate, String username) {
         return jdbcTemplate.queryForObject("SELECT num_teams FROM drafts WHERE username = '" + username + "' AND draft_id = (SELECT MAX(draft_id) FROM drafts)", Integer.class);
-    }
-
-
-    public int getUserStartingDraftSpot(JdbcTemplate jdbcTemplate, String username) {
-        String teamName = this.getUserTeamName(jdbcTemplate, username);
-        int draftId = this.getUserMostRecentDraftID(jdbcTemplate, username);
-        return jdbcTemplate.queryForObject("SELECT draft_spot FROM teams WHERE team_name = '" + teamName + "' AND draft_id = " + draftId + " AND user_team = 1", Integer.class);
-    }
-
-    public List<PlayerModel> getPlayersLeft() {
-        return this.draftDataObject.getPlayersLeft();
-    }
-
-    public List<PlayerModel> getDraftedPlayers() {
-        return this.draftDataObject.getDraftedPlayers();
     }
 
     public int getCurrRound(JdbcTemplate jdbcTemplate, String username) {
@@ -81,26 +90,12 @@ public class DraftServices {
         return currPick;
     }
 
-    private List<Integer> getDraftedTeamStringArray(JdbcTemplate jdbcTemplate, int draftID, int draftSpot) {
-        String teamArray = jdbcTemplate.queryForObject("SELECT team_array FROM teams WHERE draft_id = " + draftID + " AND draft_spot = " + draftSpot, String.class);
-        String[] teamArraySplit = teamArray.split(",");
-        List<Integer> teamArrayInt = new ArrayList<Integer>();
-        for(String player : teamArraySplit) {
-            teamArrayInt.add(Integer.parseInt(player));
-        }
-        return teamArrayInt;
+    public int getUserStartingDraftSpot(JdbcTemplate jdbcTemplate, String username) {
+        String teamName = this.getUserTeamName(jdbcTemplate, username);
+        int draftId = this.getUserMostRecentDraftID(jdbcTemplate, username);
+        return jdbcTemplate.queryForObject("SELECT draft_spot FROM teams WHERE team_name = '" + teamName + "' AND draft_id = " + draftId + " AND user_team = 1", Integer.class);
     }
 
-    private List<Integer> getAllDraftedPlayers(JdbcTemplate jdbcTemplate, String username) {
-    int draftSize = this.getDraftSize(jdbcTemplate, username);
-    List<Integer> allDraftedPlayers = new ArrayList<Integer>();
-    for (int i = 1; i <= draftSize; i++) {
-        List<Integer> teamArray = this.getDraftedTeamStringArray(jdbcTemplate, this.getUserMostRecentDraftID(jdbcTemplate, username), i);
-        allDraftedPlayers.addAll(teamArray);
-    }
-    return allDraftedPlayers;
-    }
-    
     public int getNextUserPick(JdbcTemplate jdbcTemplate, String username){
         int draftSize = this.getDraftSize(jdbcTemplate, username);
         int userPickInOddRound = this.getUserStartingDraftSpot(jdbcTemplate, username);
@@ -134,93 +129,43 @@ public class DraftServices {
         }
     }
 
-    public List<PlayerModel> startDraft(String username, String teamName, int draftSize, int desiredDraftPosition, DraftDataObject draftDataObject, JdbcTemplate jdbcTemplate) {
-        this.draftDataObject = new DraftDataObject();
-        jdbcTemplate.update("INSERT INTO drafts (username, num_teams, curr_round, curr_pick) VALUES (?,?,?,?)", username, draftSize, 1, 1);
-        int currDraftID = jdbcTemplate.queryForObject("SELECT MAX(draft_id) FROM drafts", Integer.class);
-        jdbcTemplate.update("INSERT INTO teams (team_name, draft_spot, draft_id, user_team) VALUES (?,?,?,?)", teamName, desiredDraftPosition, currDraftID, 1);
-        this.createCPUTeamsForThisDraft(draftSize, desiredDraftPosition, currDraftID, username, teamName, jdbcTemplate);
-        System.out.println(this.createPlayerModelFromDB(jdbcTemplate.queryForList("SELECT * FROM players")));
-        this.draftDataObject.startDraft(teamName, draftSize, desiredDraftPosition,this.nextDraftID);
-        return this.createPlayerModelFromDB(jdbcTemplate.queryForList("SELECT * FROM players"));
+    public List<PlayerModel> getPlayersLeft(JdbcTemplate jdbcTemplate, String username) {
+         return null;
     }
 
-    public List<PlayerModel> simTo(String username, JdbcTemplate jdbcTemplate) {
-        List<PlayerModel> players = this.draftDataObject.simComputerPicks();
-        if(this.draftDataObject.isDraftOver()) {
-            saveDraftHistory();
+    public List<PlayerModel> getDraftedPlayers(JdbcTemplate jdbcTemplate, String username) {
+        return null;
+    }
+    
+    // controls for draft itself
+    public List<PlayerModel> startDraft(JdbcTemplate jdbcTemplate, String username, String teamName, int draftSize, int desiredDraftPosition, DraftDataObject draftDataObject) {
+        jdbcTemplate.update("INSERT INTO drafts (username, num_teams, curr_round, curr_pick) VALUES (?,?,?,?)", username, draftSize, 1, 1);
+        int currDraftID = this.getUserMostRecentDraftID(jdbcTemplate, username);
+        jdbcTemplate.update("INSERT INTO teams (team_name, draft_spot, draft_id, user_team) VALUES (?,?,?,?)", teamName, desiredDraftPosition, currDraftID, 1);
+        this.createCPUTeamsForThisDraft(jdbcTemplate, draftSize, desiredDraftPosition, currDraftID);
+        System.out.println("Creating Draft players from DB");
+        //System.out.println(this.createPlayerModelFromDB(jdbcTemplate, jdbcTemplate.queryForList("SELECT * FROM players")));
+        //return this.createPlayerModelFromDB(jdbcTemplate, jdbcTemplate.queryForList("SELECT * FROM players"));
+        return null;
+    }
+
+    public void createCPUTeamsForThisDraft(JdbcTemplate jdbcTemplate, int draftSize, int desiredDraftPosition, int currDraftID) {
+        for(int i = 1; i <= draftSize; i++) {
+            if(i != desiredDraftPosition) {
+                jdbcTemplate.update("INSERT INTO teams (team_name, draft_spot, draft_id, user_team) VALUES (?,?,?,?)", "CPU Team " + i, i, currDraftID, 0);
+            }
         }
-        return players; 
+    }
+
+    public List<PlayerModel> userDraftPick(JdbcTemplate jdbcTemplate, String username, int pick){
+        List<PlayerModel> players = this.draftDataObject.userDraftPick(pick);
+        if(this.draftDataObject.isDraftOver()) {
+            //saveDraftHistory();
+        }
+        return players;
     }
 
     /*
-    public ArrayList<Strings> simTo(String username, JdbcTemplate jdbcTemplate){
-        ArrayList<Strings> computerDraftLog = new ArrayList<Strings>();
-        int currRound = this.getCurrRound();
-        int currRoundPick = this.getCurrPick();
-        int nextUserPick = this.getNextUserPick();
-        int nextUserPickRound = this.getNextUserPickRound();
-        int draftID = this.getUserMostRecentDraftID(jdbcTemplate, username);
-        while (!(currRoundPick == nextUserPick && currRound == nextUserPickRound) && currRound <= 15) {
-            // TeamModel currTeam = this.teams.get(this.currRoundPick-1);
-            // PlayerModel playerPicked = this.nextDraftPick(currTeam,this.currRoundPick);
-            int nextPlayer = this.nextDraftPick(currPick,currRoundPick,draftID,-1,jdbcTemplate);
-            if(this.currRoundPick + "".length() == 1 && this.teams.size() > 9) {
-                playerPicked.setSpotDrafted(this.currRound+".0"+this.currRoundPick);
-            }
-            else playerPicked.setSpotDrafted(this.currRound+"."+this.currRoundPick);
-            playerPicked.setTeamDraftedBy(currTeam.getTeamName());
-            currTeam.addPlayer(playerPicked.getPosition(),playerPicked);
-            computerDraftLog.add(playerPicked);				
-            this.checkForChangesInDraftEnv();
-        }
-        if (checkForEndOfDraft()) {
-            computerDraftLog.add(new PlayerModel(null, null, null,0,0,0));
-            this.isDraftOver = true;
-        }
-        this.draftLog.addAll(computerDraftLog);
-        return computerDraftLog;
-    }
-
-    private ArrayList<Integer> getPlayersNotDrafted (int draftID, jdbcTemplate jdbcTemplate) {
-        ArrayList<Integer> playersNotDrafted = new ArrayList<Integer>();
-        int draftSize = jdbcTemplate.queryForObject("Select count(players) FROM players", Integer.class);
-        for(int i = 1; i <= draftSize; i++) {
-            playersNotDrafted.add(i);
-        }
-        List<Map<String,Object>> playersDrafted = jdbcTemplate.queryForList("SELECT player_id FROM drafted_players WHERE draft_id = ?", draftID);
-        for(Map<String,Object> player : playersDrafted) {
-            playersNotDrafted.remove((Integer)player.get("player_id"));
-        }
-        System.out.println("Players Not Drafted: " + playersNotDrafted);
-        return playersNotDrafted;
-    }
-
-
-    private int nextDraftPick(int currPick, int currRoundPick, int draftID, int nextPick, jdbcTemplate jdbcTemplate) {
-		int nextPlayer;
-		if(nextPick != -1) {
-            jdbcTemplate.update("UPDATE teams SET team_array = CONCAT(COALESCE((SELECT team_array FROM teams WHERE draft_spot = ?), ''), ' ?,') where
-                draft_spot = ?", currPick, nextPick, nextPick);
-			//nextPlayer = this.playersLeft.get(nextPick-1);
-            //int currPick = this.getCurrPick();
-            //int draftID = this.getUserMostRecentDraftID(jdbcTemplate, username);
-		}
-		else {
-            boolean forcePickNeeded = this.checkForForcePick(currPick, currRoundPick, jdbcTemplate);
-			nextPlayer = this.randomNumGen.newOdds(this.returnPlayersNotDrafted(draftID, jdbcTemplate));
-			## HERE if (this.makeComputerDraftCertainPoss(currTeam, nextPick) != null) {
-				nextPlayer = makeComputerDraftCertainPoss(currTeam, nextPick);
-			}
-			else {
-				nextPlayer = this.playersLeft.get(nextPick-1);
-			}
-		}
-		this.playersLeft.remove(nextPlayer);
-		this.playersLeft.sort(null);
-		return nextPlayer;
-	}
-
     private int checkForForcePickNeeded(int currPick, int currRoundPick, int draftID, jdbcTemplate jdbcTemplate) {
         String teamArray = this.getDraftedTeamStringArray(jdbcTemplate, draftID, currPick);
         if(currRoundPick == 8) {
@@ -246,35 +191,75 @@ public class DraftServices {
 		return -1;
 
     }
-
     */
 
-    public List<PlayerModel> userDraftPick(int pick){
-        List<PlayerModel> players = this.draftDataObject.userDraftPick(pick);
+    public boolean makePick(JdbcTemplate jdbcTemplate, int draftID, int pick, int playerRankToPick) {
+        String teamArray = jdbcTemplate.queryForObject("SELECT COALESCE(team_array, '') AS team_array FROM teams WHERE draft_spot= " + draftSpot + "and draft_id="+draftID , String.class);
+        teamArray += playerRankToPick + ",";
+        jdbcTemplate.update("UPDATE teams SET team_array = ? WHERE draft_spot = ? and draft_id = ?", teamArray, pick, draftID);
+        return true;
+    }
+    
+
+    public List<PlayerModel> simTo(JdbcTemplate jdbcTemplate, String username) {
+        List<PlayerModel> players = this.draftDataObject.simComputerPicks();
         if(this.draftDataObject.isDraftOver()) {
-            saveDraftHistory();
+            //saveDraftHistory();
         }
-        return players;
+        return players; 
     }
 
-    public boolean isDraftOver(){
-        return this.draftDataObject.isDraftOver();
+    // Parsing Team Data from DB to create TeamTreeMap
+    private List<Integer> createTeamIntArrayFromDB(JdbcTemplate jdbcTemplate, int draftID, int draftSpot) {
+        List<Integer> teamArrayInt = new ArrayList<Integer>();
+        String teamArray = jdbcTemplate.queryForObject("SELECT COALESCE(team_array, '') AS team_array FROM teams WHERE draft_spot= " + draftSpot + "and draft_id="+draftID , String.class);
+        if (teamArray.length() > 0) {
+            String[] teamArraySplit = teamArray.split(",");
+            for(String player : teamArraySplit) {
+                teamArrayInt.add(Integer.parseInt(player));
+            }
+        }
+        return teamArrayInt;
     }
 
-    public boolean checkForPastDrafts() {
-        return !(this.allPastsDraftsDataObject.isEmpty());
+    private List<PlayerModel> createPlayerModelListFromIntList(JdbcTemplate jdbcTemplate, List<Integer> teamArrayInt, int draftSize) {
+        List<PlayerModel> playerModelList = new ArrayList<PlayerModel>();
+        for(int playerInt : teamArrayInt) {
+            playerModelList.add(this.createPlayerModel(jdbcTemplate, playerInt, draftSize));
+        }
+        return playerModelList;
     }
 
-    public boolean deleteThisDraft() {
-        this.draftDataObject = null;
-        return checkForDraft();    
+    private PlayerModel createPlayerModel(JdbcTemplate jdbcTemplate, int pRank, int draftSize) {
+        Map<String,Object> playerMap = jdbcTemplate.queryForList("SELECT * FROM players WHERE player_id = " + pRank).get(0);
+        
+        String name = (String)playerMap.get("namme");
+        String position = (String)playerMap.get("position");
+        int playerRank = (int)playerMap.get("player_rank");
+        Double predictedScore = (Double)playerMap.get("predicted_score");
+        String avgADP;
+
+        if(playerRank <= draftSize) {
+            avgADP = "1."+playerRank;         
+        }
+        else {
+            int pick = playerRank % draftSize;
+            int round = playerRank / draftSize;
+            avgADP = round + "." + pick;
+        }
+        return new PlayerModel(name, position, (double)playerRank, (double)predictedScore, Double.parseDouble(avgADP));
     }
 
-    public boolean checkForDraft() {
-        return  this.draftDataObject != null;
+    private TreeMap<String,PlayerModel> createTeamTreeFromDB(JdbcTemplate jdbcTemplate, List<PlayerModel> teamPlayerList) {
+        TreeMap<String,PlayerModel> teamTree = new TreeMap<String,PlayerModel>();
+        for(PlayerModel player : teamPlayerList) {
+            teamTree.put(player.getPosition(), player);
+        }
+        return teamTree;
     }
 
-    public HashMap<String,String> returnDraftMetaData(int nextDraftID) {
+    // draft history stuff - needed to be fixed
+    public HashMap<String,String> returnDraftMetaData(JdbcTemplate jdbcTemplate, String username, int nextDraftID) {
          return this.allPastsDraftsDataObject.get(nextDraftID-1).getDraftMetaData();
     }
 
@@ -282,7 +267,7 @@ public class DraftServices {
         return this.allPastsDraftsDataObject.get(nextDraftID-1).getDraftedPlayers();
     }
 
-    public ArrayList<HashMap<String,String>> getDraftHistoryMetaData() {
+    public ArrayList<HashMap<String,String>> getDraftHistoryMetaData(JdbcTemplate jdbcTemplate, String username) {
         System.out.println(this.allPastsDraftsDataObject.size());
         ArrayList<HashMap<String,String>> allMetaData = new ArrayList<HashMap<String,String>>();
         for(int currDraftIndex : this.allPastsDraftsDataObject.keySet()) {
@@ -293,47 +278,15 @@ public class DraftServices {
         return allMetaData;
     }
 
-    public List<PlayerModel> getDraftHistoryDraftedPlayerLog(int draftID) {
+    public List<PlayerModel> getDraftHistoryDraftedPlayerLog(JdbcTemplate jdbcTemplate, String username, int draftID) {
         return this.allPastsDraftsDataObject.get(draftID-1).getDraftedPlayers();
     }
 
-    public List<TreeMap<String,ArrayList<PlayerModel>>> getDraftHistoryAllTeamsMap(int draftID) {
+    public List<TreeMap<String,ArrayList<PlayerModel>>> getDraftHistoryAllTeamsMap(JdbcTemplate jdbcTemplate, String username, int draftID) {
         return this.allPastsDraftsDataObject.get(draftID-1).getDraftHistoryAllTeamsMap();
     }
 
-    public List<TeamModel> getDraftHistoryTeamList(int draftID) {
+    public List<TeamModel> getDraftHistoryTeamList(JdbcTemplate jdbcTemplate, String username, int draftID) {
         return this.allPastsDraftsDataObject.get(draftID-1).getTeams();
-    }
-
-    private void saveDraftHistory() {
-        this.allPastsDraftsDataObject.put(this.nextDraftID-1, this.draftDataObject);
-        this.nextDraftID++;
-        System.out.println("Draft History Saved - Draft ID: " + (this.nextDraftID));
-    }
-
-    private void createCPUTeamsForThisDraft(int draftSize, int desiredDraftPosition, int currDraftID, String username, String teamName, JdbcTemplate jdbcTemplate) {
-        for(int i = 1; i <= draftSize; i++) {
-            if(i != desiredDraftPosition) {
-                jdbcTemplate.update("INSERT INTO teams (team_name, draft_spot, draft_id, user_team) VALUES (?,?,?,?)", "CPU Team " + i, i, currDraftID, 0);
-            }
-        }
-    }
-
-    private List<PlayerModel> createPlayerModelFromDB(List<Map<String,Object>> playersFromDB) {
-        List<PlayerModel> players = new ArrayList<PlayerModel>();
-        for(Map<String,Object> player : playersFromDB) {
-            String fullName = (String)player.get("name");
-            String[] name = fullName.split(" ");
-            String firstName = name[0];
-            String lastName = String.join(" ", Arrays.copyOfRange(name, 1, name.length));
-            players.add(new PlayerModel(
-                    firstName,
-                    lastName,
-                    (String) player.get("position"),
-                    ((BigDecimal) player.get("predicted_score")).doubleValue(),
-                    (Integer) player.get("player_rank")
-                ));
-        }
-        return players;
     }
 }

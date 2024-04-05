@@ -1,5 +1,10 @@
 #!/bin/bash
 
+#editing /etc/passwd file for everyuser to start with bash
+sed -i 's|/bin/sh|/bin/bash|g' /etc/passwd
+
+#rest up setup below
+
 USER="root"
 PASSWORD="password"
 DATABASE="db"
