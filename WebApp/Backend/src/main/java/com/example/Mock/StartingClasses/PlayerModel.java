@@ -38,6 +38,7 @@ public class PlayerModel implements Comparable<PlayerModel>{
 		this.predictedScore = predictedScore;
 		this.avgADP = avgADP;
 	}
+	 
 
 
 
@@ -77,6 +78,14 @@ public class PlayerModel implements Comparable<PlayerModel>{
 	}
 	private void setPredictedScore(double predictedScoreChange) {
 		 this.predictedScore = predictedScoreChange;
+	}
+
+	public double getRank() {
+		return this.rank;
+	}
+
+	public void setRank(double rankChange) {
+		this.rank = rankChange;
 	}
 	
 	public double getAvgADP() {

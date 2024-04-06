@@ -1,5 +1,6 @@
 package com.example.Mock.Service;
 
+import java.lang.reflect.Array;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,8 +23,12 @@ import org.springframework.stereotype.Service;
 
 import com.example.Mock.DAO.DraftDataObject;
 import com.example.Mock.DAO.DraftedTeamsDataObject;
+import com.example.Mock.StartingClasses.DefensePlayerModel;
+import com.example.Mock.StartingClasses.KickerPlayerModel;
 import com.example.Mock.StartingClasses.PlayerModel;
+import com.example.Mock.StartingClasses.QuarterBackPlayerModel;
 import com.example.Mock.StartingClasses.TeamModel;
+import com.example.Mock.StartingClasses.TightEndPlayerModel;
 import com.example.Mock.StartingClasses.VaribleOddsPicker;
 
 
@@ -57,11 +62,6 @@ public class DraftServices {
         jdbcTemplate.update("DELETE FROM drafts WHERE draft_id = " + draftID);
         jdbcTemplate.update("DELETE FROM teams WHERE draft_id = " + draftID);
         return this.checkForCurrentDraft(jdbcTemplate, username);
-    }
-
-    // check for draft over
-    public boolean isDraftOver(JdbcTemplate jdbcTemplate){
-        return this.draftDataObject.isDraftOver();
     }
 
     // meta data for draft
@@ -110,7 +110,6 @@ public class DraftServices {
             System.out.println("Next User Pick - " + userPickInOddRound);
             return userPickInOddRound;
         }
-        //return this.draftDataObject.getNextUserPick();
     }
 
     public int getNextUserPickRound(JdbcTemplate jdbcTemplate, String username) {
@@ -129,12 +128,52 @@ public class DraftServices {
         }
     }
 
-    public List<PlayerModel> getPlayersLeft(JdbcTemplate jdbcTemplate, String username) {
-         return null;
+    public List<PlayerModel> getAllPlayers(JdbcTemplate jdbcTemplate, String username) {
+        int draftSize = this.getDraftSize(jdbcTemplate, username);
+        int count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM players", Integer.class);
+        List<Integer> allIntList = new ArrayList<Integer>();
+        for(int i = 1; i <= count; i++) {
+            allIntList.add(i);
+        }
+        List<PlayerModel> allPlayers = this.createPlayerModelListFromIntList(jdbcTemplate, allIntList, draftSize);
+        return allPlayers;
     }
 
+    public List<PlayerModel> getPlayersLeft(JdbcTemplate jdbcTemplate, String username) {
+        ArrayList<PlayerModel> allPlayers = new ArrayList<PlayerModel>(this.getAllPlayers(jdbcTemplate, username));
+        int draftID = this.getUserMostRecentDraftID(jdbcTemplate, username);
+        int draftSize = this.getDraftSize(jdbcTemplate, username);
+        for(int i = 1; i <= draftSize; i++) {
+            List<Integer> teamArrayInt = this.createTeamIntArrayFromDB(jdbcTemplate, draftID, i);
+            List<PlayerModel> teamPlayerList = this.createPlayerModelListFromIntList(jdbcTemplate, teamArrayInt, draftSize);
+            allPlayers.removeAll(teamPlayerList);
+        }
+        return allPlayers;
+    }
+
+
     public List<PlayerModel> getDraftedPlayers(JdbcTemplate jdbcTemplate, String username) {
-        return null;
+        ArrayList<PlayerModel> allPlayers = new ArrayList<PlayerModel>();
+        int draftID = this.getUserMostRecentDraftID(jdbcTemplate, username);
+        int draftSize = this.getDraftSize(jdbcTemplate, username);
+        for(int i = 1; i <= draftSize; i++) {
+            List<Integer> teamArrayInt = this.createTeamIntArrayFromDB(jdbcTemplate, draftID, i);
+            List<PlayerModel> teamPlayerList = this.createPlayerModelListFromIntList(jdbcTemplate, teamArrayInt, draftSize);
+            allPlayers.addAll(teamPlayerList);
+        }
+        return allPlayers;
+    }
+
+    public boolean isDraftOver (JdbcTemplate jdbcTemplate, String username) {
+        int draftID = this.getUserMostRecentDraftID(jdbcTemplate, username);
+        int draftSize = this.getDraftSize(jdbcTemplate, username);
+        int currRound = this.getCurrRound(jdbcTemplate, username);
+        int currPick = this.getCurrPick(jdbcTemplate, username);
+        if(currRound == 15 && currPick == draftSize) {
+            jdbcTemplate.update("UPDATE drafts SET complete_status = 1 WHERE username = '" + username + "' AND draft_id = " + draftID);
+            return true;
+        }
+        return false;
     }
     
     // controls for draft itself
@@ -144,9 +183,9 @@ public class DraftServices {
         jdbcTemplate.update("INSERT INTO teams (team_name, draft_spot, draft_id, user_team) VALUES (?,?,?,?)", teamName, desiredDraftPosition, currDraftID, 1);
         this.createCPUTeamsForThisDraft(jdbcTemplate, draftSize, desiredDraftPosition, currDraftID);
         System.out.println("Creating Draft players from DB");
-        //System.out.println(this.createPlayerModelFromDB(jdbcTemplate, jdbcTemplate.queryForList("SELECT * FROM players")));
-        //return this.createPlayerModelFromDB(jdbcTemplate, jdbcTemplate.queryForList("SELECT * FROM players"));
-        return null;
+        ArrayList<PlayerModel> allPlayers = new ArrayList<PlayerModel>(this.getAllPlayers(jdbcTemplate, username));
+        System.out.println(allPlayers);
+        return allPlayers;
     }
 
     public void createCPUTeamsForThisDraft(JdbcTemplate jdbcTemplate, int draftSize, int desiredDraftPosition, int currDraftID) {
@@ -157,62 +196,118 @@ public class DraftServices {
         }
     }
 
-    public List<PlayerModel> userDraftPick(JdbcTemplate jdbcTemplate, String username, int pick){
-        List<PlayerModel> players = this.draftDataObject.userDraftPick(pick);
-        if(this.draftDataObject.isDraftOver()) {
-            //saveDraftHistory();
+    private boolean moveToNextPick(JdbcTemplate jdbcTemplate, String username){
+        int currPick = this.getCurrPick(jdbcTemplate, username);
+        int currRound = this.getCurrRound(jdbcTemplate, username);
+        int draftSize = this.getDraftSize(jdbcTemplate, username);
+        int draftID = this.getUserMostRecentDraftID(jdbcTemplate, username);
+        if(currPick == draftSize) {
+            jdbcTemplate.update("UPDATE drafts SET curr_round = curr_round + 1, curr_pick = 1 WHERE username='" + username + "' AND draft_id=" + draftID);
+            return true;
         }
-        return players;
+        else {
+            jdbcTemplate.update("UPDATE drafts SET curr_pick = curr_pick + 1 WHERE username='" + username + "' AND draft_id=" + draftID);
+            return true;
+        }
+
+        void changeToUserNextPickDataNeeded(JdbcTemplate jdbcTemplate, String username) {
+            int draftID = this.getUserMostRecentDraftID(jdbcTemplate, username);
+            int currRound = this.getCurrRound(jdbcTemplate, username);
+            int currPick = this.getCurrPick(jdbcTemplate, username);
+            int nextUserPick = this.getNextUserPick(jdbcTemplate, username);
+            int nextUserPickRound = this.getNextUserPickRound(jdbcTemplate, username);
+            int draftSize = this.getDraftSize(jdbcTemplate, username);
+            if(currRound == nextUserPickRound && currPick == nextUserPick) {
+                jdbcTemplate.update("UPDATE teams SET  = ?, curr_pick = ? WHERE username = ? AND draft_id = ?", nextUserPickRound+1, Math.abs(currPick+) username, draftID);
+        }
     }
 
-    /*
-    private int checkForForcePickNeeded(int currPick, int currRoundPick, int draftID, jdbcTemplate jdbcTemplate) {
-        String teamArray = this.getDraftedTeamStringArray(jdbcTemplate, draftID, currPick);
+    public List<PlayerModel> userDraftPick(JdbcTemplate jdbcTemplate, String username, int pick){
+        List<PlayerModel> playersLeft = this.getPlayersLeft(jdbcTemplate, username);
+        PlayerModel playerToDraft = playersLeft.get(pick-1);
+        int draftID = this.getUserMostRecentDraftID(jdbcTemplate, username);
+        int currPick = this.getCurrPick(jdbcTemplate, username);
+        int playerRank = (int)playerToDraft.getRank();
+        this.makePick(jdbcTemplate, draftID, currPick, playerRank);
+        this.moveToNextPick(jdbcTemplate, username);
+        return new ArrayList<PlayerModel>(Arrays.asList(playerToDraft));
+    }
+
+
+    private int checkForForcePickNeeded(JdbcTemplate jdbcTemplate, int currRoundPick, int currPick, int draftID, String username) {
+        int draftSize = this.getDraftSize(jdbcTemplate, username);
+        List<Integer> currTeamIntArray = this.createTeamIntArrayFromDB(jdbcTemplate, draftID, currPick);
+        List<PlayerModel> currTeamPlayerList = this.createPlayerModelListFromIntList(jdbcTemplate, currTeamIntArray, draftSize);
+        TreeMap<String,List<PlayerModel>> currTeamTreeMap = this.createTeamTreeFromDB(jdbcTemplate, currTeamPlayerList);
+        List<PlayerModel> playersLeft = this.getPlayersLeft(jdbcTemplate, username);
         if(currRoundPick == 8) {
-			if (currTeam.getTeamTreeMap().get(QuarterBackPlayerModel.POSITIONSHORTHANDLE).isEmpty()) {
-				return getNextFocredPosstion(currTeam, QuarterBackPlayerModel.POSITIONSHORTHANDLE,nextPick);
+			if (currTeamTreeMap.get(QuarterBackPlayerModel.POSITIONSHORTHANDLE).isEmpty()) {
+				return getNextForcedPosition(playersLeft, QuarterBackPlayerModel.POSITIONSHORTHANDLE);
 			}
 		}
 		else if (currRoundPick == 10) {
-			if (currTeam.getTeamTreeMap().get(TightEndPlayerModel.POSITIONSHORTHANDLE).isEmpty()) {
-				return getNextFocredPosstion(currTeam, TightEndPlayerModel.POSITIONSHORTHANDLE,nextPick);
+			if (currTeamTreeMap.get(TightEndPlayerModel.POSITIONSHORTHANDLE).isEmpty()) {
+				return getNextForcedPosition(playersLeft,TightEndPlayerModel.POSITIONSHORTHANDLE);
 			}
 		}
 		else if (currRoundPick == 12) {
-			if (currTeam.getTeamTreeMap().get(KickerPlayerModel.POSITIONSHORTHANDLE).isEmpty()) {
-				return getNextFocredPosstion(currTeam, KickerPlayerModel.POSITIONSHORTHANDLE,nextPick);
+			if (currTeamTreeMap.get(KickerPlayerModel.POSITIONSHORTHANDLE).isEmpty()) {
+				return getNextForcedPosition(playersLeft,KickerPlayerModel.POSITIONSHORTHANDLE);
 			}
 		}
 		else if (currRoundPick == 13) {
-			if (currTeam.getTeamTreeMap().get(DefensePlayerModel.POSITIONSHORTHANDLE).isEmpty()) {
-				return getNextFocredPosstion(currTeam, DefensePlayerModel.POSITIONSHORTHANDLE,nextPick);
+			if (currTeamTreeMap.get(DefensePlayerModel.POSITIONSHORTHANDLE).isEmpty()) {
+				return getNextForcedPosition(playersLeft,DefensePlayerModel.POSITIONSHORTHANDLE);
 			}
 		}	
 		return -1;
-
-    }
-    */
-
-    public boolean makePick(JdbcTemplate jdbcTemplate, int draftID, int pick, int playerRankToPick) {
-        String teamArray = jdbcTemplate.queryForObject("SELECT COALESCE(team_array, '') AS team_array FROM teams WHERE draft_spot= " + draftSpot + "and draft_id="+draftID , String.class);
-        teamArray += playerRankToPick + ",";
-        jdbcTemplate.update("UPDATE teams SET team_array = ? WHERE draft_spot = ? and draft_id = ?", teamArray, pick, draftID);
-        return true;
     }
     
 
-    public List<PlayerModel> simTo(JdbcTemplate jdbcTemplate, String username) {
-        List<PlayerModel> players = this.draftDataObject.simComputerPicks();
-        if(this.draftDataObject.isDraftOver()) {
-            //saveDraftHistory();
+    private int getNextForcedPosition(List<PlayerModel> playersLeft, String position) {
+        for(int i = 0; i < playersLeft.size(); i++) {
+            if(playersLeft.get(i).getPosition().equals(position)) {
+                PlayerModel playerToDraft = playersLeft.get(i);
+                return (int)playerToDraft.getRank();
+            }
         }
-        return players; 
+        return -1;
     }
 
+    public boolean makePick(JdbcTemplate jdbcTemplate, int draftID, int draftSpot, int playerRankToPick) {
+        String teamArray = jdbcTemplate.queryForObject("SELECT COALESCE(team_array, '') AS team_array FROM teams WHERE draft_spot=" + draftSpot + " AND draft_id="+draftID , String.class);
+        teamArray += playerRankToPick + ",";
+        jdbcTemplate.update("UPDATE teams SET team_array = ? WHERE draft_spot = ? and draft_id = ?", teamArray, draftSpot, draftID);
+        return true;
+    }
+    
+    public List<PlayerModel> simTo(JdbcTemplate jdbcTemplate, String username) {
+        List<PlayerModel> playersDraftDuringSim = new ArrayList<PlayerModel>();
+        int draftID = this.getUserMostRecentDraftID(jdbcTemplate, username);
+        int draftSize = this.getDraftSize(jdbcTemplate, username);
+        int nextUserPickRound = this.getNextUserPickRound(jdbcTemplate, username);
+        int nextUserPick = this.getNextUserPick(jdbcTemplate, username);
+        while (!this.isDraftOver(jdbcTemplate, username) &&
+                !(nextUserPickRound== this.getCurrPick(jdbcTemplate, username) 
+                 && nextUserPick == this.getCurrRound(jdbcTemplate, username))){
+            int currRound = this.getCurrRound(jdbcTemplate, username);
+            int currPick = this.getCurrPick(jdbcTemplate, username);
+            int pick = this.checkForForcePickNeeded(jdbcTemplate, currRound, currPick, draftID, username);
+            if(pick != -1) {
+                VaribleOddsPicker randomNumGen = new VaribleOddsPicker();
+                pick = randomNumGen.newOdds(6);
+            }    
+            makePick(jdbcTemplate, draftID, draftSize, pick);
+            moveToNextPick(jdbcTemplate, username);
+            playersDraftDuringSim.add(this.createPlayerModel(jdbcTemplate, pick, draftSize));
+        }
+        return playersDraftDuringSim;
+    } 
+
     // Parsing Team Data from DB to create TeamTreeMap
-    private List<Integer> createTeamIntArrayFromDB(JdbcTemplate jdbcTemplate, int draftID, int draftSpot) {
+    public List<Integer> createTeamIntArrayFromDB(JdbcTemplate jdbcTemplate, int draftID, int draftSpot) {
         List<Integer> teamArrayInt = new ArrayList<Integer>();
-        String teamArray = jdbcTemplate.queryForObject("SELECT COALESCE(team_array, '') AS team_array FROM teams WHERE draft_spot= " + draftSpot + "and draft_id="+draftID , String.class);
+        String teamArray = jdbcTemplate.queryForObject("SELECT COALESCE(team_array, '') AS team_array FROM teams WHERE draft_spot=" + draftSpot + " AND draft_id="+draftID, String.class);
         if (teamArray.length() > 0) {
             String[] teamArraySplit = teamArray.split(",");
             for(String player : teamArraySplit) {
@@ -231,12 +326,13 @@ public class DraftServices {
     }
 
     private PlayerModel createPlayerModel(JdbcTemplate jdbcTemplate, int pRank, int draftSize) {
-        Map<String,Object> playerMap = jdbcTemplate.queryForList("SELECT * FROM players WHERE player_id = " + pRank).get(0);
+        Map<String,Object> playerMap = jdbcTemplate.queryForList("SELECT * FROM players WHERE player_rank = " + pRank).get(0);
         
-        String name = (String)playerMap.get("namme");
+        String name = (String)playerMap.get("name");
         String position = (String)playerMap.get("position");
         int playerRank = (int)playerMap.get("player_rank");
-        Double predictedScore = (Double)playerMap.get("predicted_score");
+        Object objectPredictedscored = playerMap.get("predicted_score");
+        Double predictedScore = ((BigDecimal) objectPredictedscored).doubleValue();
         String avgADP;
 
         if(playerRank <= draftSize) {
@@ -250,10 +346,15 @@ public class DraftServices {
         return new PlayerModel(name, position, (double)playerRank, (double)predictedScore, Double.parseDouble(avgADP));
     }
 
-    private TreeMap<String,PlayerModel> createTeamTreeFromDB(JdbcTemplate jdbcTemplate, List<PlayerModel> teamPlayerList) {
-        TreeMap<String,PlayerModel> teamTree = new TreeMap<String,PlayerModel>();
+    private TreeMap<String,List<PlayerModel>> createTeamTreeFromDB(JdbcTemplate jdbcTemplate, List<PlayerModel> teamPlayerList) {
+        TreeMap<String,List<PlayerModel>> teamTree = new TreeMap<String,List<PlayerModel>>();
         for(PlayerModel player : teamPlayerList) {
-            teamTree.put(player.getPosition(), player);
+            if (teamTree.containsKey(player.getPosition())) {
+                teamTree.get(player.getPosition()).add(player);
+            }
+            else {
+                teamTree.put(player.getPosition(), new ArrayList<PlayerModel>(Arrays.asList(player)));
+            }
         }
         return teamTree;
     }
