@@ -2,8 +2,8 @@
 async function checkForUserDraftHistory() {
     if (await authenticateSession() == true) {
         loadUserName();
-        let res = await fetch("http://localhost:80/api/teams/checkForCurrentDrafts/?username=" + getCookie("username"), {
-            method: 'GET'
+        let res = await fetch("http://localhost:80/api/teams/checkForCurrentDraft/?username=" + getCookie("username"), {
+            method: 'POST'
         });
         let boolForCurrentDraft = await res.json();
         console.log("current draft - " + boolForCurrentDraft);
@@ -41,8 +41,8 @@ async function checkForUserDraftHistory() {
 }
 async function selectedStartNewDraft() {
     if (await authenticateSession() == true) {
-        let res = await fetch("http://localhost:80/api/teams/checkForCurrentDrafts/?username=" + getCookie("username"), {
-            method: 'GET',
+        let res = await fetch("http://localhost:80/api/teams/checkForCurrentDraft/?username=" + getCookie("username"), {
+            method: 'POST',
         });
         let boolForCurrentDraft = await res.json();
         console.log(boolForCurrentDraft);

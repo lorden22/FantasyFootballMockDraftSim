@@ -32,6 +32,7 @@ fi
 
 echo 'Compling new Jar...'
 cd $MAIN_DIR/WebApp/Backend/
+mvn clean
 mvn package
 
 echo 'Building backend container...'

@@ -176,7 +176,7 @@ public class DraftController {
             return this.draftServices.deleteThisDraft(this.jdbcTemplate, username);
     }
 
-    @GetMapping(path="/checkForCurrentDrafts/")
+    @PostMapping(path="/checkForCurrentDraft/")
     public boolean checkForDraft(
         @RequestParam("username") String username) {
             System.out.println("Checking for current drafts: " + username + " - " + this.draftServices.checkForCurrentDraft(this.jdbcTemplate, username));
@@ -185,6 +185,13 @@ public class DraftController {
                 return true;
             }
             return false;
+    }
+
+    @PostMapping(path="/userMarkCurrentDraftComplete/")
+    public boolean userMarkCurrentDraftComplete(
+        @RequestParam("username") String username) {
+            this.draftServices.userMarkCurrentDraftComplete(this.jdbcTemplate, username);
+            return this.draftServices.checkForCurrentDraft(this.jdbcTemplate, username);
     }
 
     @GetMapping(path="/checkForPastDrafts/")

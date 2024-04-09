@@ -1,4 +1,7 @@
 package com.example.Mock.StartingClasses;
+
+import java.util.Objects;
+
 public class PlayerModel implements Comparable<PlayerModel>{
 	private String firstName;
 	private String lastName;
@@ -115,6 +118,19 @@ public class PlayerModel implements Comparable<PlayerModel>{
 			return 1;
 		}
 		else return 0;
+	}
+
+		@Override
+	public boolean equals(Object obj) {
+		if (this == obj) return true;
+		if (obj == null || getClass() != obj.getClass()) return false;
+		PlayerModel that = (PlayerModel) obj;
+		return Objects.equals(rank, that.rank); // Assuming 'rank' is a unique identifier
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(rank);
 	}
 
 	public String getSpotDrafted() {
