@@ -38,12 +38,13 @@ public class DraftServices {
 
     private TreeMap<Integer,DraftDataObject> allPastsDraftsDataObject;
     private DraftDataObject draftDataObject;
-    private int nextDraftID = 1;
+    private int nextDraftID;
     private VaribleOddsPicker randomNumGen = new VaribleOddsPicker();
 
 
-    public DraftServices() {
+    public DraftServices(int currDraftID) {
         this.allPastsDraftsDataObject = new TreeMap<Integer,DraftDataObject>();
+        this.nextDraftID = currDraftID;
     }
 
     // checks from main page

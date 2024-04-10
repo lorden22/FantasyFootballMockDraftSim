@@ -42,13 +42,15 @@ public class DraftController {
     
     public DraftController(JdbcTemplate jdbcTemplate) {
 
-        this.draftServices = new DraftServices();
         this.jdbcTemplate = jdbcTemplate;
+        Integer count = this.jdbcTemplate.queryForObject("SELECT MAX(draft_id) FROM drafts", Integer.class);
+        if(count==null) {
+            count=1;
+        }
+        this.draftServices = new DraftServices(count);
+        
         System.out.println("Database Connection: " + this.jdbcTemplate.getDataSource().toString());
-        System.out.println(this.jdbcTemplate.queryForList("SELECT * FROM players"));
-
-        this.draftServices = new DraftServices(); 
-
+        System.out.println("Starting draft_id: " + count);
         if(createPlayerDatabase()) {
             System.out.println("Player Database Created");
         }
@@ -194,7 +196,7 @@ public class DraftController {
             return this.draftServices.checkForCurrentDraft(this.jdbcTemplate, username);
     }
 
-    @GetMapping(path="/checkForPastDrafts/")
+    @PostMapping(path="/checkForPastDraft/")
     public boolean checkForPastDrafts(
         @RequestParam("username") String username) {
             if (this.draftServices.checkForPastDrafts(this.jdbcTemplate, username)) {

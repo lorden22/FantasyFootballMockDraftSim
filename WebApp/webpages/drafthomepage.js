@@ -7,8 +7,8 @@ async function checkForUserDraftHistory() {
         });
         let boolForCurrentDraft = await res.json();
         console.log("current draft - " + boolForCurrentDraft);
-        let res2 = await fetch("http://localhost:80/api/teams/checkForPastDrafts/?username=" + getCookie("username"), {
-            method: 'GET'
+        let res2 = await fetch("http://localhost:80/api/teams/checkForPastDraft/?username=" + getCookie("username"), {
+            method: 'POST'
         });
         let boolPastDrafts = await res2.json();
         console.log("past drafts - " + boolPastDrafts);

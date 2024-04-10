@@ -449,7 +449,7 @@ async function endDraft() {
     
 async function endOfCurrentDraft() {
     if(await authenticateSession() == true) {
-        let res = await fetch("http://localhost:80/api/teams/deleteThisDraft/?username="+getCookie("username"),{
+        let res = await fetch("http://localhost:80/api/teams/userMarkCurrentDraftComplete/?username="+getCookie("username"),{
             method: 'POST',})
         let boolForCurrentDraft = await res.json();
         console.log(boolForCurrentDraft);    

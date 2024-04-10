@@ -2,13 +2,13 @@ async function checkForUserDraftHistory(): Promise<void> {
     if(await authenticateSession() == true) {
         loadUserName();
 
-        let res = await fetch("http://localhost:80/api/teams/checkForCurrentDrafts/?username="+getCookie("username"),{
-            method: 'GET'})
+        let res = await fetch("http://localhost:80/api/teams/checkForCurrentDraft/?username="+getCookie("username"),{
+            method: 'POST'})
         let boolForCurrentDraft: Boolean = await res.json()
         console.log("current draft - " + boolForCurrentDraft)
 
-        let res2 = await fetch("http://localhost:80/api/teams/checkForPastDrafts/?username="+getCookie("username"),{
-            method: 'GET'})
+        let res2 = await fetch("http://localhost:80/api/teams/checkForPastDraft/?username="+getCookie("username"),{
+            method: 'POST'})
         
         let boolPastDrafts: Boolean = await res2.json();
         console.log("past drafts - " + boolPastDrafts)
@@ -46,8 +46,8 @@ async function checkForUserDraftHistory(): Promise<void> {
 
 async function selectedStartNewDraft(): Promise<void> {
     if(await authenticateSession() == true) {
-        let res = await fetch("http://localhost:80/api/teams/checkForCurrentDrafts/?username="+getCookie("username"),{
-            method: 'GET',})
+        let res = await fetch("http://localhost:80/api/teams/checkForCurrentDraft/?username="+getCookie("username"),{
+            method: 'POST',})
         let boolForCurrentDraft : Boolean = await res.json();
         console.log(boolForCurrentDraft)
 
