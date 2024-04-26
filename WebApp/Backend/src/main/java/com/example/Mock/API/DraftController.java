@@ -51,12 +51,6 @@ public class DraftController {
         
         System.out.println("Database Connection: " + this.jdbcTemplate.getDataSource().toString());
         System.out.println("Starting draft_id: " + count);
-        if(createPlayerDatabase()) {
-            System.out.println("Player Database Created");
-        }
-        else {
-            System.out.println("Player Database Not Created... Check Logs");
-        }
     }
 
     private boolean createPlayerDatabase() {

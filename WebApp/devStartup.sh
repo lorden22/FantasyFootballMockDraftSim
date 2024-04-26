@@ -16,7 +16,7 @@ if [ "$machine" = "Mac" ]; then
 
 elif [ "$machine" = "Linux" ]; then
     echo "Running on Linux"
-    MAIN_DIR='~/Coding/projects/FantasyFootballMockDraftSim/WebApp/'
+    MAIN_DIR='/home/bryan/Coding/FantasyFootballMockDraftSim'
 elif [ "$machine" = "Cygwin" ] || [ "$machine" = "MinGw" ]; then
     echo "Running on Windows"
     MAIN_DIR='/c/Users/Bryan/Coding/projects/FantasyFootballMockDraftSim'
