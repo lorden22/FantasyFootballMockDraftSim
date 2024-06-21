@@ -87,7 +87,7 @@ async function selectedResumeLastSavedDraft(): Promise<void> {
 
 async function selectedViewDraftHistory(): Promise<void> {
     if(await authenticateSession() == true) {
-        window.location.href = "draftHistory.html";
+        window.location.href = "drafthistory.html";
     }
     else {
         console.log("User not logged in. Redirecting to login page.")

@@ -400,28 +400,30 @@ async function simulateToNextPick() {
 async function userDraftPlayer() {
     if(await authenticateSession() == true) {
         await checkToClearDraftLog();
-        let nextDraftPickSpan = document.getElementById("nextDraftPick") as HTMLInputElement | null;
-        if (nextDraftPickSpan == null) {
-            console.log("nextDraftPickSpan is null. Try again.")
+        let res1 = await fetch("http://localhost:80/api/teams/getPlayersLeft/?username="+getCookie("username"),{
+            method: 'GET',
+        })
+        let data1: Player[] = await res1.json()
+        let nextDraftPickElement = document.getElementById("nextDraftPick") as HTMLInputElement;
+        let nextDraftNumber: number | null = nextDraftPickElement ? Number(nextDraftPickElement.value) : null;
+        if (nextDraftNumber == null || isNaN(Number(nextDraftPickElement.value)) ||nextDraftNumber <= 0 || nextDraftNumber > data1.length){
+            console.log("nextDraftPickNumber is null or out of range. Try again.")
+            alert("Please enter a valid number.")
             return;
         }
-        else {
-            var playerToDraftIndex = nextDraftPickSpan.value;
-        }
-        let res = await
-        fetch("http://localhost:80/api/teams/userDraftPlayer/?username="+getCookie("username")+"&playerIndex="+playerToDraftIndex, {
-            method: 'POST',
-        })
-        let data = await res.json()
-        console.log(data)
+            let res = await fetch("http://localhost:80/api/teams/userDraftPlayer/?username="+getCookie("username")+"&playerIndex="+nextDraftNumber, {
+                method: 'POST',
+            })
+            let data = await res.json()
+            console.log(data)
 
-        await getPlayerLeft();
-        parseDraftLogData(data)
+            await getPlayerLeft();
+            parseDraftLogData(data)
 
-        if (await endDraft() == false) {
-            await changeFormForNextPick();
+            if (await endDraft() == false) {
+                await changeFormForNextPick();
+            }
         }
-    }
     else {
         console.log("User not logged in. Redirecting to login page.")
         deleteAllCookies();
