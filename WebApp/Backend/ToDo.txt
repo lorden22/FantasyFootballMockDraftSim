@@ -1,4 +1,6 @@
-- Intergrate sql Database
+- TeamHistory Log
 - SSL and https
 - Publish front end to github pages
 - Publish back end to gcp/aws
+
+-clean up code as needed
