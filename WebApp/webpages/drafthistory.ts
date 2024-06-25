@@ -1,17 +1,17 @@
 "use strict";
 type DraftRowData = {
-    draftID: string;
-    teamName: string;
-    draftPosition: string;
-    draftSize: string;
-    Date: string;
-    Time: string;
+    draft_id: string;
+    team_name: string;
+    draft_spot: string;
+    num_teams: string;
+    date: string;
+    time: string;
 }
 
 async function renderDraftHistoryTable() {
     function createRow(currDraftRowMetaData: DraftRowData) {
         console.log(currDraftRowMetaData);
-        let draftID = currDraftRowMetaData.draftID;
+        let draftID = currDraftRowMetaData.draft_id;
         console.log(draftID);
         let newDraftHistoryRow = document.createElement("tr");
         newDraftHistoryRow.id = "draftHistoryRow" + draftID;
@@ -20,19 +20,19 @@ async function renderDraftHistoryTable() {
         newDraftHistoryRowDraftID.innerHTML = draftID;
         let newDraftHistoryRowTeamName = document.createElement("td");
         newDraftHistoryRowTeamName.id = "draftHistoryRowTeamName" + draftID;
-        newDraftHistoryRowTeamName.innerHTML = currDraftRowMetaData.teamName;
+        newDraftHistoryRowTeamName.innerHTML = currDraftRowMetaData.team_name;
         let newDraftHistoryRowDraftPosition = document.createElement("td");
         newDraftHistoryRowDraftPosition.id = "draftHistoryRowDraftPosition" + draftID;
-        newDraftHistoryRowDraftPosition.innerHTML = currDraftRowMetaData.draftPosition;
+        newDraftHistoryRowDraftPosition.innerHTML = currDraftRowMetaData.draft_spot;
         let newDraftHistoryRowDraftSize = document.createElement("td");
         newDraftHistoryRowDraftSize.id = "draftHistoryRowDraftSize" + draftID;
-        newDraftHistoryRowDraftSize.innerHTML = currDraftRowMetaData.draftSize;
+        newDraftHistoryRowDraftSize.innerHTML = currDraftRowMetaData.num_teams;
         let newDraftHistoryRowDraftDate = document.createElement("td");
         newDraftHistoryRowDraftDate.id = "draftHistoryRowDraftDate" + draftID;
-        newDraftHistoryRowDraftDate.innerHTML = currDraftRowMetaData.Date;
+        newDraftHistoryRowDraftDate.innerHTML = currDraftRowMetaData.date;
         let newDraftHistoryRowDraftTime = document.createElement("td");
         newDraftHistoryRowDraftTime.id = "draftHistoryRowDraftTime" + draftID;
-        newDraftHistoryRowDraftTime.innerHTML = currDraftRowMetaData.Time;
+        newDraftHistoryRowDraftTime.innerHTML = currDraftRowMetaData.time;
         let newDraftHistoryRowDraftViewDraft = document.createElement("button");
         newDraftHistoryRowDraftViewDraft.id = "draftHistoryRowDraftViewDraft" + draftID;
         newDraftHistoryRowDraftViewDraft.innerHTML = "View Draft";
@@ -59,6 +59,7 @@ async function renderDraftHistoryTable() {
         console.log(data);
         for (let intCurrDraftMetaData in data) {
             let currDraftMetaData = data[intCurrDraftMetaData];
+            currDraftMetaData
             createRow(currDraftMetaData);
         }
     }
@@ -102,7 +103,7 @@ async function renderDraftHistoryPlayerLog() {
         }
         draftHistoryPlayerLog.style.display = "block";
         draftReviewSelecterForm.style.display = "none";
-        for (let intCurrDraftLog in data.slice(0, data.length - 1)) {
+        for (let intCurrDraftLog in data.slice(0, data.length)) {
             let currPlayerDraftLog = data[intCurrDraftLog];
             let newDraftHistoryPlayerLogRow = document.createElement("tr");
             newDraftHistoryPlayerLogRow.id = "draftHistoryPlayerLogRow" + intCurrDraftLog;
@@ -367,22 +368,25 @@ async function viewTeam(teamID: string) {
 async function resetDraftHistoryPage() {
     if (await authenticateSession() == true) {
         let draftHistoryPlayerLog = document.getElementById("draftHistoryPlayerLog");
+        let draftHistoryPlayerLogBody = document.getElementById("draftReviewPlayerLogBody");
         let allTeamsTable = document.getElementById("allTeamsTable");
         let teamHistoryTable = document.getElementById("teamHistoryTable");
         let draftReviewSelecterForm = document.getElementById("draftReviewSelecterForm");
         let backButton = document.getElementById("backButton");
         if (draftHistoryPlayerLog == null ||  allTeamsTable == null ||
-            teamHistoryTable == null || draftReviewSelecterForm == null || backButton == null) {
+            teamHistoryTable == null || draftReviewSelecterForm == null || backButton == null || draftHistoryPlayerLogBody == null) {
                 console.log("draftHistoryPlayerLog or draftReviewPlayerLogBody or allTeamsTable or allTeamsTableBody or teamHistoryTable or teamHistoryTableBody or " + 
                 "draftReviewSelecterForm or backButton is null. Try again.");
                 return;
         }
         else {
             draftHistoryPlayerLog.style.display = "none";
+            draftHistoryPlayerLogBody.innerHTML = "";
             allTeamsTable.style.display = "none";
             teamHistoryTable.style.display = "none";
             draftReviewSelecterForm.style.display = "block";
             backButton.style.display = "none";
+
         }
     }
     else {

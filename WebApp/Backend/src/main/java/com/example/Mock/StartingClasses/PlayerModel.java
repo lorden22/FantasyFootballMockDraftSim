@@ -1,5 +1,6 @@
 package com.example.Mock.StartingClasses;
 
+import java.util.Comparator;
 import java.util.Objects;
 
 public class PlayerModel implements Comparable<PlayerModel>{
@@ -147,4 +148,33 @@ public class PlayerModel implements Comparable<PlayerModel>{
 	public void setTeamDraftedBy(String teamDraftedByChange) {
 		this.teamDraftedBy = teamDraftedByChange;
 	}
+
+	public static Comparator<PlayerModel> spotDraftedComparator = new Comparator<PlayerModel>() {
+		@Override
+		public int compare(PlayerModel player1, PlayerModel player2) {
+			String[] player1Split = player1.getSpotDrafted().split("\\.");
+			String[] player2Split = player2.getSpotDrafted().split("\\.");
+			Double player1Round = Double.parseDouble(player1Split[0]);
+			Double player2Round = Double.parseDouble(player2Split[0]);
+			Double player1Pick = Double.parseDouble(player1Split[1]);
+			Double player2Pick = Double.parseDouble(player2Split[1]);
+			if (player1Round < player2Round) {
+				return -1;
+			}
+			else if (player1Round > player2Round) {
+				return 1;
+			}
+			else {
+				if (player1Pick < player2Pick) {
+					return -1;
+				}
+				else if (player1Pick > player2Pick) {
+					return 1;
+				}
+				else {
+					return 0;
+				}
+			}
+		}
+	};
 }

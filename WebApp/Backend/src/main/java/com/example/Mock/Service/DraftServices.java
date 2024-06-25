@@ -2,8 +2,10 @@ package com.example.Mock.Service;
 
 import java.lang.reflect.Array;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -321,7 +323,7 @@ public class DraftServices {
 
     private PlayerModel createPlayerModel(JdbcTemplate jdbcTemplate, int pRank, int draftSize) {
         
-        Map<String,Object> playerMap = jdbcTemplate.queryForList("SELECT * FROM players WHERE player_rank = " + pRank).get(0);
+        Map<String,Object> playerMap = jdbcTemplate.queryForList("SELECT * FROM players WHERE player_rank = ?", pRank).get(0);
         String name = (String)playerMap.get("name");
         String position = (String)playerMap.get("position");
         int playerRank = (int)playerMap.get("player_rank");
@@ -363,16 +365,51 @@ public class DraftServices {
     }
 
     public ArrayList<HashMap<String,String>> getDraftHistoryMetaData(JdbcTemplate jdbcTemplate, String username) {
-        ArrayList<HashMap<String,String>> allMetaData = new ArrayList<HashMap<String,String>>();
-        for(int currDraftIndex : this.allPastsDraftsDataObject.keySet()) {
+        ArrayList<HashMap<String,String>> draftHistoryMetaData = new ArrayList<HashMap<String,String>>();
+        ArrayList<Integer> draftIDSFinished = (ArrayList<Integer>) jdbcTemplate.queryForList("SELECT draft_id FROM drafts WHERE username='" + username + "' AND complete_status=1", Integer.class);
+        for(int currDraftID: draftIDSFinished) {
+            Map<String, Object> draftMetaDataFromDB = new HashMap<String,Object>();
+            Map<String, Object> userTeamMetaDataFromDB = new HashMap<String,Object>();
+            draftMetaDataFromDB = jdbcTemplate.queryForMap("SELECT * FROM drafts WHERE username = ? AND complete_status=1 AND draft_id = ?", username, currDraftID);
+            userTeamMetaDataFromDB = jdbcTemplate.queryForMap("SELECT * FROM teams WHERE user_team=1 AND draft_id = ?", currDraftID);
             
-            allMetaData.add(this.allPastsDraftsDataObject.get(currDraftIndex).getDraftMetaData());
+            HashMap<String,String> draftMetaDataToReturn = new HashMap<String,String>();
+            draftMetaDataToReturn.put("draft_id", String.valueOf(currDraftID));
+            draftMetaDataToReturn.put("team_name", (String)userTeamMetaDataFromDB.get("team_name"));
+            draftMetaDataToReturn.put("draft_spot", String.valueOf(userTeamMetaDataFromDB.get("draft_spot")));
+            draftMetaDataToReturn.put("num_teams", String.valueOf(draftMetaDataFromDB.get("num_teams")));
+            LocalDateTime dateTime = (LocalDateTime)draftMetaDataFromDB.get("date");
+            draftMetaDataToReturn.put("date", dateTime.toLocalDate().toString());
+            draftMetaDataToReturn.put("time", dateTime.toLocalTime().toString());
+            draftHistoryMetaData.add(draftMetaDataToReturn);
         }
-        return allMetaData;
+        System.out.println(draftHistoryMetaData);
+        return draftHistoryMetaData;
     }
 
     public List<PlayerModel> getDraftHistoryDraftedPlayerLog(JdbcTemplate jdbcTemplate, String username, int draftID) {
-        return this.allPastsDraftsDataObject.get(draftID-1).getDraftedPlayers();
+        ArrayList<PlayerModel> allPlayers = new ArrayList<PlayerModel>();
+        int draftSize = jdbcTemplate.queryForObject("SELECT num_teams FROM drafts WHERE username = ? and draft_id = ?", Integer.class, username, draftID);
+        for (int i = 1; i <= draftSize; i++) {
+            List<Integer> teamArrayInt = this.createTeamIntArrayFromDB(jdbcTemplate, draftID, i);
+            List<PlayerModel> teamPlayerList = this.createPlayerModelListFromIntList(jdbcTemplate, teamArrayInt, draftSize);
+            String teamName = jdbcTemplate.queryForObject("SELECT team_name FROM teams WHERE draft_id = ? AND draft_spot = ?", String.class, draftID, i);
+            String teamDraftSpot = jdbcTemplate.queryForObject("SELECT draft_spot FROM teams WHERE draft_id = ? AND draft_spot = ?", String.class, draftID, i);
+            int round = 1;
+            int pickOod = Integer.parseInt(teamDraftSpot);
+            int pickEven = Math.abs(Integer.parseInt(teamDraftSpot) - draftSize) + 1;
+            int pick = pickOod;
+            for(PlayerModel player : teamPlayerList) {
+                player.setSpotDrafted(round+"."+pick);
+                player.setTeamDraftedBy(teamName);
+                round++;
+                pick = round % 2 == 0 ? pickEven : pickOod;
+            }
+            allPlayers.addAll(teamPlayerList);
+            System.out.println(teamPlayerList);
+        }
+        Collections.sort(allPlayers, PlayerModel.spotDraftedComparator);
+        return allPlayers;
     }
 
     public List<TreeMap<String,ArrayList<PlayerModel>>> getDraftHistoryAllTeamsMap(JdbcTemplate jdbcTemplate, String username, int draftID) {
