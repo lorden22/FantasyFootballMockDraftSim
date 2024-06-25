@@ -37,6 +37,7 @@ mvn package
 
 echo 'Building backend container...'
 cd $MAIN_DIR
+docker pull openjdk:17-jdk-slim
 docker build -f WebApp/Backend/Dockerfile -t app-backend:latest .
 
 echo 'Starting backend server inside container...'

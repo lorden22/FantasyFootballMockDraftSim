@@ -417,6 +417,16 @@ public class DraftServices {
     }
 
     public List<TeamModel> getDraftHistoryTeamList(JdbcTemplate jdbcTemplate, String username, int draftID) {
-        return this.allPastsDraftsDataObject.get(draftID-1).getTeams();
+        ArrayList<TeamModel> teamList = new ArrayList<TeamModel>();
+        int draftSize = jdbcTemplate.queryForObject("SELECT num_teams FROM drafts WHERE username = ? and draft_id = ?", Integer.class, username, draftID);
+        for (int i = 1; i <= draftSize; i++) {
+            Map<String,Object> teamData = jdbcTemplate.queryForMap("SELECT * FROM teams WHERE draft_id = ? AND draft_spot = ?", draftID, i);
+            String teamName = (String)teamData.get("team_name");
+            int draftSpot = i;
+            boolean userTeam = (int)teamData.get("user_team") == 1;
+            TeamModel team = new TeamModel(teamName, userTeam, draftSpot);
+            teamList.add(team);
+         }
+    return teamList;
     }
 }

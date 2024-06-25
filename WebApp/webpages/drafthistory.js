@@ -343,11 +343,13 @@ async function resetDraftHistoryPage() {
         let draftHistoryPlayerLog = document.getElementById("draftHistoryPlayerLog");
         let draftHistoryPlayerLogBody = document.getElementById("draftReviewPlayerLogBody");
         let allTeamsTable = document.getElementById("allTeamsTable");
+        let allTeamsTableBody = document.getElementById("allTeamsTableBody");
         let teamHistoryTable = document.getElementById("teamHistoryTable");
         let draftReviewSelecterForm = document.getElementById("draftReviewSelecterForm");
         let backButton = document.getElementById("backButton");
         if (draftHistoryPlayerLog == null || allTeamsTable == null ||
-            teamHistoryTable == null || draftReviewSelecterForm == null || backButton == null || draftHistoryPlayerLogBody == null) {
+            teamHistoryTable == null || draftReviewSelecterForm == null || backButton == null ||
+            draftHistoryPlayerLogBody == null || allTeamsTableBody == null) {
             console.log("draftHistoryPlayerLog or draftReviewPlayerLogBody or allTeamsTable or allTeamsTableBody or teamHistoryTable or teamHistoryTableBody or " +
                 "draftReviewSelecterForm or backButton is null. Try again.");
             return;
@@ -356,7 +358,8 @@ async function resetDraftHistoryPage() {
             draftHistoryPlayerLog.style.display = "none";
             draftHistoryPlayerLogBody.innerHTML = "";
             allTeamsTable.style.display = "none";
-            teamHistoryTable.style.display = "none";
+            allTeamsTableBody.innerHTML = "";
+            teamHistoryTable.innerHTML = "";
             draftReviewSelecterForm.style.display = "block";
             backButton.style.display = "none";
         }
