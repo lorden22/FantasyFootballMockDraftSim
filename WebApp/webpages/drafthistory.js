@@ -153,15 +153,18 @@ async function renderDraftHistoryTeamHistorySelecter() {
         console.log(data);
         for (let intCurrTeam in data) {
             let currTeam = data[intCurrTeam];
+            let intCurrTeamNumber = Number(intCurrTeam);
+            intCurrTeamNumber++;
+            console.log(intCurrTeamNumber);
             let currTeamRow = document.createElement("tr");
-            currTeamRow.id = "draftHistoryTeamRow" + intCurrTeam;
+            currTeamRow.id = "draftHistoryTeamRow" + intCurrTeamNumber;
             let currTeamName = document.createElement("td");
-            currTeamName.id = "draftHistoryTeamName" + intCurrTeam;
+            currTeamName.id = "draftHistoryTeamName" + intCurrTeamNumber;
             currTeamName.innerHTML = currTeam.teamName;
             let currTeamViewButton = document.createElement("btn");
-            currTeamViewButton.id = "draftHistoryViewButton" + intCurrTeam;
+            currTeamViewButton.id = "draftHistoryViewButton" + intCurrTeamNumber;
             currTeamViewButton.innerHTML = "View Team";
-            currTeamViewButton.onclick = function () { viewTeam(currTeamViewButton.id.slice(-1)); };
+            currTeamViewButton.onclick = function () { viewTeam(intCurrTeamNumber.toString()); };
             currTeamViewButton.className = "btn btn-primary";
             currTeamViewButton.style.margin = "5%";
             currTeamViewButton.style.padding = "5%";
@@ -192,9 +195,12 @@ async function renderDraftHistoryTeamHistorySelecter() {
 }
 async function viewTeam(teamID) {
     function findStarterIndex(players) {
-        let highestScore = -1;
-        let highestScoreIndex = -1;
-        for (let i = 0; i < players.length; i++) {
+        if (players == null || players.length == 0) {
+            return -1;
+        }
+        let highestScore = players[0].predictedScore;
+        let highestScoreIndex = 0;
+        for (let i = 1; i < players.length; i++) {
             if (players[i].predictedScore > highestScore) {
                 highestScore = players[i].predictedScore;
                 highestScoreIndex = i;
@@ -253,7 +259,7 @@ async function viewTeam(teamID) {
         newStarterPosition.innerHTML = stringPosition;
         newStarterRow.appendChild(newStarterDepthChartPosition);
         newStarterRow.appendChild(newStarterPosition);
-        if (playersPositon.length > 0) {
+        if (playersPositon != null && playersPositon.length > 0) {
             let startPlayer = playersPositon[starterIndex];
             let newStarterPlayerName = document.createElement("td");
             newStarterPlayerName.id = "starterPlayerName" + stringPosition;
@@ -289,7 +295,7 @@ async function viewTeam(teamID) {
             });
             let data = await res.json();
             console.log(data);
-            let postionOrder = ["QB", "RB", "WR", "TE", "Flex", "K", "DEF"];
+            let postionOrder = ["QB", "RB", "WR", "TE", "Flex", "K", "DST"];
             for (let intCurrPosition in postionOrder) {
                 console.log(intCurrPosition);
                 let currPosition = postionOrder[intCurrPosition];
@@ -311,8 +317,11 @@ async function viewTeam(teamID) {
                     console.log(currPositionPlayers);
                     let currStarterIndex = findStarterIndex(currPositionPlayers);
                     console.log(currStarterIndex);
-                    let currStarter = currPositionPlayers[currStarterIndex];
-                    console.log(currStarter);
+                    let currStarter = null;
+                    if (currStarterIndex != -1) {
+                        currStarter = currPositionPlayers[currStarterIndex];
+                        console.log(currStarter);
+                    }
                     let currStarterRow = createDataRowForStarter(currPosition, currStarterIndex, currPositionPlayers);
                     console.log(currStarterRow);
                     teamHistoryTableBody.appendChild(currStarterRow);
@@ -322,7 +331,7 @@ async function viewTeam(teamID) {
                     }
                 }
             }
-            let benchPlayers = data["QB"].concat(data["RB"]).concat(data["WR"]).concat(data["TE"]).concat(data["K"]).concat(data["DEF"]);
+            let benchPlayers = data["QB"].concat(data["RB"]).concat(data["WR"]).concat(data["TE"]).concat(data["K"]).concat(data["DST"]);
             console.log(benchPlayers);
             findBenchedPlayers(benchPlayers);
             let teamHistoryTable = document.getElementById("teamHistoryTable");
@@ -345,11 +354,12 @@ async function resetDraftHistoryPage() {
         let allTeamsTable = document.getElementById("allTeamsTable");
         let allTeamsTableBody = document.getElementById("allTeamsTableBody");
         let teamHistoryTable = document.getElementById("teamHistoryTable");
+        let teamHistoryTableBody = document.getElementById("teamHistoryTableBody");
         let draftReviewSelecterForm = document.getElementById("draftReviewSelecterForm");
         let backButton = document.getElementById("backButton");
         if (draftHistoryPlayerLog == null || allTeamsTable == null ||
             teamHistoryTable == null || draftReviewSelecterForm == null || backButton == null ||
-            draftHistoryPlayerLogBody == null || allTeamsTableBody == null) {
+            draftHistoryPlayerLogBody == null || allTeamsTableBody == null || teamHistoryTableBody == null) {
             console.log("draftHistoryPlayerLog or draftReviewPlayerLogBody or allTeamsTable or allTeamsTableBody or teamHistoryTable or teamHistoryTableBody or " +
                 "draftReviewSelecterForm or backButton is null. Try again.");
             return;
@@ -359,7 +369,8 @@ async function resetDraftHistoryPage() {
             draftHistoryPlayerLogBody.innerHTML = "";
             allTeamsTable.style.display = "none";
             allTeamsTableBody.innerHTML = "";
-            teamHistoryTable.innerHTML = "";
+            teamHistoryTable.style.display = "none";
+            teamHistoryTableBody.innerHTML = "";
             draftReviewSelecterForm.style.display = "block";
             backButton.style.display = "none";
         }

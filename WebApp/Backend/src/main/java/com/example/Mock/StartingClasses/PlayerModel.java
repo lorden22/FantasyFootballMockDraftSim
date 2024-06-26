@@ -43,11 +43,6 @@ public class PlayerModel implements Comparable<PlayerModel>{
 		this.avgADP = avgADP;
 	}
 	 
-
-
-
-
-
 	public String getFirstName() {
 		return this.firstName;
 	}
@@ -107,7 +102,7 @@ public class PlayerModel implements Comparable<PlayerModel>{
 	}
 	
 	public String toString() {
-		return this.firstName + " " + this.lastName + " - Predicted 2023 score = "
+		return this.firstName + " " + this.lastName + " - Predicted 2024 score = "
 		+ this.predictedScore + ", Avg ADP = " + this.avgADP;
 	}
 	

@@ -412,8 +412,29 @@ public class DraftServices {
         return allPlayers;
     }
 
-    public List<TreeMap<String,ArrayList<PlayerModel>>> getDraftHistoryAllTeamsMap(JdbcTemplate jdbcTemplate, String username, int draftID) {
-        return this.allPastsDraftsDataObject.get(draftID-1).getDraftHistoryAllTeamsMap();
+    public TreeMap<String,ArrayList<PlayerModel>> getDraftHistoryAllTeamsMap(JdbcTemplate jdbcTemplate, String username, int draftID, int teamIndex) {
+        TreeMap<String,ArrayList<PlayerModel>> teamMap = new TreeMap<String,ArrayList<PlayerModel>>();
+        List<Integer> teamArrayList = this.createTeamIntArrayFromDB(jdbcTemplate, draftID, teamIndex);
+        int draftSize = jdbcTemplate.queryForObject("SELECT num_teams FROM drafts WHERE username = ? and draft_id = ?", Integer.class, username, draftID);
+        List<PlayerModel> teamPlayerList = this.createPlayerModelListFromIntList(jdbcTemplate, teamArrayList, draftSize);
+        String teamName = jdbcTemplate.queryForObject("SELECT team_name FROM teams WHERE draft_id = ? AND draft_spot = ?", String.class, draftID, teamIndex);
+        int round = 1;
+        int pickOod = teamIndex;
+        int pickEven = Math.abs(teamIndex - draftSize) + 1;
+        int pick = pickOod;
+        for (PlayerModel player : teamPlayerList) {
+            player.setSpotDrafted(round + "." + pick);
+            player.setTeamDraftedBy(teamName);
+            round++;
+            pick = round % 2 == 0 ? pickEven : pickOod;
+            if(teamMap.containsKey(player.getPosition())) {
+                teamMap.get(player.getPosition()).add(player);
+            }
+            else {
+                teamMap.put(player.getPosition(), new ArrayList<PlayerModel>(Arrays.asList(player)));
+            }
+        }
+        return teamMap;
     }
 
     public List<TeamModel> getDraftHistoryTeamList(JdbcTemplate jdbcTemplate, String username, int draftID) {

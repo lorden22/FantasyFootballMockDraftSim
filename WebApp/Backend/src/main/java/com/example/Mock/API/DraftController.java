@@ -226,8 +226,7 @@ public class DraftController {
         @RequestParam("username") String username,
         @RequestParam("draftID") int draftID,
         @RequestParam("teamIndex") int teamIndex) {
-            List<TreeMap<String,ArrayList<PlayerModel>>> allTreeMaps = this.draftServices.getDraftHistoryAllTeamsMap(this.jdbcTemplate, username, draftID);
-            return allTreeMaps.get(teamIndex);
+            return this.draftServices.getDraftHistoryAllTeamsMap(this.jdbcTemplate, username, draftID, teamIndex);
     }
 
 }
