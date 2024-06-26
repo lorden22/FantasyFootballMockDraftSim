@@ -216,6 +216,9 @@ async function viewTeam(teamID) {
         }
         else {
             for (let i = 0; i < benchPlayers.length; i++) {
+                if (benchPlayers[i] == null) {
+                    continue;
+                }
                 let newBenchPlayerRow = document.createElement("tr");
                 newBenchPlayerRow.id = "benchPlayerRow" + i;
                 newBenchPlayerRow.style.width = "100%";

@@ -285,8 +285,11 @@ public class DraftServices {
                 !(nextUserPickRound == this.getCurrRound(jdbcTemplate, username) 
                  && nextUserPick == this.getCurrPick(jdbcTemplate, username))){
             int currRound = this.getCurrRound(jdbcTemplate, username);
+            System.out.println("Curr Round: " + currRound);
             int currPick = this.getCurrPick(jdbcTemplate, username);
+            System.out.println("Curr Pick: " + currPick);
             int pick = this.checkForForcePickNeeded(jdbcTemplate, currRound, currPick, draftID, username);
+            System.out.println("Pick: " + pick);
             if(pick == -1) {
                 VaribleOddsPicker randomNumGen = new VaribleOddsPicker();
                 pick = randomNumGen.newOdds(6);
@@ -296,6 +299,7 @@ public class DraftServices {
             makePick(jdbcTemplate, draftID, currPick, pick);
             moveToNextPick(jdbcTemplate, username);
             playersDraftDuringSim.add(this.createPlayerModel(jdbcTemplate, pick, draftSize));
+            System.out.println(playersDraftDuringSim.get(playersDraftDuringSim.size()-1).getFullName() + " was drafted in round " + currRound + " pick " + currPick);
         }
         return playersDraftDuringSim;
     } 
@@ -336,6 +340,9 @@ public class DraftServices {
         }
         else {
             int pick = playerRank % draftSize;
+            if (pick == 0) {
+                pick = 1;
+            }
             int round = playerRank / draftSize;
             avgADP = round + "." + pick;
         }
