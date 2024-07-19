@@ -13,6 +13,7 @@ import java.util.TreeMap;
 
 import javax.naming.ldap.HasControls;
 import javax.swing.plaf.basic.BasicInternalFrameTitlePane.SystemMenuBar;
+import javax.swing.text.StyledEditorKit.BoldAction;
 import javax.xml.crypto.dsig.keyinfo.RetrievalMethod;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +86,10 @@ public class DraftServices {
 
     public int getDraftSize(JdbcTemplate jdbcTemplate, String username) {
         return jdbcTemplate.queryForObject("SELECT num_teams FROM drafts WHERE username = '" + username + "' AND draft_id = (SELECT MAX(draft_id) FROM drafts)", Integer.class);
+    }
+
+    public int getDraftSizeByDraftID(JdbcTemplate jdbcTemplate, int draftID) {
+        return jdbcTemplate.queryForObject("SELECT num_teams FROM drafts WHERE draft_id = ?", Integer.class, draftID);
     }
 
     public int getCurrRound(JdbcTemplate jdbcTemplate, String username) {
@@ -221,6 +226,9 @@ public class DraftServices {
         int draftID = this.getUserMostRecentDraftID(jdbcTemplate, username);
         int currPick = this.getCurrPick(jdbcTemplate, username);
         int playerRank = (int)playerToDraft.getRank();
+        if (checkForEvenOrOddRound(jdbcTemplate, draftID)) {
+            currPick = flipDraftPick(currPick, this.getDraftSize(jdbcTemplate, username));
+        }
         this.makePick(jdbcTemplate, draftID, currPick, playerRank);
         this.moveToNextPick(jdbcTemplate, username);
         return new ArrayList<PlayerModel>(Arrays.asList(playerToDraft));
@@ -233,6 +241,7 @@ public class DraftServices {
         List<PlayerModel> currTeamPlayerList = this.createPlayerModelListFromIntList(jdbcTemplate, currTeamIntArray, draftSize);
         TreeMap<String,List<PlayerModel>> currTeamTreeMap = this.createTeamTreeFromDB(jdbcTemplate, currTeamPlayerList);
         List<PlayerModel> playersLeft = this.getPlayersLeft(jdbcTemplate, username);
+        System.out.println(currTeamTreeMap);
         if(currRoundPick == 8) {
 			if (!currTeamTreeMap.containsKey(QuarterBackPlayerModel.POSITIONSHORTHANDLE)){
 				return getNextForcedPosition(playersLeft, QuarterBackPlayerModel.POSITIONSHORTHANDLE);
@@ -288,6 +297,10 @@ public class DraftServices {
             System.out.println("Curr Round: " + currRound);
             int currPick = this.getCurrPick(jdbcTemplate, username);
             System.out.println("Curr Pick: " + currPick);
+            if (checkForEvenOrOddRound(jdbcTemplate, draftID)) {
+                System.out.println("Even Round: " + currRound + " Pick: " + currPick + " Flipping Pick to " + flipDraftPick(currPick, draftSize));
+                currPick = flipDraftPick(currPick, draftSize);
+            }
             int pick = this.checkForForcePickNeeded(jdbcTemplate, currRound, currPick, draftID, username);
             System.out.println("Pick: " + pick);
             if(pick == -1) {
@@ -300,6 +313,7 @@ public class DraftServices {
             moveToNextPick(jdbcTemplate, username);
             playersDraftDuringSim.add(this.createPlayerModel(jdbcTemplate, pick, draftSize));
             System.out.println(playersDraftDuringSim.get(playersDraftDuringSim.size()-1).getFullName() + " was drafted in round " + currRound + " pick " + currPick);
+            System.out.println("'\n\n\'");
         }
         return playersDraftDuringSim;
     } 
@@ -422,8 +436,10 @@ public class DraftServices {
     public TreeMap<String,ArrayList<PlayerModel>> getDraftHistoryAllTeamsMap(JdbcTemplate jdbcTemplate, String username, int draftID, int teamIndex) {
         TreeMap<String,ArrayList<PlayerModel>> teamMap = new TreeMap<String,ArrayList<PlayerModel>>();
         List<Integer> teamArrayList = this.createTeamIntArrayFromDB(jdbcTemplate, draftID, teamIndex);
+        System.out.println(teamArrayList);
         int draftSize = jdbcTemplate.queryForObject("SELECT num_teams FROM drafts WHERE username = ? and draft_id = ?", Integer.class, username, draftID);
         List<PlayerModel> teamPlayerList = this.createPlayerModelListFromIntList(jdbcTemplate, teamArrayList, draftSize);
+        System.out.println(teamPlayerList);
         String teamName = jdbcTemplate.queryForObject("SELECT team_name FROM teams WHERE draft_id = ? AND draft_spot = ?", String.class, draftID, teamIndex);
         int round = 1;
         int pickOod = teamIndex;
@@ -441,6 +457,7 @@ public class DraftServices {
                 teamMap.put(player.getPosition(), new ArrayList<PlayerModel>(Arrays.asList(player)));
             }
         }
+        System.out.println(teamMap);
         return teamMap;
     }
 
@@ -457,4 +474,16 @@ public class DraftServices {
          }
     return teamList;
     }
+
+    private boolean checkForEvenOrOddRound(JdbcTemplate jdbcTemplate,  int draft_id) {
+        int currRound = jdbcTemplate.queryForObject("SELECT curr_round FROM drafts WHERE draft_id = ?", Integer.class, draft_id);
+        return currRound % 2 == 0;
+    }
+
+    private int flipDraftPick(int pickToFlip, int draftSize) {
+        if (pickToFlip == draftSize) return 1;
+        else return Math.abs(pickToFlip - draftSize)+1;
+    }
+
+    
 }
