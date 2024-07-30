@@ -1,6 +1,8 @@
-package com.example.Mock.StartingClasses;
+package com.example.Mock.PlayerModels;
 
-public class QuarterBackPlayerModel extends PlayerModel{
+import com.example.Mock.DAO.PlayerDataObject;
+
+public class QuarterBackPlayerModel extends PlayerDataObject{
 	private static final double QUARTERBACKALLOWEDREACH = -0.1;
 	public static final String POSITIONSHORTHANDLE = "QB";
 	

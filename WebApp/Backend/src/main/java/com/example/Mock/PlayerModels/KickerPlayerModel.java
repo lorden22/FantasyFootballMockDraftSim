@@ -1,6 +1,8 @@
-package com.example.Mock.StartingClasses;
+package com.example.Mock.PlayerModels;
 
-public class KickerPlayerModel extends PlayerModel {
+import com.example.Mock.DAO.PlayerDataObject;
+
+public class KickerPlayerModel extends PlayerDataObject {
     private static final double KICKERALLOWEDREACH = 0.5;
     public static final String POSITIONSHORTHANDLE = "K";
 

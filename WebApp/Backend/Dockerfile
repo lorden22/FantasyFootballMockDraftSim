@@ -7,7 +7,7 @@ RUN apt-get update -y && \
 
 ARG JAR_FILE=WebApp/Backend/target/WebBackend-0.0.1-SNAPSHOT.jar
 ADD ${JAR_FILE} app.jar
-ADD WebApp/Backend/src/main/java/com/example/Mock/StartingClasses/WebScraping/PlayerData.txt PlayerData.txt
+ADD WebScraping/PlayerData.txt PlayerData.txt
 ADD WebApp/Backend/mockDraft.sql mockDraft.sql
 ADD WebApp/Backend/startup.sh startup.sh
 RUN chmod +x startup.sh

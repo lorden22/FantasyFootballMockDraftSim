@@ -12,8 +12,6 @@ esac
 if [ "$machine" = "Mac" ]; then
     echo "Running on Mac"
     MAIN_DIR='/Users/bryanlorden/Documents/self-workspace/personal/FantasyFootballMockDraftSim/'
-    cd $MAIN_DIR/WebApp/Backend/
-
 elif [ "$machine" = "Linux" ]; then
     echo "Running on Linux"
     MAIN_DIR='/home/bryan/Coding/FantasyFootballMockDraftSim'
@@ -27,10 +25,13 @@ else
     exit 1
 fi
 
-# Assuming you're now in the correct project directory, no need to change directories again
-# Let's remove the 'cd' command that was here, as it's not necessary with the above logicpwd
+echo 'Stopping and removing any existing containers...'
+docker ps -a | grep app-backend && docker stop app-backend && docker rm app-backend
 
-echo 'Compling new Jar...'
+echo 'Removing any existing images...'
+docker images | grep app-backend && docker rmi app-backend:latest
+
+echo 'Compiling new Jar...'
 cd $MAIN_DIR/WebApp/Backend/
 mvn clean
 mvn package
@@ -41,6 +42,6 @@ docker pull openjdk:17-jdk-slim
 docker build -f WebApp/Backend/Dockerfile -t app-backend:latest .
 
 echo 'Starting backend server inside container...'
-docker run -p 80:8080 app-backend
- 
-echo 'Backend server started on port 8080'
+docker run -d --name app-backend -p 80:8080 app-backend
+
+echo 'Backend server started on port 80'

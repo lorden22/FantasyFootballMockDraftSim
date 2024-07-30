@@ -1,4 +1,4 @@
-package com.example.Mock.StartingClasses;
+package com.example.Mock;
 
 public class VaribleOddsPicker {
 	private int randomGenValue;

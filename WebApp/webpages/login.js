@@ -1,59 +1,82 @@
 "use strict";
 async function addUser() {
-    let userNameEleValue = document.getElementById("username").value || null;
-    let passwordEleValue = document.getElementById("password").value || null;
-    if (userNameEleValue == null || passwordEleValue == null) {
-        alert("Username or password is null. Try again.");
+    const userNameEle = document.getElementById("username");
+    const passwordEle = document.getElementById("password");
+    const userNameEleValue = userNameEle.value || null;
+    const passwordEleValue = passwordEle.value || null;
+    if (userNameEleValue === null || passwordEleValue === null) {
+        showMessage("Username or password is null. Try again.", "error");
         return;
     }
-    let username = userNameEleValue;
-    let password = passwordEleValue;
-    let checkUserRes = await fetch("http://localhost:80/api/login/checkUser/?username=" + username, {
-        method: 'GET',
-    });
-    let checkUserData = await checkUserRes.json();
-    if (checkUserData == true)
-        alert("Username already taken. Try again.");
-    else {
-        let addUser = await fetch("http://localhost:80/api/login/addUser/?username=" + username + "&password=" + password, {
-            method: 'PUT',
+    const username = userNameEleValue;
+    const password = passwordEleValue;
+    try {
+        const checkUserRes = await fetch(`http://localhost:80/api/login/checkUser/?username=${username}`, {
+            method: 'GET',
         });
-        let addUserRes = await addUser.json();
-        let setUpUserRes = await fetch("http://localhost:80/api/teams/initaizeUserAccountSetup/?username=" + username, {
-            method: 'POST',
-        });
-        let setUpUserData = await setUpUserRes.json();
-        console.log(addUserRes);
-        console.log(setUpUserData);
-        alert("Account created. Please login.");
-        window.location.href = "loginpage.html";
+        const checkUserData = await checkUserRes.json();
+        if (checkUserData) {
+            showMessage("Username already taken. Try again.", "error");
+        }
+        else {
+            const addUserRes = await fetch(`http://localhost:80/api/login/addUser/?username=${username}&password=${password}`, {
+                method: 'PUT',
+            });
+            const addUserData = await addUserRes.json();
+            await fetch(`http://localhost:80/api/teams/initaizeUserAccountSetup/?username=${username}`, {
+                method: 'POST',
+            });
+            showMessage("Account created. Please login.", "success");
+            setTimeout(() => {
+                window.location.href = "loginpage.html";
+            }, 2000);
+        }
+    }
+    catch (error) {
+        showMessage("An error occurred. Please try again.", "error");
     }
 }
 async function attemptLogin() {
-    let userNameEleValue = document.getElementById("username").value || null;
-    let passwordEleValue = document.getElementById("password").value || null;
-    if (userNameEleValue == null || passwordEleValue == null) {
-        alert("Username or password is null. Try again.");
+    const userNameEle = document.getElementById("username");
+    const passwordEle = document.getElementById("password");
+    const userNameEleValue = userNameEle.value || null;
+    const passwordEleValue = passwordEle.value || null;
+    if (userNameEleValue === null || passwordEleValue === null) {
+        showMessage("Username or password is null. Try again.", "error");
         return;
     }
-    let username = userNameEleValue;
-    let password = passwordEleValue;
-    let attemptLoginRes = await fetch("http://localhost:80/api/login/attemptLogin/?username=" + username + "&password=" + password, {
-        method: 'GET',
-    });
-    let attemptLoginData = await attemptLoginRes.json();
-    if (attemptLoginData == true) {
-        let generateSessionID = await fetch("http://localhost:80/api/login/generateSessionID/?username=" + username, {
+    const username = userNameEleValue;
+    const password = passwordEleValue;
+    try {
+        const attemptLoginRes = await fetch(`http://localhost:80/api/login/attemptLogin/?username=${username}&password=${password}`, {
             method: 'GET',
         });
-        console.log(generateSessionID);
-        let generateSessionIDData = await generateSessionID.text();
-        console.log(generateSessionIDData);
-        alert("Login successful.");
-        document.cookie = "username=" + username + "; path=/";
-        document.cookie = "sessionID=" + generateSessionIDData + "; path=/";
-        window.location.href = "drafthomepage.html";
+        const attemptLoginData = await attemptLoginRes.json();
+        if (attemptLoginData) {
+            const generateSessionIDRes = await fetch(`http://localhost:80/api/login/generateSessionID/?username=${username}`, {
+                method: 'GET',
+            });
+            const generateSessionIDData = await generateSessionIDRes.text();
+            showMessage("Login successful.", "success");
+            document.cookie = `username=${username}; path=/`;
+            document.cookie = `sessionID=${generateSessionIDData}; path=/`;
+            setTimeout(() => {
+                window.location.href = "drafthomepage.html";
+            }, 2000);
+        }
+        else {
+            showMessage("Login failed. Try different credentials.", "error");
+        }
     }
-    else
-        alert("Login failed. Try different credentials.");
+    catch (error) {
+        showMessage("An error occurred. Please try again.", "error");
+    }
+}
+function showMessage(message, type) {
+    const messageContainer = document.getElementById("message-container");
+    messageContainer.innerHTML = `<div class="message ${type}">${message}</div>`;
+    messageContainer.classList.add("show");
+    setTimeout(() => {
+        messageContainer.classList.remove("show");
+    }, 3000);
 }

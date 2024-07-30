@@ -1,10 +1,8 @@
 package com.example;
 
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Scanner;
-import java.util.function.Function;
 
 public class DraftHandler {
 	private ArrayList<PlayerModel> playersLeft;

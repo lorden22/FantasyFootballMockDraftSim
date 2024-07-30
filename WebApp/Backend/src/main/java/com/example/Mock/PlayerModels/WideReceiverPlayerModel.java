@@ -1,6 +1,8 @@
-package com.example.Mock.StartingClasses;
+package com.example.Mock.PlayerModels;
 
-public class WideReceiverPlayerModel extends PlayerModel {
+import com.example.Mock.DAO.PlayerDataObject;
+
+public class WideReceiverPlayerModel extends PlayerDataObject {
 	private static final double WIDERECEIVERALLOWEDREACH = 0.1;
 	public static final String POSITIONSHORTHANDLE = "WR";
 	

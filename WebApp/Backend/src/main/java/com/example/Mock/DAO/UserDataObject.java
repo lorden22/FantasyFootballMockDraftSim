@@ -4,12 +4,11 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Repository;
-
-import com.example.Mock.DAO.UserDAO;
-    
 
 @Repository
 @Scope(value = "prototype")
@@ -18,7 +17,9 @@ public class UserDataObject implements UserDAO  {
     private String username;
     private String hashPassword;
     private String salt;
-    //private String latestSessionID;
+
+    @Autowired
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     public UserDataObject(String username, String passwordText) throws NoSuchAlgorithmException {
         this.username = username;
@@ -35,49 +36,17 @@ public class UserDataObject implements UserDAO  {
         this.hashPassword = bypeArrayToString(hash);
     }
 
-    /*public boolean authenticateUserPassword(String attemptedPassword) throws NoSuchAlgorithmException {
-        MessageDigest digest;
-        digest = MessageDigest.getInstance("SHA-256");
-        digest.reset();
-        digest.update(this.salt.getBytes());
-        byte[] hash = digest.digest(attemptedPassword.getBytes());
-        String attemptedHashPassword = bypeArrayToString(hash);
-        System.out.println(attemptedHashPassword + " " + this.hashPassword);
-        return attemptedHashPassword.equals(this.hashPassword);
-    }
-
-    public boolean authenticateSessionID(String attemptedSessionID) {
-        return attemptedSessionID.equals(this.latestSessionID);
-    }
-
-    public String generateSessionID() {
-        SecureRandom random = new SecureRandom();
-        byte[] bytes = new byte[16];
-        random.nextBytes(bytes);
-        this.latestSessionID = bypeArrayToString(bytes);
-        return this.latestSessionID;
-    }
-
-    public String getUsername() {
-        return this.username;
-    }
-
-     public String getSessionID() {
-        return this.latestSessionID;
-    }
-
-    public boolean logout() {
-        this.latestSessionID = null;
-        return true;
-    }
-    */
-
-    public boolean addUserToDatabase(JdbcTemplate jdbcTemplate) {
+    public boolean addUserToDatabase() {
+        String sql = "INSERT INTO users (username, hash_pass, salt) VALUES (:username, :hash_pass, :salt)";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("username", this.username);
+        params.addValue("hash_pass", this.hashPassword);
+        params.addValue("salt", this.salt);
+        
         try {
-            jdbcTemplate.update("INSERT INTO users (username, hash_pass, salt) VALUES (?, ?, ?)", this.username, this.hashPassword, this.salt);
+            namedParameterJdbcTemplate.update(sql, params);
             return true;
-        }
-        catch (Exception error) {
+        } catch (Exception error) {
             error.printStackTrace();
             return false;
         }
@@ -90,5 +59,4 @@ public class UserDataObject implements UserDAO  {
         }
         return sb.toString();
     }
-    
 }

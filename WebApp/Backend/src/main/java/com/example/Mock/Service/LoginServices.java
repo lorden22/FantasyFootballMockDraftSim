@@ -4,11 +4,12 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-//import java.util.HashMap;
-//import java.util.HashSet;
 import java.util.Map;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.Mock.DAO.UserDataObject;
@@ -16,160 +17,120 @@ import com.example.Mock.DAO.UserDataObject;
 @Service
 public class LoginServices{
 
-    //private HashSet<UserDataObject> users;
+    @Autowired
+    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    public LoginServices() {
-        //this.users = new HashSet<UserDataObject>();
-    }
-
-    public boolean checkUser(String username, JdbcTemplate jdbcTemplate) {
+    public boolean checkUser(String username) {
         System.out.println("Checking User - " + username);
-        ArrayList<Map<String,Object>> returnList = new ArrayList<Map<String,Object>>(jdbcTemplate.queryForList("SELECT * FROM users WHERE username = '" + username + "'"));
+        String sql = "SELECT * FROM users WHERE username = :username";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("username", username);
+        
+        ArrayList<Map<String,Object>> returnList = new ArrayList<>(namedParameterJdbcTemplate.queryForList(sql, params));
         System.out.println(returnList.size() + "- 0 is user not found, 1 is user found");
-        if(returnList.size() == 0) {
-            System.out.println("False");
-            return false;
-        }
-        else {
-            System.out.println("True");
-            return true;
-        }
-
-        /*for(UserDataObject user : users) {
-            if(user.getUsername().equals(username)) {
-                System.out.println("True");
-                return true;
-            }
-        }
-        System.out.println("False");
-        return false;
-        */
-
+        return returnList.size() != 0;
     }
 
-    public boolean addUser(String usernameWanted, String passwordWanted, JdbcTemplate jdbcTemplate) throws NoSuchAlgorithmException {
-        if(checkUser(usernameWanted,jdbcTemplate) == true) {
+    public boolean addUser(String usernameWanted, String passwordWanted) throws NoSuchAlgorithmException {
+        if(checkUser(usernameWanted)) {
             System.out.println("User Already Exists");
             return false;
         }
         System.out.println("Adding User");
         UserDataObject userToAdd = new UserDataObject(usernameWanted, passwordWanted);
-        //users.add(userToAdd);
-        System.out.println("Adding user to db...\n" + userToAdd.addUserToDatabase(jdbcTemplate));
+        System.out.println("Adding user to db...\n" + userToAdd.addUserToDatabase());
         return true;
     }
 
-    public boolean removeUser(String username, JdbcTemplate jdbcTemplate) {
-        if(checkUser(username,jdbcTemplate) == false) {
+    public boolean removeUser(String username) {
+        if(!checkUser(username)) {
             System.out.println("User Does Not Exist");
             return false;
         }
-        jdbcTemplate.execute("DELETE FROM users WHERE username = '" + username + "'");
+        String sql = "DELETE FROM users WHERE username = :username";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("username", username);
+        namedParameterJdbcTemplate.update(sql, params);
         return true;
-        
-
-        /*for(UserDataObject user : users) {
-            if(user.getUsername().equals(username)) {
-                users.remove(user);
-                return true;
-            }
-        }
-        return false;*/
     }
 
-    public boolean authenticateUserPassword(String username, String password, JdbcTemplate jdbcTemplate) throws NoSuchAlgorithmException {
-        if(checkUser(username,jdbcTemplate) == false) {
+    public boolean authenticateUserPassword(String username, String password) throws NoSuchAlgorithmException {
+        if(!checkUser(username)) {
             System.out.println("User Does Not Exist");
             return false;
         }
 
-        ArrayList<Map<String,Object>> returnList = new ArrayList<Map<String,Object>>(jdbcTemplate.queryForList("SELECT * FROM users WHERE username = '" + username + "'"));
+        String sql = "SELECT * FROM users WHERE username = :username";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("username", username);
+
+        ArrayList<Map<String,Object>> returnList = new ArrayList<>(namedParameterJdbcTemplate.queryForList(sql, params));
         String salt = returnList.get(0).get("salt").toString();
         String hashPassword = returnList.get(0).get("hash_pass").toString();
-        MessageDigest digest;
-        digest = MessageDigest.getInstance("SHA-256");
+        MessageDigest digest = MessageDigest.getInstance("SHA-256");
         digest.reset();
         digest.update(salt.getBytes());
         byte[] hash = digest.digest(password.getBytes());
         String attemptedHashPassword = bypeArrayToString(hash);
         System.out.println(attemptedHashPassword + " " + hashPassword);
         return attemptedHashPassword.equals(hashPassword);
-
-        /*for(UserDataObject user : users) {
-            if(user.getUsername().equals(username) && user.authenticateUserPassword(password)) {
-                return true;
-            }
-        }
-        return false;*/
     }
 
-    public boolean authenticateUserSessionID(String username, String sessionID, JdbcTemplate jdbcTemplate) throws NoSuchAlgorithmException {
-        if(checkUser(username,jdbcTemplate) == false) {
+    public boolean authenticateUserSessionID(String username, String sessionID) throws NoSuchAlgorithmException {
+        if(!checkUser(username)) {
             System.out.println("User Does Not Exist");
             return false;
         }
-        ArrayList<Map<String,Object>> returnList = new ArrayList<Map<String,Object>>(jdbcTemplate.queryForList("SELECT * FROM users WHERE username = '" + username + "'"));
+
+        String sql = "SELECT * FROM users WHERE username = :username";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("username", username);
+
+        ArrayList<Map<String,Object>> returnList = new ArrayList<>(namedParameterJdbcTemplate.queryForList(sql, params));
         String latestSessionID = returnList.get(0).get("recent_session_id").toString();
         return latestSessionID.equals(sessionID);
-        
-
-        /**for(UserDataObject user : users) {
-            if(user.getUsername().equals(username) && user.authenticateSessionID(sessionID)) {
-                return true;
-            }
-        }
-        return false;*/
     }
 
-    public String generateSessionID(String username, JdbcTemplate jdbcTemplate) throws NoSuchAlgorithmException {
-        if(checkUser(username,jdbcTemplate) == false) {
+    public String generateSessionID(String username) throws NoSuchAlgorithmException {
+        if(!checkUser(username)) {
             System.out.println("User Does Not Exist");
             return null;
         }
         System.out.println("Generating Session ID");
         String sessionID = this.generateAUserSessionID();
         System.out.println("Session ID Generated: " + sessionID);
-        jdbcTemplate.execute("UPDATE users SET recent_session_id = '" + sessionID + "' WHERE username = '" + username + "'");
-        return sessionID;
-        
 
-        /* 
-        for(UserDataObject user : users) {
-            if(user.getUsername().equals(username)) {
-                return user.generateSessionID();
-            }
-        }
-        return null;
-        */
+        String sql = "UPDATE users SET recent_session_id = :sessionID WHERE username = :username";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("sessionID", sessionID);
+        params.addValue("username", username);
+
+        namedParameterJdbcTemplate.update(sql, params);
+        return sessionID;
     }
 
-    public boolean logout(String username, String sessionID, JdbcTemplate jdbcTemplate) throws NoSuchAlgorithmException {
-        if(this.authenticateUserPassword(username, sessionID, jdbcTemplate)) {
+    public boolean logout(String username, String sessionID) throws NoSuchAlgorithmException {
+        if(!this.authenticateUserPassword(username, sessionID)) {
             System.out.println("User Not Authenticated and Could Not Be Logout");
             return false;
         }
-        jdbcTemplate.execute("UPDATE users SET recent_session_id = NULL WHERE username = '" + username + "'");
+
+        String sql = "UPDATE users SET recent_session_id = NULL WHERE username = :username";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("username", username);
+
+        namedParameterJdbcTemplate.update(sql, params);
         return true;
-        
-
-
-        /*for(UserDataObject user : users) {
-            if(user.getUsername().equals(username) && user.authenticateSessionID(sessionID)) {
-                user.logout();
-                return true;
-            }
-        }
-        return false;*/
     }
 
-     private static String bypeArrayToString(byte[] bytes) {
+    private static String bypeArrayToString(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {
             sb.append(String.format("%02x", b));
         }
         return sb.toString();
     }
-    
+
     private String generateAUserSessionID() {
         SecureRandom random = new SecureRandom();
         byte[] bytes = new byte[16];

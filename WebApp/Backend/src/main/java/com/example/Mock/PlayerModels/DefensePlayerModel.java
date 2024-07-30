@@ -1,6 +1,8 @@
-package com.example.Mock.StartingClasses;
+package com.example.Mock.PlayerModels;
 
-public class DefensePlayerModel extends PlayerModel {
+import com.example.Mock.DAO.PlayerDataObject;
+
+public class DefensePlayerModel extends PlayerDataObject {
     private static final double DEFENSEALLOWEDREACH = 0.5;
     public static final String POSITIONSHORTHANDLE = "DST";
 

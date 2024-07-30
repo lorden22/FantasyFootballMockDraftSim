@@ -1,6 +1,8 @@
-package com.example.Mock.StartingClasses;
+package com.example.Mock.PlayerModels;
 
-public class RunningBackPlayerModel extends PlayerModel {
+import com.example.Mock.DAO.PlayerDataObject;
+
+public class RunningBackPlayerModel extends PlayerDataObject {
 	private static final double RUNNINGBACKPOSITIONREACHWEIGHT = 0.2;
 	public static final String POSITIONSHORTHANDLE = "RB";
 	
