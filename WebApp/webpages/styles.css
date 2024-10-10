@@ -103,9 +103,8 @@ body {
 }
 
 .form-label-inline {
-    font-weight: bold;
     margin-bottom: 5px;
-    color: #4a5568;
+    color: white;
     display: inline-block;
     width: 200px;
     text-align: right;
@@ -288,14 +287,14 @@ body {
     font-size: 28px;
     font-weight: bold;
     margin: 0;
-    color: #2d3748;
+    color: white;
 }
 
 .secondary-heading-container h2 {
     font-size: 24px;
     font-weight: bold;
     margin: 20px 0;
-    color: #6c757d;
+    color: white;
 }
 
 .draft-mode-select-container {
@@ -304,7 +303,7 @@ body {
 }
 
 .draft-mode-button {
-    background-color: #007bff;
+    background-color: #00bd19;
     color: #fff;
     border: none;
     border-radius: 3px;
@@ -317,10 +316,11 @@ body {
 }
 
 .draft-mode-button:hover {
-    background-color: #0056b3;
+    background-color: #108800;
 }
 
 .draft-form-container {
+    color: white;
     margin-top: 30px;
 }
 
@@ -346,7 +346,7 @@ body {
     display: block;
     margin: 20px auto;
     width: 200px;
-    background-color: #007bff;
+    background-color: #00bd19;
     color: #fff;
     border: none;
     border-radius: 3px;
@@ -358,17 +358,18 @@ body {
 }
 
 .get-draft-form input[type="button"]:hover {
-    background-color: #0056b3;
+    background-color: #108800;
 }
+
 
 /* Message Container */
 .message-container {
-    display: none;
     position: fixed;
     top: 20px;
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
+    display: none;
 }
 
 .message-container.show {
@@ -384,10 +385,10 @@ body {
     text-align: center;
 }
 
-.message.success {
-    background-color: #28a745;
-}
-
 .message.error {
     background-color: #dc3545;
+}
+
+.message.success {
+    background-color: #28a745;
 }

@@ -18,12 +18,11 @@ public class UserDataObject implements UserDAO  {
     private String hashPassword;
     private String salt;
 
-    @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    public UserDataObject(String username, String passwordText) throws NoSuchAlgorithmException {
+    public UserDataObject(String username, String passwordText, NamedParameterJdbcTemplate namedParameterJdbcTemplate) throws NoSuchAlgorithmException {
         this.username = username;
-
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
         SecureRandom random = new SecureRandom();
         byte[] bytes = new byte[16];
         random.nextBytes(bytes);

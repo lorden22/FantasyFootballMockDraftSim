@@ -37,7 +37,7 @@ public class LoginServices{
             return false;
         }
         System.out.println("Adding User");
-        UserDataObject userToAdd = new UserDataObject(usernameWanted, passwordWanted);
+        UserDataObject userToAdd = new UserDataObject(usernameWanted, passwordWanted, this.namedParameterJdbcTemplate);
         System.out.println("Adding user to db...\n" + userToAdd.addUserToDatabase());
         return true;
     }
@@ -110,7 +110,7 @@ public class LoginServices{
     }
 
     public boolean logout(String username, String sessionID) throws NoSuchAlgorithmException {
-        if(!this.authenticateUserPassword(username, sessionID)) {
+        if(!this.authenticateUserSessionID(username, sessionID)) {
             System.out.println("User Not Authenticated and Could Not Be Logout");
             return false;
         }

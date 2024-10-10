@@ -33,8 +33,9 @@ public class DraftServices {
     @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
-    public DraftServices(int currDraftID) {
+    public DraftServices(int currDraftID, NamedParameterJdbcTemplate namedParameterJdbcTemplate) {
         this.nextDraftID = currDraftID;
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
     }
 
     // checks from main page

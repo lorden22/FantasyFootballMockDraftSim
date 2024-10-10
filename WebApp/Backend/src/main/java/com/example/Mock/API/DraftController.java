@@ -26,7 +26,7 @@ public class DraftController {
         if(count==null) {
             count=1;
         }
-        this.draftServices = new DraftServices(count);
+        this.draftServices = new DraftServices(count, namedParameterJdbcTemplate);
         
         System.out.println("Database Connection: " + namedParameterJdbcTemplate.getJdbcTemplate().getDataSource().toString());
         System.out.println("Starting draft_id: " + count);

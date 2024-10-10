@@ -1,16 +1,25 @@
+"use strict";
+
 function loadGifWhileRenderPage(functionToLoad: () => void): void {
     setTimeout(() => {
-        document.getElementById("loading-container")!.style.display = "none";
-        document.getElementById("content-container")!.style.display = "block";
+        const loadingContainer = document.getElementById("loading-container");
+        const contentContainer = document.getElementById("content-container");
+        if (loadingContainer && contentContainer) {
+            loadingContainer.style.display = "none";
+            contentContainer.style.display = "block";
+        }
     }, 300);
     functionToLoad();
 }
 
-
 function loadGifWhileBigPageChange(functionToLoad: () => void): void {
     setTimeout(() => {
-        document.getElementById("loading-container")!.style.display = "none";
-        document.getElementById("content-container")!.style.display = "block";
+        const loadingContainer = document.getElementById("loading-container");
+        const contentContainer = document.getElementById("content-container");
+        if (loadingContainer && contentContainer) {
+            loadingContainer.style.display = "none";
+            contentContainer.style.display = "block";
+        }
     }, 50);
     functionToLoad();
 }
@@ -24,49 +33,70 @@ function goToHomePage(): void {
 }
 
 function loadUserName(): void {
-    console.log("UserName = " + getCookie("username"))
-    if(getCookie("username") == "") {
-        alert("You must be logged in to view this page.")
-        window.location.href = "loginpage.html"
-    }
-    else {
-        document.getElementById("userNameSpan")!.innerHTML = getCookie("username")
+    console.log("UserName = " + getCookie("username"));
+    if (getCookie("username") == "") {
+        alert("You must be logged in to view this page.");
+        window.location.href = "loginpage.html";
+    } else {
+        const userNameSpan = document.getElementById("userNameSpan");
+        if (userNameSpan) {
+            userNameSpan.innerHTML = getCookie("username");
+        }
     }
 }
 
-async function authenticateSession(): Promise<boolean>  {
-    var authenticateSessionRes: Response;
+async function authenticateSession(): Promise<boolean> {
+    let authenticateSessionRes: Response;
     try {
-        authenticateSessionRes = await
-        fetch("http://localhost:80/api/login/attemptSession/?username="+getCookie("username")+"&sessionID="+getCookie("sessionID"), {
+        authenticateSessionRes = await fetch("http://localhost:80/api/login/attemptSession/?username=" + getCookie("username") + "&sessionID=" + getCookie("sessionID"), {
             method: 'GET',
-        })
+        });
+    } catch {
+        showMessage("Server is down. Please try again later. Returning to login page.", "error");
+        setTimeout(() => {
+            window.location.href = "loginpage.html";
+        }, 2000);
+        return false;
     }
-    catch {
-        alert("Server is down. Please try again later. Returning to login page.")
-        window.location.href = "loginpage.html"
-        return false
-    }
-    let authenticateSessionData: Boolean = await authenticateSessionRes.json()
-
+    let authenticateSessionData = await authenticateSessionRes.json();
     if (authenticateSessionData == true) {
-        console.log("Session authenticated.")
+        console.log("Session authenticated.");
         return true;
+    } else {
+        return false;
     }
-    else return false;
 }
 
 async function logoutServerSide(): Promise<void> {
-     let logoutRes = await
-    fetch("http://localhost:80/api/login/logout/?username="+getCookie("username")+"&sessionID="+getCookie("sessionID"), {
+    let logoutRes = await fetch("http://localhost:80/api/login/logout/?username=" + getCookie("username") + "&sessionID=" + getCookie("sessionID"), {
         method: 'POST',
-    })
-
-    let logoutData: Boolean = await logoutRes.json()
-
+    });
+    let logoutData = await logoutRes.json();
     if (logoutData == true) {
-        deleteAllCookies();
-        window.location.href = "loginpage.html"
+        showMessage("Logout successful. Redirecting to login page...", "error");
+        setTimeout(() => {
+            deleteAllCookies();
+            window.location.href = "loginpage.html";
+        }, 2000);
+    } else {
+        showMessage("Logout failed.", "error");
     }
-    else alert("Logout failed.")
+}
+
+function showMessage(message: string, type: 'error' | 'success'): void {
+    const messageContainer = document.getElementById('message-container');
+    if (messageContainer) {
+        const messageElement = document.createElement('div');
+        messageElement.className = `message ${type}`;
+        messageElement.textContent = message;
+        messageContainer.appendChild(messageElement);
+        messageContainer.classList.add('show');
+
+        setTimeout(() => {
+            messageElement.remove();
+            if (messageContainer.children.length === 0) {
+                messageContainer.classList.remove('show');
+            }
+        }, 3000);
+    }
 }

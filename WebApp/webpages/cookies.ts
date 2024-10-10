@@ -32,10 +32,6 @@ function deleteAllCookies(): void {
   let userName: string;
 
   for (let i = 0; i < cookies.length; i++) {
-    if (cookies[i].split("=")[0] == "username") {
-      userName = cookies[i].split("=")[1];
-      alert("Logged out of " + userName + "'s account.");
-    }
     console.log("Send this to Delete cookie -  " + cookies[i].split("=")[0]);
     deleteCookie(cookies[i].split("=")[0]);
   }

@@ -96,25 +96,23 @@ async function selectedViewDraftHistory(): Promise<void> {
 }
 
 async function selectedDeleteCurrentDraft(): Promise<void> {
-    if(await authenticateSession() == true) {
-        let res = await fetch("http://localhost:80/api/teams/deleteThisDraft/?username="+getCookie("username"),{   
-            method: 'POST',})
-        let boolForCurrentDraft: Boolean = await res.json();
+    if (await authenticateSession()) {
+        let res = await fetch("http://localhost:80/api/teams/deleteThisDraft/?username=" + getCookie("username"), {
+            method: 'POST',
+        });
+        let boolForCurrentDraft = await res.json();
         console.log(boolForCurrentDraft);
-        alert("Draft deleted. You may now start a new draft.")
-        let resumeDraftButton: HTMLButtonElement | null = document.getElementById("resumeDraftButton") as HTMLButtonElement | null;
-        let deleteDraftButton: HTMLButtonElement | null = document.getElementById("deleteDraftButton") as HTMLButtonElement | null;
-        if (resumeDraftButton == null || deleteDraftButton == null) {
-            console.log("resumeDraftButton or deleteDraftButton is null. Try again.")
-            return;
-        }
-        else {
+        showMessage("Draft deleted. You may now start a new draft.", "error");
+        let resumeDraftButton = document.getElementById("resumeDraftButton");
+        let deleteDraftButton = document.getElementById("deleteDraftButton");
+        if (resumeDraftButton && deleteDraftButton) {
             resumeDraftButton.style.display = "none";
             deleteDraftButton.style.display = "none";
+        } else {
+            console.log("resumeDraftButton or deleteDraftButton is null. Try again.");
         }
-    }
-    else {
-        console.log("User not logged in. Redirecting to login page.")
+    } else {
+        console.log("User not logged in. Redirecting to login page.");
         deleteAllCookies();
     }
 }

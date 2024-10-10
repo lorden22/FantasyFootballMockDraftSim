@@ -72,11 +72,3 @@ async function attemptLogin() {
         showMessage("An error occurred. Please try again.", "error");
     }
 }
-function showMessage(message, type) {
-    const messageContainer = document.getElementById("message-container");
-    messageContainer.innerHTML = `<div class="message ${type}">${message}</div>`;
-    messageContainer.classList.add("show");
-    setTimeout(() => {
-        messageContainer.classList.remove("show");
-    }, 3000);
-}
