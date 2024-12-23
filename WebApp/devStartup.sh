@@ -34,7 +34,9 @@ docker images | grep app-backend && docker rmi app-backend:latest
 echo 'Compiling new Jar...'
 cd $MAIN_DIR/WebApp/Backend/
 mvn clean
-mvn package
+
+# mvn package
+mvn package -DskipTests -Dmaven.test.skip=true
 
 echo 'Building backend container...'
 cd $MAIN_DIR

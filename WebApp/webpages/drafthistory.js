@@ -157,9 +157,13 @@ async function renderDraftHistoryTeamHistorySelecter() {
             intCurrTeamNumber++;
             console.log(intCurrTeamNumber);
             let currTeamRow = document.createElement("tr");
+            currTeamRow.style.width = "100%";
+            currTeamRow.style.justifyContent = "space-between";
+            currTeamRow.style.alignItems = "center";
             currTeamRow.id = "draftHistoryTeamRow" + intCurrTeamNumber;
             let currTeamName = document.createElement("td");
             currTeamName.id = "draftHistoryTeamName" + intCurrTeamNumber;
+            let currTeamViewButtonTd = document.createElement("td");
             currTeamName.innerHTML = currTeam.teamName;
             let currTeamViewButton = document.createElement("btn");
             currTeamViewButton.id = "draftHistoryViewButton" + intCurrTeamNumber;
@@ -168,8 +172,9 @@ async function renderDraftHistoryTeamHistorySelecter() {
             currTeamViewButton.className = "btn btn-primary";
             currTeamViewButton.style.margin = "5%";
             currTeamViewButton.style.padding = "5%";
+            currTeamViewButtonTd.appendChild(currTeamViewButton);
             currTeamRow.appendChild(currTeamName);
-            currTeamRow.appendChild(currTeamViewButton);
+            currTeamRow.appendChild(currTeamViewButtonTd);
             let allTeamsTableBody = document.getElementById("allTeamsTableBody");
             if (allTeamsTableBody == null) {
                 console.log("allTeamsTableBody is null. Try again.");
@@ -177,14 +182,14 @@ async function renderDraftHistoryTeamHistorySelecter() {
             }
             allTeamsTableBody.appendChild(currTeamRow);
         }
-        let allTeamsTable = document.getElementById("allTeamsTable");
+        let teamReviewSection = document.getElementById("teamReviewSection");
         let draftReviewSelecterForm = document.getElementById("draftReviewSelecterForm");
         let backButton = document.getElementById("backButton");
-        if (allTeamsTable == null || draftReviewSelecterForm == null || backButton == null) {
-            console.log("allTeamsTable or draftReviewSelecterForm or backButton is null. Try again.");
+        if (teamReviewSection == null || draftReviewSelecterForm == null || backButton == null) {
+            console.log("teamReviewSection or draftReviewSelecterForm or backButton is null. Try again.");
             return;
         }
-        allTeamsTable.style.display = "block";
+        teamReviewSection.style.display = "flex";
         draftReviewSelecterForm.style.display = "none";
         backButton.style.display = "inline";
     }
@@ -222,6 +227,8 @@ async function viewTeam(teamID) {
                 let newBenchPlayerRow = document.createElement("tr");
                 newBenchPlayerRow.id = "benchPlayerRow" + i;
                 newBenchPlayerRow.style.width = "100%";
+                newBenchPlayerRow.style.height = "7%";
+                newBenchPlayerRow.style.justifyContent = "space-between";
                 let newBenchPlayerDepthChartPosition = document.createElement("td");
                 newBenchPlayerDepthChartPosition.id = "depthChartPositionBench" + i;
                 newBenchPlayerDepthChartPosition.innerHTML = "Bench";
@@ -254,6 +261,8 @@ async function viewTeam(teamID) {
         let newStarterRow = document.createElement("tr");
         newStarterRow.id = "starterRow" + stringPosition;
         newStarterRow.style.width = "100%";
+        newStarterRow.style.height = "7%";
+        newStarterRow.style.justifyContent = "space-between";
         let newStarterDepthChartPosition = document.createElement("td");
         newStarterDepthChartPosition.id = "depthChartPositionStarter" + stringPosition;
         newStarterDepthChartPosition.innerHTML = "Starter";
@@ -354,25 +363,22 @@ async function resetDraftHistoryPage() {
     if (await authenticateSession() == true) {
         let draftHistoryPlayerLog = document.getElementById("draftHistoryPlayerLog");
         let draftHistoryPlayerLogBody = document.getElementById("draftReviewPlayerLogBody");
-        let allTeamsTable = document.getElementById("allTeamsTable");
+        let teamReviewSection = document.getElementById("teamReviewSection");
         let allTeamsTableBody = document.getElementById("allTeamsTableBody");
-        let teamHistoryTable = document.getElementById("teamHistoryTable");
         let teamHistoryTableBody = document.getElementById("teamHistoryTableBody");
         let draftReviewSelecterForm = document.getElementById("draftReviewSelecterForm");
         let backButton = document.getElementById("backButton");
-        if (draftHistoryPlayerLog == null || allTeamsTable == null ||
-            teamHistoryTable == null || draftReviewSelecterForm == null || backButton == null ||
+        if (draftHistoryPlayerLog == null || teamReviewSection == null ||
+            draftReviewSelecterForm == null || backButton == null ||
             draftHistoryPlayerLogBody == null || allTeamsTableBody == null || teamHistoryTableBody == null) {
-            console.log("draftHistoryPlayerLog or draftReviewPlayerLogBody or allTeamsTable or allTeamsTableBody or teamHistoryTable or teamHistoryTableBody or " +
-                "draftReviewSelecterForm or backButton is null. Try again.");
+            console.log("One or more required elements are null. Try again.");
             return;
         }
         else {
             draftHistoryPlayerLog.style.display = "none";
             draftHistoryPlayerLogBody.innerHTML = "";
-            allTeamsTable.style.display = "none";
+            teamReviewSection.style.display = "none";
             allTeamsTableBody.innerHTML = "";
-            teamHistoryTable.style.display = "none";
             teamHistoryTableBody.innerHTML = "";
             draftReviewSelecterForm.style.display = "block";
             backButton.style.display = "none";

@@ -396,33 +396,372 @@ body {
 
 /* Draft Page Specific Styles */
 #content-container .custom-col-4 {
-    flex: 1; /* Allow columns to grow equally */
-    box-sizing: border-box; /* Include padding and border in the element's total width */
-    padding: 10px; /* Add some padding */
+    box-sizing: border-box;
+    padding: 10px;
+    height: 100%;
+    overflow: hidden;
+    width: 100%;
+    
+}
+
+/* Draft Controls specific styles */
+#draftControlsPar {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    width: 100%;
+    height: calc(100vh - 250px);
+    min-height: 200px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+#draftControlsPar form {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+#draftControlsPar input[type="text"] {
+    width: 80%;
+    max-width: 300px;
+    margin: 10px 0;
+    padding: 8px;
+}
+
+#draftControlsPar button {
+    width: auto;
+    min-width: 150px;
+    max-width: 200px;
+    margin: 10px auto;
+    padding: 8px 15px;
 }
 
 #content-container .custom-row {
-    display: flex; /* Use flexbox for layout */
-    justify-content: space-between; /* Distribute space evenly */
-    height: calc(100vh - 100px); /* Adjust height to fit within the viewport */
+    display: flex;
+    justify-content: space-between;
+    height: calc(100vh - 150px);
+    margin-top: 20px;
+    width: 100%;
+    align-items: flex-start;
 }
 
-#content-container #playerListPar {
-    padding-top: 5%; /* Full height of the column */
+#content-container #playerListPar,
+#content-container #draftLogPar {
+    height: calc(100vh - 250px);
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    width: 100%;
+}
+
+#content-container #playerListPar::-webkit-scrollbar,
+#content-container #draftLogPar::-webkit-scrollbar {
+    display: none;
 }
 
 #content-container .custom-scrollable-col {
-    overflow-y: auto; /* Enable vertical scrolling */
-    max-height: calc(95% - 40px); /* Set a maximum height, adjust for header */
+    height: 100%;
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    width: 100%;
+}
+
+#content-container .custom-scrollable-col::-webkit-scrollbar {
+    display: none;
+}
+
+#content-container .custom-player-list-par {
+    margin-top: 20px;
+    padding-bottom: 20px;
+}
+
+/* Keep headers visible */
+#content-container .sticky-header {
+    position: sticky;
+    top: 0;
+    background-color: inherit;
+    z-index: 10;
+}
+
+/* Draft History Page Specific Styles */
+#draftHistoryTableDiv {
+    margin: 20px;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+}
+
+#draftHistoryTable {
+    margin-bottom: 0;
+}
+
+#draftHistoryTable th {
+    background-color: rgba(0, 0, 0, 0.3);
+    color: white;
+    font-weight: bold;
+}
+
+#draftHistoryTable td {
+    color: white;
+}
+
+#draftHistoryTable button {
+    background-color: #00bd19;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 8px 15px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+#draftHistoryTable button:hover {
+    background-color: #108800;
+}
+
+/* Draft Review Page Specific Styles */
+.review-options {
+    margin: 20px;
+    text-align: center;
+}
+
+.review-options .draft-mode-button {
+    margin: 0 10px;
+}
+
+.review-table {
+    margin: 20px;
+    padding: 20px;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    height: calc(100vh - 250px);
+    overflow: hidden;
+}
+
+.review-table table {
+    margin-bottom: 0;
+    height: 100%;
+}
+
+.review-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.review-table tbody {
+    display: block;
+    height: calc(100% - 50px);
+    overflow-y: auto;
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
 }
 
-#content-container .custom-scrollable-col::-webkit-scrollbar {
-    display: none; /* Hide scrollbar for Chrome, Safari, and Opera */
+.review-table tbody::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
 }
 
-#content-container .custom-player-list-par {
-    margin-top: 20px; /* Adjust this value as needed for spacing */
-    padding-bottom: 20px; /* Add padding to prevent overlap */
+.review-table thead,
+.review-table tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
 }
+
+.review-table th {
+    background-color: rgba(0, 0, 0, 0.3);
+    color: white;
+    font-weight: bold;
+}
+
+.review-table td {
+    color: white;
+    background-color: transparent !important;
+}
+
+.review-table tbody {
+    background-color: transparent;
+}
+
+.review-table tr {
+    background-color: transparent !important;
+}
+
+.review-table tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.review-table tr:nth-of-type(even) {
+    background-color: transparent !important;
+}
+
+.review-table button {
+    background-color: #00bd19;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    padding: 8px 15px;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.review-table button:hover {
+    background-color: #108800;
+}
+
+#backButton {
+    margin-left: 10px;
+    background-color: #dc3545;
+}
+
+#backButton:hover {
+    background-color: #c82333;
+}
+
+/* Team Review Section Styles */
+.team-review-section {
+    margin: 0;
+    padding: 0 20px;
+    height: calc(100vh - 250px);
+}
+
+.team-review-section .col-sm-4,
+.team-review-section .col-sm-8 {
+    height: 100%;
+}
+
+.team-review-section .review-table {
+    margin: 0;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.team-review-section .table-dark {
+    background-color: #343a40;
+    margin-bottom: 0;
+}
+
+.team-review-section table {
+    font-size: 0.9rem;
+    height: 100%;
+}
+
+.team-review-section thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.team-review-section tbody {
+    display: block;
+    height: calc(100% - 50px);
+    overflow-y: auto;
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
+.team-review-section tbody::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.team-review-section thead,
+.team-review-section tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+/* Common striping for both tables */
+.team-review-section .table-striped tbody tr {
+    background-color: #343a40;
+}
+
+.team-review-section .table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+/* Override any cell-specific backgrounds */
+.team-review-section .table-dark td,
+.team-review-section .table-dark th {
+    background-color: transparent !important;
+    padding: 8px;
+    vertical-align: middle;
+}
+
+.team-review-section .btn {
+    padding: 4px 8px;
+    margin: 0;
+}
+
+/* Specific header background to ensure visibility */
+.team-review-section thead th {
+    background-color: #343a40 !important;
+}
+
+/* Player Table Specific Styles */
+.player-table-container {
+    height: 100%;
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.player-table-container::-webkit-scrollbar {
+    display: none;
+}
+
+.player-table {
+    background-color: #343a40;
+    margin-bottom: 0;
+    width: 100%;
+}
+
+.player-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: #343a40;
+}
+
+.player-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.player-table tbody tr:nth-of-type(even) {
+    background-color: #343a40;
+}
+
+.player-table td,
+.player-table th {
+    padding: 8px;
+    vertical-align: middle;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}/* Team Table Styles - keeping original */
+#allTeamsTable.table-striped tbody tr:nth-of-type(odd) td {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+#allTeamsTable.table-striped tbody tr:nth-of-type(even) td {
+    background-color: #343a40;
+}
+
+.team-review-section .btn {
+    padding: 4px 8px;
+    margin: 0;
+}
+

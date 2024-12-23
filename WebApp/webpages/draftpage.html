@@ -40,7 +40,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="custom-col-4" id="draftControllerCol">
+                    <div class="custom-col-4" id="draftControllerCol" >
                         <div id="draftControllFormCol">
                             <h3 class="text-center">Draft Controls</h3>
                             <br>
@@ -49,13 +49,13 @@
                                 <input type="button" class="draft-mode-button" value="Start Draft" onClick="startDraftFromDraftPage()">
                             </form>
                             <form id="waitingDraftControllerForm" class="text-center hide">
-                                <p>Currently pick is <span id="currRound">1</span>.<span id="currPick">1</span>, <span id="nextPickInfo">your next pick is <span id="nextUserPickRound">1</span>.<span id="nextUserPick"></span>. 
-                                    Click the button below to simulate to your next draft pick.</span></p>
+                                <p>Currently pick is <span id="currRound">1</span>.<span id="currPick">1</span>, <span id="nextPickInfo">your next pick is <span id="nextUserPickRound">1</span>.<span id="nextUserPick"></span>.</span>
+                                Click the button below to simulate to your next draft pick.</p>
                                 <input type="button" class="draft-mode-button" value="Simulate" onClick="simulateToNextPick()">  
                             </form>
-                            <form id="draftControllerForm" class="text-center hide">
-                                <p>It's your turn at pick <span id="currUserPickRound">1</span>.<span id="currUserPickSpot">1</span></p>
-                                <p>Enter number next to player to draft: <input type="text" id="nextDraftPick"></p>
+                            <form id="draftControllerForm" class="text-center hide" style="width: 100%;">
+                                <p>It's your turn at pick <span id="currUserPickRound">1</span>.<span id="currUserPickSpot">1</span>
+                                    Enter number next to player to draft: <input type="text" id="nextDraftPick"></p>
                                 <input class="draft-mode-button" type="button" value="Draft Player" onClick="userDraftPlayer()">
                             </form>
                             <form id="draftCompleteForm" class="text-center hide">
