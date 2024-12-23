@@ -9,7 +9,7 @@ async function setUpDraft() {
                 let draftNotStartedForm = document.getElementById("draftNotStartedForm");
                 let draftControllerForm = document.getElementById("draftControllerForm");
                 if (draftNotStartedForm == null || draftControllerForm == null) {
-                    console.log("draftNotStartedForm or draftControllerForm is null. Try again.");
+                    showMessage("An error occurred while loading the draft interface. Please refresh the page.", "error");
                     return;
                 }
                 else {
@@ -25,7 +25,7 @@ async function setUpDraft() {
                 let currUserPickRound = document.getElementById("currUserPickRound");
                 let currUserPickSpot = document.getElementById("currUserPickSpot");
                 if (draftControllerForm == null || waitingDraftControllerForm == null || currUserPickRound == null || currUserPickSpot == null) {
-                    console.log("draftControllerForm or waitingDraftControllerForm is null. Try again.");
+                    showMessage("An error occurred while loading the draft interface. Please refresh the page.", "error");
                     return;
                 }
                 else {
@@ -52,7 +52,7 @@ async function setUpDraft() {
                 let currPickSpan = document.getElementById("currPick");
                 let nextUserPickSpan = document.getElementById("nextUserPick");
                 if (currPickSpan == null || nextUserPickSpan == null) {
-                    console.log("currPickSpan or nextUserPickSpan is null. Try again.");
+                    showMessage("An error occurred while loading the draft interface. Please refresh the page.", "error");
                     return;
                 }
                 else {
@@ -78,14 +78,18 @@ async function setUpDraft() {
             parseDraftLogData(data);
         }
         else if (draftType == "new") {
-            console.log("Staring New draft");
+            showMessage("Starting new draft...", "success");
         }
-        else
-            console.log("Error .... draftType = " + draftType);
+        else {
+            showMessage("Invalid draft type. Please try again.", "error");
+        }
     }
     else {
-        console.log("User not logged in. Redirecting to login page.");
-        deleteAllCookies();
+        showMessage("You must be logged in to access the draft. Redirecting to login page...", "error");
+        setTimeout(() => {
+            deleteAllCookies();
+            window.location.href = "loginpage.html";
+        }, 2000);
     }
 }
 async function startDraftFromDraftPage() {
@@ -357,32 +361,46 @@ async function simulateToNextPick() {
 }
 async function userDraftPlayer() {
     if (await authenticateSession() == true) {
-        await checkToClearDraftLog();
-        let res1 = await fetch("http://localhost:80/api/teams/getPlayersLeft/?username=" + getCookie("username"), {
-            method: 'GET',
-        });
-        let data1 = await res1.json();
-        let nextDraftPickElement = document.getElementById("nextDraftPick");
-        let nextDraftNumber = nextDraftPickElement ? Number(nextDraftPickElement.value) : null;
-        if (nextDraftNumber == null || isNaN(Number(nextDraftPickElement.value)) || nextDraftNumber <= 0 || nextDraftNumber > data1.length) {
-            console.log("nextDraftPickNumber is null or out of range. Try again.");
-            alert("Please enter a valid number.");
+        let nextDraftPick = document.getElementById("nextDraftPick");
+        if (nextDraftPick == null) {
+            showMessage("An error occurred while reading your draft pick. Please try again.", "error");
             return;
         }
-        let res = await fetch("http://localhost:80/api/teams/userDraftPlayer/?username=" + getCookie("username") + "&playerIndex=" + nextDraftNumber, {
+        let pick = parseInt(nextDraftPick.value);
+        if (isNaN(pick) || !Number.isInteger(pick) || pick < 1) {
+            showMessage("Please enter a valid player number to draft.", "error");
+            return;
+        }
+        let res = await fetch("http://localhost:80/api/teams/userDraftPlayer/?username=" + getCookie("username") + "&playerIndex=" + pick, {
             method: 'POST',
         });
         let data = await res.json();
-        console.log(data);
-        await getPlayerLeft();
         parseDraftLogData(data);
-        if (await endDraft() == false) {
-            await changeFormForNextPick();
+        getPlayerLeft();
+        nextDraftPick.value = "";
+        let currPick = await getCurrPick();
+        let nextUserPick = await getNextUserPick();
+        let currRound = await getCurrRound();
+        let draftControllerForm = document.getElementById("draftControllerForm");
+        let waitingDraftControllerForm = document.getElementById("waitingDraftControllerForm");
+        let currPickSpan = document.getElementById("currPick");
+        let nextUserPickSpan = document.getElementById("nextUserPick");
+        if (draftControllerForm == null || waitingDraftControllerForm == null || currPickSpan == null || nextUserPickSpan == null) {
+            showMessage("An error occurred while updating the draft interface. Please refresh the page.", "error");
+            return;
         }
+        draftControllerForm.style.display = "none";
+        waitingDraftControllerForm.style.display = "block";
+        currPickSpan.innerHTML = String(currPick);
+        nextUserPickSpan.innerHTML = String(nextUserPick);
+        changeFormForNextPick();
     }
     else {
-        console.log("User not logged in. Redirecting to login page.");
-        deleteAllCookies();
+        showMessage("You must be logged in to make a draft pick. Redirecting to login page...", "error");
+        setTimeout(() => {
+            deleteAllCookies();
+            window.location.href = "loginpage.html";
+        }, 2000);
     }
 }
 async function endDraft() {

@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.TreeMap;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import com.example.Mock.DAO.PlayerDataObject;
 import com.example.Mock.DAO.TeamDataObject;
@@ -89,13 +91,32 @@ public class DraftController {
 
     @GetMapping(path="/getNextUserPickRound/")
     public int getNextUserPickRound(@RequestParam("username") String username) {
-        int draftID = draftServices.getUserMostRecentDraftID(username);
-        int draftSize = draftServices.getDraftSize(draftID);
-        int userPickInOddRound = draftServices.getUserStartingDraftSpot(draftServices.getUserTeamName(draftID), draftID);
-        int userPickInEvenRound = Math.abs(userPickInOddRound - draftSize) + 1;
-        int currRound = draftServices.getCurrRound(draftID);
-        int currPick = draftServices.getCurrPick(draftID);
-        return draftServices.getNextUserPickRound(draftSize, userPickInOddRound, userPickInEvenRound, currRound, currPick);
+        try {
+            int draftID = draftServices.getUserMostRecentDraftID(username);
+            int draftSize = draftServices.getDraftSize(draftID);
+            int userPickInOddRound = draftServices.getUserStartingDraftSpot(draftServices.getUserTeamName(draftID), draftID);
+            int userPickInEvenRound = draftSize - userPickInOddRound + 1;
+            int currRound = draftServices.getCurrRound(draftID);
+            int currPick = draftServices.getCurrPick(draftID);
+            
+            // Calculate next round based on current position
+            int nextRound = currRound;
+            if (currRound % 2 == 1) { // Odd round
+                if (currPick > userPickInOddRound) {
+                    System.out.println("Odd round, currPick: " + currPick + " > userPickInOddRound: " + userPickInOddRound);
+                    nextRound++;
+                }
+            } else { // Even round
+                if (currPick > userPickInEvenRound) {
+                    System.out.println("Even round, currPick: " + currPick + " > userPickInEvenRound: " + userPickInEvenRound);
+                    nextRound++;
+                }
+            }
+            
+            return nextRound;
+        } catch (Exception e) {
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Error calculating next user pick round", e);
+        }
     }
 
     @PostMapping(path="/userDraftPlayer/")

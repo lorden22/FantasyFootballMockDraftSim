@@ -49,17 +49,15 @@ async function selectedStartNewDraft(): Promise<void> {
         let res = await fetch("http://localhost:80/api/teams/checkForCurrentDraft/?username="+getCookie("username"),{
             method: 'POST',})
         let boolForCurrentDraft : Boolean = await res.json();
-        console.log(boolForCurrentDraft)
-
+        
         if (boolForCurrentDraft == true) {
-            alert("You already have a draft in progress. Please resume that draft or delete it before starting a new one.")
+            showMessage("You already have a draft in progress. Please resume that draft or delete it before starting a new one.", "error");
         }
         else {
-
             let draftModeSelectContainer: HTMLDivElement | null = document.getElementById("draftModeSelectContainer") as HTMLDivElement | null;
             let draftFormContainer: HTMLDivElement | null = document.getElementById("draftFormContainer") as HTMLDivElement | null;
             if (draftModeSelectContainer == null || draftFormContainer == null) {
-                console.log("draftModeSelectContainer or draftFormContainer is null. Try again.")
+                showMessage("An error occurred while loading the draft form. Please try again.", "error");
                 return;
             }
             else {
@@ -69,8 +67,11 @@ async function selectedStartNewDraft(): Promise<void> {
         }
     }
     else {
-        console.log("User not logged in. Redirecting to login page.")
-        deleteAllCookies();
+        showMessage("You must be logged in to start a draft. Redirecting to login page...", "error");
+        setTimeout(() => {
+            deleteAllCookies();
+            window.location.href = "loginpage.html";
+        }, 2000);
     }
 }
 
@@ -118,64 +119,67 @@ async function selectedDeleteCurrentDraft(): Promise<void> {
 }
 
 async function startDraft(): Promise<void> {
-
     function checkStartDraftInput(teamName: string, draftSize: number, draftPosition: number): boolean {
-        if (typeof teamName != "string") {
-            alert(teamName + " - Not a valid string value to name your team. Try again.")
-            return false
+        if (typeof teamName != "string" || teamName.trim() === "") {
+            showMessage("Please enter a valid team name.", "error");
+            return false;
         }
-        if (typeof draftSize != "number" ||
-            !Number.isInteger(draftSize)) {
-                alert(draftSize + " - Not a valid int entered for the draft size. Try again.")
-                return false
+        if (typeof draftSize != "number" || !Number.isInteger(draftSize) || draftSize < 2) {
+            showMessage("Please enter a valid number of teams (must be at least 2).", "error");
+            return false;
         }
-        if (typeof draftPosition != "number" ||
-            !Number.isInteger(draftPosition) ||
-            draftPosition > draftSize) {
-                alert(draftPosition + " - Not a valid int entered for your starting draft position. Try again.")
-                return false
+        if (typeof draftPosition != "number" || !Number.isInteger(draftPosition) || draftPosition < 1 || draftPosition > draftSize) {
+            showMessage("Please enter a valid draft position (must be between 1 and " + draftSize + ").", "error");
+            return false;
         }
-        return true
+        return true;
     }
 
     if(await authenticateSession() == true) {
-
         let teamNameInput: HTMLInputElement | null = document.getElementById("teamNameInput") as HTMLInputElement | null;
         let sizeOfTeamsInput: HTMLInputElement | null = document.getElementById("sizeOfTeamsInput") as HTMLInputElement | null;
         let draftPositionInput: HTMLInputElement | null = document.getElementById("draftPositionInput") as HTMLInputElement | null;
 
         if (teamNameInput == null || sizeOfTeamsInput == null || draftPositionInput == null) {
-            console.log("teamNameInput or sizeOfTeamsInput or draftPositionInput is null. Try again.")
+            showMessage("An error occurred while reading the form. Please try again.", "error");
             return;
         }
-        
         else {
-
             let teamName: string = teamNameInput.value;
             let draftSizeString: string = sizeOfTeamsInput.value;
             let draftPositionString: string = draftPositionInput.value;
+            
+            let draftSize = parseInt(draftSizeString);
+            let draftPosition = parseInt(draftPositionString);
 
-        
-            let draftSize = parseInt(draftSizeString)
-            let draftPosition = parseInt(draftPositionString)
+            if (isNaN(draftSize)) {
+                showMessage("Please enter a valid number for the number of teams.", "error");
+                return;
+            }
 
-            if (checkStartDraftInput(teamName,draftSize,draftPosition) == true) {
-                let res = await 
-                fetch(("http://localhost:80/api/teams/startDraft/?username="+getCookie("username")+"&teamName="+teamName+"&draftSize="+draftSize+"&draftPosition="+draftPosition), {
+            if (isNaN(draftPosition)) {
+                showMessage("Please enter a valid number for your draft position.", "error");
+                return;
+            }
+
+            if (checkStartDraftInput(teamName, draftSize, draftPosition) == true) {
+                let res = await fetch(("http://localhost:80/api/teams/startDraft/?username="+getCookie("username")+"&teamName="+teamName+"&draftSize="+draftSize+"&draftPosition="+draftPosition), {
                     method: 'POST',
-                })
-                let data = await res.json()
-                console.log(data)
-
+                });
+                let data = await res.json();
+                
                 document.cookie = "teamName=" + teamName + "; path=/";
                 document.cookie = "draftPosition=" + draftPositionString + "; path=/";
+                document.cookie = "draftType=new; path=/";
+                window.location.href = "draftpage.html";
             }
-            document.cookie = "draftType=new; path=/";
-            window.location.href = "draftpage.html"
         }
     }
     else {
-        console.log("User not logged in. Redirecting to login page.")
-        deleteAllCookies();
+        showMessage("You must be logged in to start a draft. Redirecting to login page...", "error");
+        setTimeout(() => {
+            deleteAllCookies();
+            window.location.href = "loginpage.html";
+        }, 2000);
     }
 }

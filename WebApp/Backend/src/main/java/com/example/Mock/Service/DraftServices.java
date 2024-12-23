@@ -163,8 +163,22 @@ public class DraftServices {
         for(int i = 1; i <= draftSize; i++) {
             List<Integer> teamArrayInt = this.createTeamIntArrayFromDB(draftID, i);
             List<PlayerDataObject> teamPlayerList = this.createPlayerModelListFromIntList(teamArrayInt, draftSize);
+            String teamName = namedParameterJdbcTemplate.queryForObject("SELECT team_name FROM teams WHERE draft_id = :draftID AND draft_spot = :draftSpot", 
+                new MapSqlParameterSource("draftID", draftID).addValue("draftSpot", i), String.class);
+
+            int round = 1;
+            int pickOdd = i;
+            int pickEven = Math.abs(i - draftSize) + 1;
+            int pick = pickOdd;
+            for(PlayerDataObject player : teamPlayerList) {
+                player.setSpotDrafted(round + "." + pick);
+                player.setTeamDraftedBy(teamName);
+                round++;
+                pick = round % 2 == 0 ? pickEven : pickOdd;
+            }
             allPlayers.addAll(teamPlayerList);
         }
+        Collections.sort(allPlayers, PlayerDataObject.spotDraftedComparator);
         return allPlayers;
     }
 
@@ -237,7 +251,7 @@ public class DraftServices {
         return playerPicked;
     }
 
-    public List<PlayerDataObject> userDraftPick(String username, int pick){
+    public List<PlayerDataObject> userDraftPick(String username, int pick) {
         int draftID = this.getUserMostRecentDraftID(username);
         int draftSize = this.getDraftSize(draftID);
         List<PlayerDataObject> playersLeft = this.getPlayersLeft(draftID, draftSize);
@@ -245,7 +259,9 @@ public class DraftServices {
         int currRound = this.getCurrRound(draftID);
         int currPick = this.getCurrPick(draftID);
         int playerRank = (int)playerToDraft.getRank();
-        String teamName = this.getTeamNameFromDraftSpot(draftID, draftID);
+        int draftSpot = (currRound % 2 == 0) ? draftSize - currPick + 1 : currPick;
+        String teamName = this.getTeamNameFromDraftSpot(draftID, draftSpot);
+        System.out.println("User Pick! \n Team: " + teamName + "\n Curr Pick: " + currRound + "." + currPick);
         this.updatePlayerPickedMetaData(playerToDraft, currRound, currPick, teamName);
         this.makePick(draftID, currPick, playerRank);
         this.moveToNextPick(draftID, username);
@@ -253,7 +269,8 @@ public class DraftServices {
     }
 
     private int checkForForcePickNeeded(int currRoundPick, int currPick, int draftID, int draftSize, List<PlayerDataObject> playersLeft) {
-        List<Integer> currTeamIntArray = this.createTeamIntArrayFromDB(draftID, currPick);
+        int draftSpot = (currRoundPick % 2 == 0) ? draftSize - currPick + 1 : currPick;
+        List<Integer> currTeamIntArray = this.createTeamIntArrayFromDB(draftID, draftSpot);
         List<PlayerDataObject> currTeamPlayerList = this.createPlayerModelListFromIntList(currTeamIntArray, draftSize);
         TreeMap<String, List<PlayerDataObject>> currTeamTreeMap = this.createTeamTreeFromDB(currTeamPlayerList);
         System.out.println(currTeamTreeMap);
@@ -287,21 +304,23 @@ public class DraftServices {
         return -1;
     }
 
-    public boolean makePick(int draftID, int draftSpot, int playerRankToPick) {
-        int draftSpotConverted = draftSpot;
-        if (checkForEvenOrOddRound(draftID)) {
-            draftSpotConverted = flipDraftPick(draftSpot, this.getDraftSize(draftID));
-        }
-        String sql1 = "SELECT COALESCE(team_array, '') AS team_array FROM teams WHERE draft_spot=:draftSpotConverted AND draft_id=:draftID";
+    public boolean makePick(int draftID, int currPick, int playerRankToPick) {
+        int currRound = this.getCurrRound(draftID);
+        int draftSize = this.getDraftSize(draftID);
+        // In even rounds, we need to convert the current pick to the correct team's draft spot
+        int draftSpot = (currRound % 2 == 0) ? draftSize - currPick + 1 : currPick;
+        
+        String sql1 = "SELECT COALESCE(team_array, '') AS team_array FROM teams WHERE draft_spot=:draftSpot AND draft_id=:draftID";
         MapSqlParameterSource params1 = new MapSqlParameterSource();
-        params1.addValue("draftSpotConverted", draftSpotConverted);
+        params1.addValue("draftSpot", draftSpot);
         params1.addValue("draftID", draftID);
         String teamArray = namedParameterJdbcTemplate.queryForObject(sql1, params1, String.class);
         teamArray += playerRankToPick + ",";
-        String sql2 = "UPDATE teams SET team_array = :teamArray WHERE draft_spot = :draftSpotConverted AND draft_id = :draftID";
+        
+        String sql2 = "UPDATE teams SET team_array = :teamArray WHERE draft_spot = :draftSpot AND draft_id = :draftID";
         MapSqlParameterSource params2 = new MapSqlParameterSource();
         params2.addValue("teamArray", teamArray);
-        params2.addValue("draftSpotConverted", draftSpotConverted);
+        params2.addValue("draftSpot", draftSpot);
         params2.addValue("draftID", draftID);
         namedParameterJdbcTemplate.update(sql2, params2);
         return true;
@@ -313,16 +332,21 @@ public class DraftServices {
         List<PlayerDataObject> playersDraftDuringSim = new ArrayList<>();
         int nextUserPickRound = this.getNextUserPickRound(draftSize, this.getUserStartingDraftSpot(this.getUserTeamName(draftID), draftID), Math.abs(this.getUserStartingDraftSpot(this.getUserTeamName(draftID), draftID) - draftSize) + 1, this.getCurrRound(draftID), this.getCurrPick(draftID));
         int nextUserPick = this.getNextUserPick(draftSize, this.getUserStartingDraftSpot(this.getUserTeamName(draftID), draftID), Math.abs(this.getUserStartingDraftSpot(this.getUserTeamName(draftID), draftID) - draftSize) + 1, this.getCurrRound(draftID), this.getCurrPick(draftID));
+        String teamName;
         while (!this.isDraftOver(this.getCurrRound(draftID), this.getCurrPick(draftID)) &&
                 !(nextUserPickRound == this.getCurrRound(draftID) 
                  && nextUserPick == this.getCurrPick(draftID))){
             int currRound = this.getCurrRound(draftID);
-            System.out.println("Curr Round: " + currRound);
             int currPick = this.getCurrPick(draftID);
-            System.out.println("Curr Pick: " + currPick);
+            // In even rounds, we need to convert the current pick to the correct team's draft spot
+            int draftSpot = (currRound % 2 == 0) ? draftSize - currPick + 1 : currPick;
+            
+            teamName = this.getTeamNameFromDraftSpot(draftID, draftSpot);
+            System.out.println("Computer Pick! \n Team: " + teamName + "\n Curr Pick: " + currRound + "." + currPick);
             List<PlayerDataObject> playersLeft = this.getPlayersLeft(draftID, draftSize);
             int pick = this.checkForForcePickNeeded(currRound, currPick, draftID, draftSize, playersLeft);
-            System.out.println("Pick: " + pick);
+            if (pick == -1) { System.out.println("No Force Pick Needed"); }
+            else { System.out.println("Force Pick Needed"); }
             if(pick == -1) {
                 VaribleOddsPicker randomNumGen = new VaribleOddsPicker();
                 pick = randomNumGen.newOdds(6);
@@ -330,12 +354,11 @@ public class DraftServices {
             }
             makePick(draftID, currPick, pick);
             moveToNextPick(draftID, username);
-            String teamName = this.getTeamNameFromDraftSpot(draftID, currPick);
             PlayerDataObject playerDrafted = this.createPlayerModel(pick, draftSize);
             playerDrafted = this.updatePlayerPickedMetaData(playerDrafted, currRound, currPick, teamName);
             playersDraftDuringSim.add(playerDrafted);
             System.out.println(playersDraftDuringSim.get(playersDraftDuringSim.size()-1).getFullName() + " was drafted in round " + currRound + " pick " + currPick);
-            System.out.println("'\n\n\'");
+            System.out.println("----------------------------------");
         }
         return playersDraftDuringSim;
     } 
