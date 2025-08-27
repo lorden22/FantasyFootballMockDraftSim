@@ -10,4 +10,4 @@ public interface TeamDataObjectDAO {
     int getTeamSize();
     boolean isUserTeam();
     TreeMap<String, ArrayList<PlayerDataObject>> getTeamTreeMap();
-}
+} 

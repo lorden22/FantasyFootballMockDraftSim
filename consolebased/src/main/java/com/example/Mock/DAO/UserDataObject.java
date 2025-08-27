@@ -3,28 +3,19 @@ package com.example.Mock.DAO;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Scope;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.stereotype.Repository;
-
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import com.example.common.Logger;
 
-@Repository
-@Scope(value = "prototype")
 public class UserDataObject implements UserDAO  {
-
     private String username;
     private String hashPassword;
     private String salt;
 
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-
-    public UserDataObject(String username, String passwordText, NamedParameterJdbcTemplate namedParameterJdbcTemplate) throws NoSuchAlgorithmException {
+    public UserDataObject(String username, String passwordText) throws NoSuchAlgorithmException {
         this.username = username;
-        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
+        Logger.logAuth(username, "USER_OBJECT_CREATED", "Creating user object with hashed password");
         SecureRandom random = new SecureRandom();
         byte[] bytes = new byte[16];
         random.nextBytes(bytes);
@@ -37,21 +28,22 @@ public class UserDataObject implements UserDAO  {
     }
 
     public boolean addUserToDatabase() {
-        String sql = "INSERT INTO users (username, hash_pass, salt) VALUES (:username, :hash_pass, :salt)";
-        MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("username", this.username);
-        params.addValue("hash_pass", this.hashPassword);
-        params.addValue("salt", this.salt);
-        
-        try {
-            namedParameterJdbcTemplate.update(sql, params);
-            Logger.logAuth(this.username, "USER_CREATED", "SUCCESS");
+        Logger.logAuth(this.username, "ADD_USER_TO_DB", "ATTEMPT");
+        String sql = "INSERT INTO users (username, hash_pass, salt) VALUES (?, ?, ?)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, this.username);
+            stmt.setString(2, this.hashPassword);
+            stmt.setString(3, this.salt);
+            stmt.executeUpdate();
+            Logger.logAuth(this.username, "ADD_USER_TO_DB", "SUCCESS");
             return true;
-        } catch (Exception error) {
+        } catch (SQLException error) {
             Logger.logError("Failed to add user " + this.username + " to database: " + error.getMessage());
+            Logger.logAuth(this.username, "ADD_USER_TO_DB", "FAILED");
             return false;
         }
-    }   
+    }
 
     private static String bypeArrayToString(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
@@ -60,4 +52,4 @@ public class UserDataObject implements UserDAO  {
         }
         return sb.toString();
     }
-}
+} 

@@ -15,13 +15,11 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
-import com.example.Mock.VaribleOddsPicker;
-import com.example.Mock.DAO.PlayerDataObject;
+import com.example.common.VaribleOddsPicker;
+import com.example.common.PlayerDataObject;
 import com.example.Mock.DAO.TeamDataObject;
-import com.example.Mock.PlayerModels.DefensePlayerModel;
-import com.example.Mock.PlayerModels.KickerPlayerModel;
-import com.example.Mock.PlayerModels.QuarterBackPlayerModel;
-import com.example.Mock.PlayerModels.TightEndPlayerModel;
+import com.example.common.PlayerModels.*;
+import com.example.common.Logger;
 
 @Service
 @Scope(value="prototype")
@@ -207,9 +205,9 @@ public class DraftServices {
         namedParameterJdbcTemplate.update(sql2, params2);
 
         this.createCPUTeamsForThisDraft(draftSize, desiredDraftPosition, currDraftID);
-        System.out.println("Creating Draft players from DB");
+        Logger.logDraft(currDraftID, username, "CREATE_DRAFT", "Loading " + draftSize + " teams from database");
         ArrayList<PlayerDataObject> allPlayers = new ArrayList<>(this.getAllPlayers(draftSize));
-        System.out.println(allPlayers);
+        Logger.logDraft(currDraftID, username, "CREATE_DRAFT", "Loaded " + allPlayers.size() + " players from database");
         return allPlayers;
     }
 
@@ -234,11 +232,20 @@ public class DraftServices {
         String sql;
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("draftID", draftID);
+        
+        int newRound = currRound;
+        int newPick = currPick;
+        
         if(currPick == draftSize) {
             sql = "UPDATE drafts SET curr_round = curr_round + 1, curr_pick = 1 WHERE draft_id=:draftID";
+            newRound = currRound + 1;
+            newPick = 1;
         } else {
             sql = "UPDATE drafts SET curr_pick = curr_pick + 1 WHERE draft_id=:draftID";
+            newPick = currPick + 1;
         }
+        
+        Logger.logDraftProgress(draftID, currRound, currPick, newRound, newPick);
         namedParameterJdbcTemplate.update(sql, params);
         return true;
     }
@@ -261,7 +268,8 @@ public class DraftServices {
         int playerRank = (int)playerToDraft.getRank();
         int draftSpot = (currRound % 2 == 0) ? draftSize - currPick + 1 : currPick;
         String teamName = this.getTeamNameFromDraftSpot(draftID, draftSpot);
-        System.out.println("User Pick! \n Team: " + teamName + "\n Curr Pick: " + currRound + "." + currPick);
+        Logger.logPlayerDrafted(draftID, username, playerToDraft.getFullName(), playerToDraft.getPosition(), currRound, currPick);
+        Logger.logTeamUpdate(draftID, username, teamName, "USER_DRAFTED_PLAYER");
         this.updatePlayerPickedMetaData(playerToDraft, currRound, currPick, teamName);
         this.makePick(draftID, currPick, playerRank);
         this.moveToNextPick(draftID, username);
@@ -273,7 +281,7 @@ public class DraftServices {
         List<Integer> currTeamIntArray = this.createTeamIntArrayFromDB(draftID, draftSpot);
         List<PlayerDataObject> currTeamPlayerList = this.createPlayerModelListFromIntList(currTeamIntArray, draftSize);
         TreeMap<String, List<PlayerDataObject>> currTeamTreeMap = this.createTeamTreeFromDB(currTeamPlayerList);
-        System.out.println(currTeamTreeMap);
+        Logger.logDraft(draftID, "SYSTEM", "FORCE_PICK_CHECK", "Team composition: " + currTeamTreeMap.keySet().toString());
         if(currRoundPick == 8) {
             if (!currTeamTreeMap.containsKey(QuarterBackPlayerModel.POSITIONSHORTHANDLE)){
                 return getNextForcedPosition(playersLeft, QuarterBackPlayerModel.POSITIONSHORTHANDLE);
@@ -342,11 +350,10 @@ public class DraftServices {
             int draftSpot = (currRound % 2 == 0) ? draftSize - currPick + 1 : currPick;
             
             teamName = this.getTeamNameFromDraftSpot(draftID, draftSpot);
-            System.out.println("Computer Pick! \n Team: " + teamName + "\n Curr Pick: " + currRound + "." + currPick);
+            Logger.logDraft(draftID, username, "CPU_PICK", "Team: " + teamName + " Pick: " + currRound + "." + currPick);
             List<PlayerDataObject> playersLeft = this.getPlayersLeft(draftID, draftSize);
             int pick = this.checkForForcePickNeeded(currRound, currPick, draftID, draftSize, playersLeft);
-            if (pick == -1) { System.out.println("No Force Pick Needed"); }
-            else { System.out.println("Force Pick Needed"); }
+            Logger.logDraft(draftID, username, "FORCE_PICK", pick == -1 ? "NOT_NEEDED" : "NEEDED");
             if(pick == -1) {
                 VaribleOddsPicker randomNumGen = new VaribleOddsPicker();
                 pick = randomNumGen.newOdds(6);
@@ -357,8 +364,8 @@ public class DraftServices {
             PlayerDataObject playerDrafted = this.createPlayerModel(pick, draftSize);
             playerDrafted = this.updatePlayerPickedMetaData(playerDrafted, currRound, currPick, teamName);
             playersDraftDuringSim.add(playerDrafted);
-            System.out.println(playersDraftDuringSim.get(playersDraftDuringSim.size()-1).getFullName() + " was drafted in round " + currRound + " pick " + currPick);
-            System.out.println("----------------------------------");
+            Logger.logPlayerDrafted(draftID, "CPU", playerDrafted.getFullName(), playerDrafted.getPosition(), currRound, currPick);
+            Logger.logTeamUpdate(draftID, "CPU", teamName, "CPU_DRAFTED_PLAYER");
         }
         return playersDraftDuringSim;
     } 
@@ -449,7 +456,7 @@ public class DraftServices {
             draftMetaDataToReturn.put("time", dateTime.toLocalTime().toString());
             draftHistoryMetaData.add(draftMetaDataToReturn);
         }
-        System.out.println(draftHistoryMetaData);
+        Logger.logDraft(-1, username, "GET_DRAFT_HISTORY", "Retrieved " + draftHistoryMetaData.size() + " draft records");
         return draftHistoryMetaData;
     }
 
@@ -474,7 +481,7 @@ public class DraftServices {
                 pick = round % 2 == 0 ? pickEven : pickOdd;
             }
             allPlayers.addAll(teamPlayerList);
-            System.out.println(teamPlayerList);
+            Logger.logDraft(draftID, username, "GET_DRAFT_HISTORY_PLAYERS", "Team " + i + " has " + teamPlayerList.size() + " players");
         }
         Collections.sort(allPlayers, PlayerDataObject.spotDraftedComparator);
         return allPlayers;
@@ -483,11 +490,11 @@ public class DraftServices {
     public TreeMap<String,ArrayList<PlayerDataObject>> getDraftHistoryAllTeamsMap(String username, int draftID, int teamIndex) {
         TreeMap<String,ArrayList<PlayerDataObject>> teamMap = new TreeMap<>();
         List<Integer> teamArrayList = this.createTeamIntArrayFromDB(draftID, teamIndex);
-        System.out.println(teamArrayList);
+        Logger.logDraft(draftID, username, "GET_TEAM_ARRAY", "Team " + teamIndex + " array size: " + teamArrayList.size());
         int draftSize = namedParameterJdbcTemplate.queryForObject("SELECT num_teams FROM drafts WHERE username = :username AND draft_id = :draftID", 
             new MapSqlParameterSource("username", username).addValue("draftID", draftID), Integer.class);
         List<PlayerDataObject> teamPlayerList = this.createPlayerModelListFromIntList(teamArrayList, draftSize);
-        System.out.println(teamPlayerList);
+        Logger.logDraft(draftID, username, "GET_TEAM_PLAYERS", "Team " + teamIndex + " has " + teamPlayerList.size() + " players");
         String teamName = namedParameterJdbcTemplate.queryForObject("SELECT team_name FROM teams WHERE draft_id = :draftID AND draft_spot = :draftSpot", 
             new MapSqlParameterSource("draftID", draftID).addValue("draftSpot", teamIndex), String.class);
         int round = 1;
@@ -505,7 +512,7 @@ public class DraftServices {
                 teamMap.put(player.getPosition(), new ArrayList<>(Collections.singletonList(player)));
             }
         }
-        System.out.println(teamMap);
+        Logger.logDraft(draftID, username, "GET_TEAM_MAP", "Team " + teamIndex + " map created with " + teamMap.size() + " position groups");
         return teamMap;
     }
 

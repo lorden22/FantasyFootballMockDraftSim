@@ -13,6 +13,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.Mock.DAO.UserDataObject;
+import com.example.common.Logger;
 
 @Service
 public class LoginServices{
@@ -21,42 +22,47 @@ public class LoginServices{
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
     public boolean checkUser(String username) {
-        System.out.println("Checking User - " + username);
+        Logger.logAuth(username, "CHECK_USER", "ATTEMPT");
         String sql = "SELECT * FROM users WHERE username = :username";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("username", username);
         
         ArrayList<Map<String,Object>> returnList = new ArrayList<>(namedParameterJdbcTemplate.queryForList(sql, params));
-        System.out.println(returnList.size() + "- 0 is user not found, 1 is user found");
-        return returnList.size() != 0;
+        boolean userExists = returnList.size() != 0;
+        Logger.logAuth(username, "CHECK_USER", userExists ? "USER_FOUND" : "USER_NOT_FOUND");
+        return userExists;
     }
 
     public boolean addUser(String usernameWanted, String passwordWanted) throws NoSuchAlgorithmException {
+        Logger.logAuth(usernameWanted, "ADD_USER", "ATTEMPT");
         if(checkUser(usernameWanted)) {
-            System.out.println("User Already Exists");
+            Logger.logAuth(usernameWanted, "ADD_USER", "FAILED_USER_EXISTS");
             return false;
         }
-        System.out.println("Adding User");
         UserDataObject userToAdd = new UserDataObject(usernameWanted, passwordWanted, this.namedParameterJdbcTemplate);
-        System.out.println("Adding user to db...\n" + userToAdd.addUserToDatabase());
-        return true;
+        boolean success = userToAdd.addUserToDatabase();
+        Logger.logAuth(usernameWanted, "ADD_USER", success ? "SUCCESS" : "FAILED");
+        return success;
     }
 
     public boolean removeUser(String username) {
+        Logger.logAuth(username, "REMOVE_USER", "ATTEMPT");
         if(!checkUser(username)) {
-            System.out.println("User Does Not Exist");
+            Logger.logAuth(username, "REMOVE_USER", "FAILED_USER_NOT_EXISTS");
             return false;
         }
         String sql = "DELETE FROM users WHERE username = :username";
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("username", username);
         namedParameterJdbcTemplate.update(sql, params);
+        Logger.logAuth(username, "REMOVE_USER", "SUCCESS");
         return true;
     }
 
     public boolean authenticateUserPassword(String username, String password) throws NoSuchAlgorithmException {
+        Logger.logAuth(username, "AUTH_PASSWORD", "ATTEMPT");
         if(!checkUser(username)) {
-            System.out.println("User Does Not Exist");
+            Logger.logAuth(username, "AUTH_PASSWORD", "FAILED_USER_NOT_EXISTS");
             return false;
         }
 
@@ -72,13 +78,15 @@ public class LoginServices{
         digest.update(salt.getBytes());
         byte[] hash = digest.digest(password.getBytes());
         String attemptedHashPassword = bypeArrayToString(hash);
-        System.out.println(attemptedHashPassword + " " + hashPassword);
-        return attemptedHashPassword.equals(hashPassword);
+        boolean authenticated = attemptedHashPassword.equals(hashPassword);
+        Logger.logAuth(username, "AUTH_PASSWORD", authenticated ? "SUCCESS" : "FAILED_WRONG_PASSWORD");
+        return authenticated;
     }
 
     public boolean authenticateUserSessionID(String username, String sessionID) throws NoSuchAlgorithmException {
+        Logger.logAuth(username, "AUTH_SESSION", "ATTEMPT");
         if(!checkUser(username)) {
-            System.out.println("User Does Not Exist");
+            Logger.logAuth(username, "AUTH_SESSION", "FAILED_USER_NOT_EXISTS");
             return false;
         }
 
@@ -88,17 +96,19 @@ public class LoginServices{
 
         ArrayList<Map<String,Object>> returnList = new ArrayList<>(namedParameterJdbcTemplate.queryForList(sql, params));
         String latestSessionID = returnList.get(0).get("recent_session_id").toString();
-        return latestSessionID.equals(sessionID);
+        boolean authenticated = latestSessionID.equals(sessionID);
+        Logger.logAuth(username, "AUTH_SESSION", authenticated ? "SUCCESS" : "FAILED_INVALID_SESSION");
+        return authenticated;
     }
 
     public String generateSessionID(String username) throws NoSuchAlgorithmException {
+        Logger.logAuth(username, "GENERATE_SESSION", "ATTEMPT");
         if(!checkUser(username)) {
-            System.out.println("User Does Not Exist");
+            Logger.logAuth(username, "GENERATE_SESSION", "FAILED_USER_NOT_EXISTS");
             return null;
         }
-        System.out.println("Generating Session ID");
         String sessionID = this.generateAUserSessionID();
-        System.out.println("Session ID Generated: " + sessionID);
+        Logger.logAuth(username, "GENERATE_SESSION", "SUCCESS_" + sessionID);
 
         String sql = "UPDATE users SET recent_session_id = :sessionID WHERE username = :username";
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -110,8 +120,9 @@ public class LoginServices{
     }
 
     public boolean logout(String username, String sessionID) throws NoSuchAlgorithmException {
+        Logger.logAuth(username, "LOGOUT", "ATTEMPT");
         if(!this.authenticateUserSessionID(username, sessionID)) {
-            System.out.println("User Not Authenticated and Could Not Be Logout");
+            Logger.logAuth(username, "LOGOUT", "FAILED_NOT_AUTHENTICATED");
             return false;
         }
 
@@ -120,6 +131,7 @@ public class LoginServices{
         params.addValue("username", username);
 
         namedParameterJdbcTemplate.update(sql, params);
+        Logger.logAuth(username, "LOGOUT", "SUCCESS");
         return true;
     }
 

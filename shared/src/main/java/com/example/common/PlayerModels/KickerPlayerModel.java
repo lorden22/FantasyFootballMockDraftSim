@@ -1,6 +1,6 @@
-package com.example.Mock.PlayerModels;
+package com.example.common.PlayerModels;
 
-import com.example.Mock.DAO.PlayerDataObject;
+import com.example.common.PlayerDataObject;
 
 public class KickerPlayerModel extends PlayerDataObject {
     private static final double KICKERALLOWEDREACH = 0.5;
@@ -9,4 +9,4 @@ public class KickerPlayerModel extends PlayerDataObject {
     public KickerPlayerModel(String firstName, String lastName, double predictedScore, double avgADP) {
         super(firstName, lastName, POSITIONSHORTHANDLE, predictedScore, avgADP, KICKERALLOWEDREACH);
     }
-}
+} 

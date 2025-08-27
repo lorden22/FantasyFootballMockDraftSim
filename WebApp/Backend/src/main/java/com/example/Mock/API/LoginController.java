@@ -1,6 +1,7 @@
 package com.example.Mock.API;
 
 import com.example.Mock.Service.LoginServices;
+import com.example.common.Logger;
 
 import java.security.NoSuchAlgorithmException;
 
@@ -17,7 +18,7 @@ public class LoginController {
     @Autowired
     public LoginController(LoginServices loginServices) {
         this.loginServices = loginServices;
-        System.out.println("Login Services Initialized");
+        Logger.logInfo("Login Services Initialized");
     }
 
     @GetMapping(path = "/checkUser/")
@@ -28,7 +29,7 @@ public class LoginController {
     @PutMapping(path = "/addUser/")
     public boolean addUser(@RequestParam("username") String username, @RequestParam("password") String password) throws NoSuchAlgorithmException {
         boolean log = loginServices.addUser(username, password);
-        System.out.println(log + " " + username + " " + password);
+        Logger.logAuth(username, "ADD_USER_API", log ? "SUCCESS" : "FAILED");
         return log;
     }
 
@@ -40,23 +41,23 @@ public class LoginController {
     @GetMapping(path = "/attemptLogin/")
     public boolean attemptLogin(@RequestParam("username") String username, @RequestParam("password") String password) throws NoSuchAlgorithmException {
         boolean log = loginServices.authenticateUserPassword(username, password);
-        System.out.println(log + " " + username + " " + password);
+        Logger.logAuth(username, "LOGIN_API", log ? "SUCCESS" : "FAILED");
         return log;
     }
 
     @GetMapping(path = "/attemptSession/")
     public boolean attemptedSessionID(@RequestParam("username") String username, @RequestParam("sessionID") String sessionID) throws NoSuchAlgorithmException {
         boolean log = loginServices.authenticateUserSessionID(username, sessionID);
-        System.out.println(log + " " + username + " " + sessionID);
+        Logger.logAuth(username, "SESSION_API", log ? "SUCCESS" : "FAILED");
         return log;
     }
 
-    @GetMapping(path = "/generateSessionID/") 
+    @GetMapping(path = "/generateSessionID/")
     public String generateSessionID(@RequestParam("username") String username) throws NoSuchAlgorithmException {
         return loginServices.generateSessionID(username);
     }
 
-    @PostMapping(path = "/logout/")
+    @PutMapping(path = "/logout/")
     public boolean logout(@RequestParam("username") String username, @RequestParam("sessionID") String sessionID) throws NoSuchAlgorithmException {
         return loginServices.logout(username, sessionID);
     }

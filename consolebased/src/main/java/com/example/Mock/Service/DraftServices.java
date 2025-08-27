@@ -1,0 +1,270 @@
+package com.example.Mock.Service;
+
+import java.sql.*;
+import java.util.*;
+import com.example.common.Logger;
+import com.example.common.PlayerDataObject;
+import com.example.Mock.DAO.DBConnection;
+import com.example.Mock.DAO.DraftDataObjectDAO;
+import com.example.Mock.DAO.TeamDataObject;
+
+public class DraftServices {
+    
+    // Check if user has a current (incomplete) draft
+    public boolean checkForCurrentDraft(String username) {
+        Logger.logAuth(username, "CHECK_CURRENT_DRAFT", "ATTEMPT");
+        String sql = "SELECT COUNT(*) FROM drafts WHERE username = ? AND complete_status = 0";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                boolean hasCurrentDraft = rs.getInt(1) > 0;
+                Logger.logAuth(username, "CHECK_CURRENT_DRAFT", hasCurrentDraft ? "FOUND" : "NOT_FOUND");
+                return hasCurrentDraft;
+            }
+        } catch (SQLException e) {
+            Logger.logError("Failed to check for current draft for user " + username + ": " + e.getMessage());
+        }
+        Logger.logAuth(username, "CHECK_CURRENT_DRAFT", "ERROR");
+        return false;
+    }
+    
+    // Check if user has past (completed) drafts
+    public boolean checkForPastDrafts(String username) {
+        Logger.logAuth(username, "CHECK_PAST_DRAFTS", "ATTEMPT");
+        String sql = "SELECT COUNT(*) FROM drafts WHERE username = ? AND complete_status = 1";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                boolean hasPastDrafts = rs.getInt(1) > 0;
+                Logger.logAuth(username, "CHECK_PAST_DRAFTS", hasPastDrafts ? "FOUND" : "NOT_FOUND");
+                return hasPastDrafts;
+            }
+        } catch (SQLException e) {
+            Logger.logError("Failed to check for past drafts for user " + username + ": " + e.getMessage());
+        }
+        Logger.logAuth(username, "CHECK_PAST_DRAFTS", "ERROR");
+        return false;
+    }
+    
+    // Get the user's most recent draft ID
+    public int getUserMostRecentDraftID(String username) {
+        String sql = "SELECT draft_id FROM drafts WHERE username = ? ORDER BY draft_id DESC LIMIT 1";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("draft_id");
+            }
+        } catch (SQLException e) {
+            Logger.logError("Failed to get most recent draft ID for user " + username + ": " + e.getMessage());
+        }
+        return -1;
+    }
+    
+    // Get current draft information
+    public Map<String, Object> getCurrentDraftInfo(String username) {
+        Map<String, Object> draftInfo = new HashMap<>();
+        String sql = "SELECT draft_id, num_teams, curr_round, curr_pick FROM drafts WHERE username = ? AND complete_status = 0 ORDER BY draft_id DESC LIMIT 1";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                draftInfo.put("draft_id", rs.getInt("draft_id"));
+                draftInfo.put("num_teams", rs.getInt("num_teams"));
+                draftInfo.put("curr_round", rs.getInt("curr_round"));
+                draftInfo.put("curr_pick", rs.getInt("curr_pick"));
+                Logger.logAuth(username, "GET_CURRENT_DRAFT_INFO", "Retrieved draft info");
+                return draftInfo;
+            }
+        } catch (SQLException e) {
+            Logger.logError("Failed to get current draft info for user " + username + ": " + e.getMessage());
+        }
+        return null;
+    }
+    
+    // Get user's team name for a draft
+    public String getUserTeamName(int draftId) {
+        String sql = "SELECT team_name FROM teams WHERE draft_id = ? AND user_team = TRUE LIMIT 1";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, draftId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("team_name");
+            }
+        } catch (SQLException e) {
+            Logger.logError("Failed to get user team name for draft " + draftId + ": " + e.getMessage());
+        }
+        return "Your Team";
+    }
+    
+    // Delete the user's current draft
+    public boolean deleteCurrentDraft(String username) {
+        Logger.logDraft(-1, username, "DELETE_CURRENT_DRAFT", "ATTEMPT");
+        int draftId = getUserMostRecentDraftID(username);
+        if (draftId == -1) {
+            Logger.logDraft(-1, username, "DELETE_CURRENT_DRAFT", "NO_DRAFT_FOUND");
+            return false;
+        }
+        
+        try (Connection conn = DBConnection.getConnection()) {
+            conn.setAutoCommit(false);
+            
+            // Delete teams associated with this draft
+            String deleteTeamsSql = "DELETE FROM teams WHERE draft_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteTeamsSql)) {
+                stmt.setInt(1, draftId);
+                stmt.executeUpdate();
+            }
+            
+            // Delete the draft itself
+            String deleteDraftSql = "DELETE FROM drafts WHERE draft_id = ? AND username = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteDraftSql)) {
+                stmt.setInt(1, draftId);
+                stmt.setString(2, username);
+                int rowsAffected = stmt.executeUpdate();
+                if (rowsAffected > 0) {
+                    conn.commit();
+                    Logger.logDraft(draftId, username, "DELETE_CURRENT_DRAFT", "SUCCESS");
+                    return true;
+                }
+            }
+            
+            conn.rollback();
+        } catch (SQLException e) {
+            Logger.logError("Failed to delete current draft for user " + username + ": " + e.getMessage());
+        }
+        
+        Logger.logDraft(draftId, username, "DELETE_CURRENT_DRAFT", "FAILED");
+        return false;
+    }
+    
+    // Get draft history metadata for display
+    public List<Map<String, String>> getDraftHistoryMetaData(String username) {
+        List<Map<String, String>> draftHistory = new ArrayList<>();
+        String sql = "SELECT draft_id, num_teams, date, complete_status FROM drafts WHERE username = ? AND complete_status = 1 ORDER BY draft_id DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Map<String, String> draftInfo = new HashMap<>();
+                draftInfo.put("draft_id", String.valueOf(rs.getInt("draft_id")));
+                draftInfo.put("num_teams", String.valueOf(rs.getInt("num_teams")));
+                draftInfo.put("created_at", rs.getTimestamp("date").toString());
+                draftInfo.put("completed", rs.getInt("complete_status") == 1 ? "true" : "false");
+                draftHistory.add(draftInfo);
+            }
+            Logger.logAuth(username, "GET_DRAFT_HISTORY", "LOADED_" + draftHistory.size() + "_DRAFTS");
+        } catch (SQLException e) {
+            Logger.logError("Failed to get draft history for user " + username + ": " + e.getMessage());
+        }
+        return draftHistory;
+    }
+
+    public int startDraft(String username, String teamName, int draftSize, String desiredDraftPick, List<PlayerDataObject> allPlayers) {
+        Logger.logDraft(-1, username, "START_DRAFT", "Initiating draft with " + draftSize + " teams");
+        
+        // Create a draft record in the database
+        int draftId = createDraft(username, draftSize);
+        if (draftId == -1) {
+            Logger.logError("Failed to create draft in database for user: " + username);
+            return -1;
+        }
+        
+        Logger.logDraft(draftId, username, "DRAFT_CREATED", "Draft created successfully");
+        
+        // Create teams in the database
+        int desiredDraftPickInt = desiredDraftPick.equalsIgnoreCase("R") ? (int)(Math.random() * draftSize) + 1 : Integer.parseInt(desiredDraftPick);
+        Logger.logDraft(draftId, username, "DRAFT_POSITION", "Selected position: " + desiredDraftPickInt);
+        
+        for (int i = 1; i <= draftSize; i++) {
+            boolean isUserTeam = (i == desiredDraftPickInt);
+            createTeam(draftId, isUserTeam ? teamName : ("CPU Team " + i), isUserTeam, i);
+        }
+        
+        Logger.logDraft(draftId, username, "TEAMS_CREATED", "Created " + draftSize + " teams");
+        Logger.logInfo("Draft " + draftId + " ready with " + allPlayers.size() + " available players");
+        
+        Logger.logDraft(draftId, username, "DRAFT_SETUP_COMPLETE", "Draft setup completed successfully");
+        return draftId;
+    }
+    
+    // Mark draft as completed
+    public boolean completeDraft(String username, int draftId) {
+        String sql = "UPDATE drafts SET complete_status = 1 WHERE draft_id = ? AND username = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, draftId);
+            stmt.setString(2, username);
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                Logger.logDraft(draftId, username, "DRAFT_COMPLETED", "Draft marked as completed");
+                return true;
+            }
+        } catch (SQLException e) {
+            Logger.logError("Failed to complete draft " + draftId + ": " + e.getMessage());
+        }
+        return false;
+    }
+
+    private int createDraft(String username, int numTeams) {
+        String sql = "INSERT INTO drafts (username, num_teams, curr_round, curr_pick, complete_status) VALUES (?, ?, 1, 1, 0)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, username);
+            stmt.setInt(2, numTeams);
+            stmt.executeUpdate();
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) {
+                int draftId = rs.getInt(1);
+                Logger.logDraft(draftId, username, "DRAFT_DB_CREATED", "Database record created");
+                return draftId;
+            }
+        } catch (SQLException e) {
+            Logger.logError("Failed to create draft in database: " + e.getMessage());
+        }
+        return -1;
+    }
+
+    private void createTeam(int draftId, String teamName, boolean isUserTeam, int teamNumber) {
+        String sql = "INSERT INTO teams (draft_id, team_name, user_team, team_number) VALUES (?, ?, ?, ?)";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, draftId);
+            stmt.setString(2, teamName);
+            stmt.setBoolean(3, isUserTeam);
+            stmt.setInt(4, teamNumber);
+            stmt.executeUpdate();
+            Logger.logTeamUpdate(draftId, isUserTeam ? "USER" : "SYSTEM", teamName, "TEAM_DB_CREATED");
+        } catch (SQLException e) {
+            Logger.logError("Failed to create team " + teamName + ": " + e.getMessage());
+        }
+    }
+
+    private List<TeamDataObject> getTeamsForDraft(int draftId) {
+        List<TeamDataObject> teams = new ArrayList<>();
+        String sql = "SELECT team_name, user_team, team_number FROM teams WHERE draft_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, draftId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                String teamName = rs.getString("team_name");
+                boolean userTeam = rs.getBoolean("user_team");
+                int teamNumber = rs.getInt("team_number");
+                teams.add(new TeamDataObject(teamName, userTeam, teamNumber));
+            }
+            Logger.logDraft(draftId, "SYSTEM", "TEAMS_LOADED", "Loaded " + teams.size() + " teams from database");
+        } catch (SQLException e) {
+            Logger.logError("Failed to load teams for draft " + draftId + ": " + e.getMessage());
+        }
+        return teams;
+    }
+} 

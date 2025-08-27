@@ -11,9 +11,10 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.example.Mock.DAO.PlayerDataObject;
+import com.example.common.PlayerDataObject;
 import com.example.Mock.DAO.TeamDataObject;
 import com.example.Mock.Service.DraftServices;
+import com.example.common.Logger;
 
 @RequestMapping("api/teams")
 @CrossOrigin
@@ -30,8 +31,7 @@ public class DraftController {
         }
         this.draftServices = new DraftServices(count, namedParameterJdbcTemplate);
         
-        System.out.println("Database Connection: " + namedParameterJdbcTemplate.getJdbcTemplate().getDataSource().toString());
-        System.out.println("Starting draft_id: " + count);
+        Logger.logInfo("Database Connection established, Starting draft_id: " + count);
     }
     
     @PostMapping(path="/initaizeUserAccountSetup")
@@ -103,12 +103,12 @@ public class DraftController {
             int nextRound = currRound;
             if (currRound % 2 == 1) { // Odd round
                 if (currPick > userPickInOddRound) {
-                    System.out.println("Odd round, currPick: " + currPick + " > userPickInOddRound: " + userPickInOddRound);
+                    Logger.logDraft(draftID, username, "GET_NEXT_USER_PICK_ROUND", "Odd round, currPick: " + currPick + " > userPickInOddRound: " + userPickInOddRound);
                     nextRound++;
                 }
             } else { // Even round
                 if (currPick > userPickInEvenRound) {
-                    System.out.println("Even round, currPick: " + currPick + " > userPickInEvenRound: " + userPickInEvenRound);
+                    Logger.logDraft(draftID, username, "GET_NEXT_USER_PICK_ROUND", "Even round, currPick: " + currPick + " > userPickInEvenRound: " + userPickInEvenRound);
                     nextRound++;
                 }
             }
@@ -130,11 +130,31 @@ public class DraftController {
         return draftServices.deleteThisDraft(username);
     }
 
-    @PostMapping(path="/checkForCurrentDraft/")
-    public boolean checkForDraft(@RequestParam("username") String username) {
-        boolean currentDraftExists = draftServices.checkForCurrentDraft(username);
-        System.out.println("Checking for current drafts: " + username + " - " + currentDraftExists);
-        return currentDraftExists;
+    @GetMapping(path="/checkIfUserPick/")
+    public boolean checkIfUserPick(@RequestParam("username") String username) {
+        int draftID = draftServices.getUserMostRecentDraftID(username);
+        int draftSize = draftServices.getDraftSize(draftID);
+        int currRound = draftServices.getCurrRound(draftID);
+        int currPick = draftServices.getCurrPick(draftID);
+        String teamName = draftServices.getUserTeamName(draftID);
+        int userPickInOddRound = draftServices.getUserStartingDraftSpot(teamName, draftID);
+        int userPickInEvenRound = draftSize - userPickInOddRound + 1;
+        
+        Logger.logDraft(draftID, username, "CHECK_USER_PICK", 
+            String.format("Round: %d, Pick: %d, UserOdd: %d, UserEven: %d", 
+            currRound, currPick, userPickInOddRound, userPickInEvenRound));
+        
+        if (currRound % 2 == 1) {
+            if (currPick > userPickInOddRound) {
+                Logger.logDraft(draftID, username, "CHECK_USER_PICK", "Odd round, user turn passed");
+            }
+            return currPick == userPickInOddRound;
+        } else {
+            if (currPick > userPickInEvenRound) {
+                Logger.logDraft(draftID, username, "CHECK_USER_PICK", "Even round, user turn passed");
+            }
+            return currPick == userPickInEvenRound;
+        }
     }
 
     @PostMapping(path="/userMarkCurrentDraftComplete/")
@@ -143,10 +163,17 @@ public class DraftController {
         return draftServices.checkForCurrentDraft(username);
     }
 
-    @PostMapping(path="/checkForPastDraft/")
+    @GetMapping(path="/checkForCurrentDraft/")
+    public boolean checkForCurrentDraft(@RequestParam("username") String username) {
+        boolean currentDraftExists = draftServices.checkForCurrentDraft(username);
+        Logger.logDraft(-1, username, "CHECK_CURRENT_DRAFT", currentDraftExists ? "EXISTS" : "NOT_EXISTS");
+        return currentDraftExists;
+    }
+    
+    @GetMapping(path="/checkForPastDrafts/") 
     public boolean checkForPastDrafts(@RequestParam("username") String username) {
         boolean pastDraftExists = draftServices.checkForPastDrafts(username);
-        System.out.println("Checking for past drafts: " + username + " - " + pastDraftExists);
+        Logger.logDraft(-1, username, "CHECK_PAST_DRAFTS", pastDraftExists ? "EXISTS" : "NOT_EXISTS");
         return pastDraftExists;
     }
 
