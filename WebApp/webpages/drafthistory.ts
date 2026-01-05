@@ -17,25 +17,25 @@ async function renderDraftHistoryTable() {
         newDraftHistoryRow.id = "draftHistoryRow" + draftID;
         let newDraftHistoryRowDraftID = document.createElement("td");
         newDraftHistoryRowDraftID.id = "draftHistoryRowDraftID" + draftID;
-        newDraftHistoryRowDraftID.innerHTML = draftID;
+        newDraftHistoryRowDraftID.textContent = draftID;
         let newDraftHistoryRowTeamName = document.createElement("td");
         newDraftHistoryRowTeamName.id = "draftHistoryRowTeamName" + draftID;
-        newDraftHistoryRowTeamName.innerHTML = currDraftRowMetaData.team_name;
+        newDraftHistoryRowTeamName.textContent = currDraftRowMetaData.team_name;
         let newDraftHistoryRowDraftPosition = document.createElement("td");
         newDraftHistoryRowDraftPosition.id = "draftHistoryRowDraftPosition" + draftID;
-        newDraftHistoryRowDraftPosition.innerHTML = currDraftRowMetaData.draft_spot;
+        newDraftHistoryRowDraftPosition.textContent = currDraftRowMetaData.draft_spot;
         let newDraftHistoryRowDraftSize = document.createElement("td");
         newDraftHistoryRowDraftSize.id = "draftHistoryRowDraftSize" + draftID;
-        newDraftHistoryRowDraftSize.innerHTML = currDraftRowMetaData.num_teams;
+        newDraftHistoryRowDraftSize.textContent = currDraftRowMetaData.num_teams;
         let newDraftHistoryRowDraftDate = document.createElement("td");
         newDraftHistoryRowDraftDate.id = "draftHistoryRowDraftDate" + draftID;
-        newDraftHistoryRowDraftDate.innerHTML = currDraftRowMetaData.date;
+        newDraftHistoryRowDraftDate.textContent = currDraftRowMetaData.date;
         let newDraftHistoryRowDraftTime = document.createElement("td");
         newDraftHistoryRowDraftTime.id = "draftHistoryRowDraftTime" + draftID;
-        newDraftHistoryRowDraftTime.innerHTML = currDraftRowMetaData.time;
+        newDraftHistoryRowDraftTime.textContent = currDraftRowMetaData.time;
         let newDraftHistoryRowDraftViewDraft = document.createElement("button");
         newDraftHistoryRowDraftViewDraft.id = "draftHistoryRowDraftViewDraft" + draftID;
-        newDraftHistoryRowDraftViewDraft.innerHTML = "View Draft";
+        newDraftHistoryRowDraftViewDraft.textContent = "View Draft";
         newDraftHistoryRowDraftViewDraft.onclick = function () { viewDraft(draftID); };
         newDraftHistoryRowDraftViewDraft.className = "btn btn-primary";
         newDraftHistoryRow.appendChild(newDraftHistoryRowDraftID);
@@ -52,7 +52,7 @@ async function renderDraftHistoryTable() {
     }
     if (await authenticateSession() == true) {
         loadUserName();
-        let res = await fetch("http://localhost:80/api/teams/getDraftHistoryMetaData/?username=" + getCookie("username"), {
+        let res = await fetch("/api/teams/getDraftHistoryMetaData/?username=" + getCookie("username"), {
             method: 'GET',
         });
         let data = await res.json();
@@ -90,7 +90,7 @@ async function renderDraftReviewPage() {
 }
 async function renderDraftHistoryPlayerLog() {
     if (await authenticateSession() == true) {
-        let res = await fetch("http://localhost:80/api/teams/getDraftHistoryPlayerLog/?username=" + getCookie("username") + "&draftID=" + getCookie("draftIDToView"), {
+        let res = await fetch("/api/teams/getDraftHistoryPlayerLog/?username=" + getCookie("username") + "&draftID=" + getCookie("draftIDToView"), {
             method: 'GET',
         });
         let data = await res.json();
@@ -111,22 +111,22 @@ async function renderDraftHistoryPlayerLog() {
             let roundPickArray = newDraftHistoryPlayerLogSpot.split(".");
             let newDraftHistoryPlayerLogRound = document.createElement("td");
             newDraftHistoryPlayerLogRound.id = "draftHistoryPlayerLogRound" + intCurrDraftLog;
-            newDraftHistoryPlayerLogRound.innerHTML = roundPickArray[0];
+            newDraftHistoryPlayerLogRound.textContent = roundPickArray[0];
             let newDraftHistoryPlayerLogPick = document.createElement("td");
             newDraftHistoryPlayerLogPick.id = "draftHistoryPlayerLogPick" + intCurrDraftLog;
-            newDraftHistoryPlayerLogPick.innerHTML = roundPickArray[1];
+            newDraftHistoryPlayerLogPick.textContent = roundPickArray[1];
             let newDraftHistoryPlayerLogPlayerName = document.createElement("td");
             newDraftHistoryPlayerLogPlayerName.id = "draftHistoryPlayerLogPlayerName" + intCurrDraftLog;
-            newDraftHistoryPlayerLogPlayerName.innerHTML = currPlayerDraftLog.fullName;
+            newDraftHistoryPlayerLogPlayerName.textContent = currPlayerDraftLog.fullName;
             let newDraftHistoryPlayerLogPlayerPosition = document.createElement("td");
             newDraftHistoryPlayerLogPlayerPosition.id = "draftHistoryPlayerLogPlayerPosition" + intCurrDraftLog;
-            newDraftHistoryPlayerLogPlayerPosition.innerHTML = currPlayerDraftLog.position;
+            newDraftHistoryPlayerLogPlayerPosition.textContent = currPlayerDraftLog.position;
             let newDraftHistoryPlayerLogPlayerScore = document.createElement("td");
             newDraftHistoryPlayerLogPlayerScore.id = "draftHistoryPlayerLogPlayerScored" + intCurrDraftLog;
-            newDraftHistoryPlayerLogPlayerScore.innerHTML = currPlayerDraftLog.predictedScore;
+            newDraftHistoryPlayerLogPlayerScore.textContent = currPlayerDraftLog.predictedScore;
             let newDraftHistoryPlayerLogPlayerTeam = document.createElement("td");
             newDraftHistoryPlayerLogPlayerTeam.id = "draftHistoryPlayerLogPlayerTeam" + intCurrDraftLog;
-            newDraftHistoryPlayerLogPlayerTeam.innerHTML = currPlayerDraftLog.teamDraftedBy;
+            newDraftHistoryPlayerLogPlayerTeam.textContent = currPlayerDraftLog.teamDraftedBy;
             newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogRound);
             newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogPick);
             newDraftHistoryPlayerLogRow.appendChild(newDraftHistoryPlayerLogPlayerName);
@@ -157,7 +157,7 @@ async function renderDraftHistoryPlayerLog() {
 
 async function renderDraftHistoryTeamHistorySelecter() {
     if (await authenticateSession() == true) {
-        let res = await fetch("http://localhost:80/api/teams/getDraftHistoryTeamList/?username=" + getCookie("username") + "&draftID=" + getCookie("draftIDToView"), {
+        let res = await fetch("/api/teams/getDraftHistoryTeamList/?username=" + getCookie("username") + "&draftID=" + getCookie("draftIDToView"), {
             method: 'GET',
         });
         let data = await res.json();
@@ -175,10 +175,10 @@ async function renderDraftHistoryTeamHistorySelecter() {
             let currTeamName = document.createElement("td");
             currTeamName.id = "draftHistoryTeamName" + intCurrTeamNumber;
             let currTeamViewButtonTd = document.createElement("td");
-            currTeamName.innerHTML = currTeam.teamName;
+            currTeamName.textContent = currTeam.teamName;
             let currTeamViewButton = document.createElement("btn");
             currTeamViewButton.id = "draftHistoryViewButton" + intCurrTeamNumber;
-            currTeamViewButton.innerHTML = "View Team";
+            currTeamViewButton.textContent = "View Team";
             currTeamViewButton.onclick = function () { viewTeam(intCurrTeamNumber.toString());};
             currTeamViewButton.className = "btn btn-primary";
             currTeamViewButton.style.margin = "5%";
@@ -222,6 +222,14 @@ async function viewTeam(teamID: string) {
         teamDraftedBy: string,
     }
 
+    // Helper function to format ADP by removing leading zeros after decimal
+    function formatADP(adp: number): string {
+        // For values like 4.01 -> 4.1, 4.02 -> 4.2, etc.
+        // Remove leading zero after decimal point when followed by single digit
+        const formatted = adp.toFixed(2);
+        return formatted.replace(/\.0(\d)$/, '.$1');
+    }
+
     function findStarterIndex(players: Player[]) {
         if (players == null || players.length == 0) {
             return -1;
@@ -255,22 +263,22 @@ async function viewTeam(teamID: string) {
                 newBenchPlayerRow.style.justifyContent = "space-between";
                 let newBenchPlayerDepthChartPosition = document.createElement("td");
                 newBenchPlayerDepthChartPosition.id = "depthChartPositionBench" + i;
-                newBenchPlayerDepthChartPosition.innerHTML = "Bench";
+                newBenchPlayerDepthChartPosition.textContent = "Bench";
                 let newBenchPlayerPosition = document.createElement("td");
                 newBenchPlayerPosition.id = "benchPlayerPosition" + i;
-                newBenchPlayerPosition.innerHTML = benchPlayers[i].position;
+                newBenchPlayerPosition.textContent = benchPlayers[i].position;
                 let newBenchPlayerName = document.createElement("td");
                 newBenchPlayerName.id = "benchPlayerName" + i;
-                newBenchPlayerName.innerHTML = benchPlayers[i].fullName;
+                newBenchPlayerName.textContent = benchPlayers[i].fullName;
                 let newBenchPlayerPredictedScore = document.createElement("td");
                 newBenchPlayerPredictedScore.id = "benchPlayerPredictedScore" + i;
-                newBenchPlayerPredictedScore.innerHTML = "" + benchPlayers[i].predictedScore;
+                newBenchPlayerPredictedScore.textContent = "" + benchPlayers[i].predictedScore;
                 let newBenchPlayerAvgADP = document.createElement("td");
                 newBenchPlayerAvgADP.id = "benchPlayerAvgADP" + i;
-                newBenchPlayerAvgADP.innerHTML = "" + benchPlayers[i].avgADP;
+                newBenchPlayerAvgADP.textContent = formatADP(benchPlayers[i].avgADP);
                 let newBenchPlayerSpotDrafted = document.createElement("td");
                 newBenchPlayerSpotDrafted.id = "benchPlayerSpotDrafted" + i;
-                newBenchPlayerSpotDrafted.innerHTML = "" + benchPlayers[i].spotDrafted;
+                newBenchPlayerSpotDrafted.textContent = "" + benchPlayers[i].spotDrafted;
                 newBenchPlayerRow.appendChild(newBenchPlayerDepthChartPosition);
                 newBenchPlayerRow.appendChild(newBenchPlayerPosition);
                 newBenchPlayerRow.appendChild(newBenchPlayerName);
@@ -290,26 +298,26 @@ async function viewTeam(teamID: string) {
         newStarterRow.style.justifyContent = "space-between";
         let newStarterDepthChartPosition = document.createElement("td");
         newStarterDepthChartPosition.id = "depthChartPositionStarter" + stringPosition;
-        newStarterDepthChartPosition.innerHTML = "Starter";
+        newStarterDepthChartPosition.textContent = "Starter";
         let newStarterPosition = document.createElement("td");
         newStarterPosition.id = "staterPosition" + stringPosition;
-        newStarterPosition.innerHTML = stringPosition;
+        newStarterPosition.textContent = stringPosition;
         newStarterRow.appendChild(newStarterDepthChartPosition);
         newStarterRow.appendChild(newStarterPosition);
         if (playersPositon != null && playersPositon.length > 0) {
             let startPlayer = playersPositon[starterIndex];
             let newStarterPlayerName = document.createElement("td");
             newStarterPlayerName.id = "starterPlayerName" + stringPosition;
-            newStarterPlayerName.innerHTML = playersPositon[starterIndex].fullName;
+            newStarterPlayerName.textContent = playersPositon[starterIndex].fullName;
             let newStarterPredictedScore = document.createElement("td");
             newStarterPredictedScore.id = "starterPredictedScore" + stringPosition;
-            newStarterPredictedScore.innerHTML = "" + playersPositon[starterIndex].predictedScore;
+            newStarterPredictedScore.textContent = "" + playersPositon[starterIndex].predictedScore;
             let newStarterAvgADP = document.createElement("td");
             newStarterAvgADP.id = "starterAvgADP" + stringPosition;
-            newStarterAvgADP.innerHTML = "" + playersPositon[starterIndex].avgADP;
+            newStarterAvgADP.textContent = formatADP(playersPositon[starterIndex].avgADP);
             let newStarterspotDrafted = document.createElement("td");
             newStarterspotDrafted.id = "starteSpotDrafted" + stringPosition;
-            newStarterspotDrafted.innerHTML = "" + playersPositon[starterIndex].spotDrafted;
+            newStarterspotDrafted.textContent = "" + playersPositon[starterIndex].spotDrafted;
             newStarterRow.appendChild(newStarterPosition);
             newStarterRow.appendChild(newStarterPlayerName);
             newStarterRow.appendChild(newStarterPredictedScore);
@@ -328,7 +336,7 @@ async function viewTeam(teamID: string) {
         else {
             console.log("teamHistoryTableBody is not null. Continue.");
             teamHistoryTableBody.innerHTML = "";
-            let res = await fetch(`http://localhost:80/api/teams/getDraftHistoryTeamReview/?username=${getCookie("username")}&draftID=${getCookie("draftIDToView")}&teamIndex=${teamID}`, {
+            let res = await fetch(`/api/teams/getDraftHistoryTeamReview/?username=${getCookie("username")}&draftID=${getCookie("draftIDToView")}&teamIndex=${teamID}`, {
             method: 'GET',
             });
             let data = await res.json();

@@ -37,14 +37,15 @@ function loadUserName() {
     else {
         const userNameSpan = document.getElementById("userNameSpan");
         if (userNameSpan) {
-            userNameSpan.innerHTML = getCookie("username");
+            // Use textContent instead of innerHTML to prevent XSS
+            userNameSpan.textContent = getCookie("username");
         }
     }
 }
 async function authenticateSession() {
     let authenticateSessionRes;
     try {
-        authenticateSessionRes = await fetch("http://localhost:80/api/login/attemptSession/?username=" + getCookie("username") + "&sessionID=" + getCookie("sessionID"), {
+        authenticateSessionRes = await fetch("/api/login/attemptSession/?username=" + getCookie("username") + "&sessionID=" + getCookie("sessionID"), {
             method: 'GET',
         });
     }
@@ -65,8 +66,8 @@ async function authenticateSession() {
     }
 }
 async function logoutServerSide() {
-    let logoutRes = await fetch("http://localhost:80/api/login/logout/?username=" + getCookie("username") + "&sessionID=" + getCookie("sessionID"), {
-        method: 'POST',
+    let logoutRes = await fetch("/api/login/logout/?username=" + getCookie("username") + "&sessionID=" + getCookie("sessionID"), {
+        method: 'PUT',
     });
     let logoutData = await logoutRes.json();
     if (logoutData == true) {

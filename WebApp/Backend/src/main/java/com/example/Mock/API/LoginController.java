@@ -79,7 +79,7 @@ public class LoginController {
         return loginServices.removeUser(username);
     }
 
-    @GetMapping(path = "/attemptLogin/")
+    @PostMapping(path = "/attemptLogin/")
     public boolean attemptLogin(@RequestParam("username") String username, @RequestParam("password") String password) throws NoSuchAlgorithmException {
         validateUsername(username);
         validatePassword(password);

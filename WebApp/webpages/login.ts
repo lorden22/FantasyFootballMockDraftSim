@@ -13,7 +13,7 @@ async function addUser(): Promise<void> {
     const password: string = passwordEleValue;
 
     try {
-        const checkUserRes = await fetch(`http://localhost:80/api/login/checkUser/?username=${username}`, {
+        const checkUserRes = await fetch(`/api/login/checkUser/?username=${encodeURIComponent(username)}`, {
             method: 'GET',
         });
         const checkUserData: boolean = await checkUserRes.json();
@@ -21,12 +21,20 @@ async function addUser(): Promise<void> {
         if (checkUserData) {
             showMessage("Username already taken. Try again.", "error");
         } else {
-            const addUserRes = await fetch(`http://localhost:80/api/login/addUser/?username=${username}&password=${password}`, {
+            // Send credentials in request body, not URL
+            const formData = new URLSearchParams();
+            formData.append('username', username);
+            formData.append('password', password);
+            const addUserRes = await fetch('/api/login/addUser/', {
                 method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: formData,
             });
             const addUserData = await addUserRes.json();
 
-            await fetch(`http://localhost:80/api/teams/initaizeUserAccountSetup/?username=${username}`, {
+            await fetch(`/api/teams/initaizeUserAccountSetup/?username=${encodeURIComponent(username)}`, {
                 method: 'POST',
             });
 
@@ -55,20 +63,29 @@ async function attemptLogin(): Promise<void> {
     const password: string = passwordEleValue;
 
     try {
-        const attemptLoginRes = await fetch(`http://localhost:80/api/login/attemptLogin/?username=${username}&password=${password}`, {
-            method: 'GET',
+        // Send credentials in request body, not URL (security best practice)
+        const formData = new URLSearchParams();
+        formData.append('username', username);
+        formData.append('password', password);
+        const attemptLoginRes = await fetch('/api/login/attemptLogin/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: formData,
         });
         const attemptLoginData = await attemptLoginRes.json();
 
         if (attemptLoginData) {
-            const generateSessionIDRes = await fetch(`http://localhost:80/api/login/generateSessionID/?username=${username}`, {
+            const generateSessionIDRes = await fetch(`/api/login/generateSessionID/?username=${encodeURIComponent(username)}`, {
                 method: 'GET',
             });
             const generateSessionIDData = await generateSessionIDRes.text();
 
             showMessage("Login successful.", "success");
-            document.cookie = `username=${username}; path=/`;
-            document.cookie = `sessionID=${generateSessionIDData}; path=/`;
+            // Set cookies with Secure flag for HTTPS
+            document.cookie = `username=${encodeURIComponent(username)}; path=/; SameSite=Strict`;
+            document.cookie = `sessionID=${generateSessionIDData}; path=/; SameSite=Strict`;
             setTimeout(() => {
                 window.location.href = "drafthomepage.html";
             }, 2000);
