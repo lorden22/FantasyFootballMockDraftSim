@@ -146,7 +146,47 @@ public class DraftServices {
         return this.createPlayerModelListFromIntList(allIntList, draftSize);
     }
 
+    // OPTIMIZED VERSION: Reduces database queries from ~150+ to ~3 per call
     public List<PlayerDataObject> getPlayersLeft(int draftID, int draftSize) {
+        // Single query to get all drafted player ranks across all teams
+        String sql = "SELECT COALESCE(team_array, '') AS team_array FROM teams WHERE draft_id = :draftID";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("draftID", draftID);
+        
+        List<Map<String, Object>> teamResults = namedParameterJdbcTemplate.queryForList(sql, params);
+        
+        // Collect all drafted player ranks in a single pass
+        List<Integer> allDraftedPlayerRanks = new ArrayList<>();
+        for (Map<String, Object> teamResult : teamResults) {
+            String teamArray = (String) teamResult.get("team_array");
+            if (teamArray != null && !teamArray.isEmpty()) {
+                String[] playerRanks = teamArray.split(",");
+                for (String playerRank : playerRanks) {
+                    if (!playerRank.trim().isEmpty()) {
+                        allDraftedPlayerRanks.add(Integer.parseInt(playerRank.trim()));
+                    }
+                }
+            }
+        }
+        
+        // Get total player count
+        String countSql = "SELECT COUNT(*) FROM players";
+        int totalPlayers = namedParameterJdbcTemplate.queryForObject(countSql, new MapSqlParameterSource(), Integer.class);
+        
+        // Create list of available player ranks (not drafted)
+        List<Integer> availablePlayerRanks = new ArrayList<>();
+        for (int i = 1; i <= totalPlayers; i++) {
+            if (!allDraftedPlayerRanks.contains(i)) {
+                availablePlayerRanks.add(i);
+            }
+        }
+        
+        // Bulk fetch all available players in single query
+        return this.createPlayerModelListFromIntListOptimized(availablePlayerRanks, draftSize);
+    }
+    
+    // FALLBACK: Keep original method for compatibility
+    public List<PlayerDataObject> getPlayersLeftOriginal(int draftID, int draftSize) {
         ArrayList<PlayerDataObject> allPlayers = new ArrayList<>(this.getAllPlayers(draftSize));
         for(int i = 1; i <= draftSize; i++) {
             List<Integer> teamArrayInt = this.createTeamIntArrayFromDB(draftID, i);
@@ -334,38 +374,69 @@ public class DraftServices {
         return true;
     }
     
+    // OPTIMIZED VERSION: Cache data and reduce database calls during simulation
     public List<PlayerDataObject> simTo(String username) {
         int draftID = this.getUserMostRecentDraftID(username);
         int draftSize = this.getDraftSize(draftID);
         List<PlayerDataObject> playersDraftDuringSim = new ArrayList<>();
-        int nextUserPickRound = this.getNextUserPickRound(draftSize, this.getUserStartingDraftSpot(this.getUserTeamName(draftID), draftID), Math.abs(this.getUserStartingDraftSpot(this.getUserTeamName(draftID), draftID) - draftSize) + 1, this.getCurrRound(draftID), this.getCurrPick(draftID));
-        int nextUserPick = this.getNextUserPick(draftSize, this.getUserStartingDraftSpot(this.getUserTeamName(draftID), draftID), Math.abs(this.getUserStartingDraftSpot(this.getUserTeamName(draftID), draftID) - draftSize) + 1, this.getCurrRound(draftID), this.getCurrPick(draftID));
+        
+        // Cache frequently accessed user data
+        String userTeamName = this.getUserTeamName(draftID);
+        int userStartingDraftSpot = this.getUserStartingDraftSpot(userTeamName, draftID);
+        int userPickInEvenRound = Math.abs(userStartingDraftSpot - draftSize) + 1;
+        
+        // Cache team names to avoid repeated DB queries
+        Map<Integer, String> teamNameCache = new HashMap<>();
+        String teamNameSql = "SELECT draft_spot, team_name FROM teams WHERE draft_id = :draftID";
+        MapSqlParameterSource teamParams = new MapSqlParameterSource();
+        teamParams.addValue("draftID", draftID);
+        List<Map<String, Object>> teamResults = namedParameterJdbcTemplate.queryForList(teamNameSql, teamParams);
+        for (Map<String, Object> teamResult : teamResults) {
+            int draftSpot = (int) teamResult.get("draft_spot");
+            String teamName = (String) teamResult.get("team_name");
+            teamNameCache.put(draftSpot, teamName);
+        }
+        
+        // Pre-calculate next user pick to avoid repeated calculations
+        int currRound = this.getCurrRound(draftID);
+        int currPick = this.getCurrPick(draftID);
+        int nextUserPickRound = this.getNextUserPickRound(draftSize, userStartingDraftSpot, userPickInEvenRound, currRound, currPick);
+        int nextUserPick = this.getNextUserPick(draftSize, userStartingDraftSpot, userPickInEvenRound, currRound, currPick);
+        
         String teamName;
-        while (!this.isDraftOver(this.getCurrRound(draftID), this.getCurrPick(draftID)) &&
-                !(nextUserPickRound == this.getCurrRound(draftID) 
-                 && nextUserPick == this.getCurrPick(draftID))){
-            int currRound = this.getCurrRound(draftID);
-            int currPick = this.getCurrPick(draftID);
+        VaribleOddsPicker randomNumGen = new VaribleOddsPicker(); // Reuse same instance
+        
+        while (!this.isDraftOver(currRound, currPick) &&
+                !(nextUserPickRound == currRound && nextUserPick == currPick)) {
+            
             // In even rounds, we need to convert the current pick to the correct team's draft spot
             int draftSpot = (currRound % 2 == 0) ? draftSize - currPick + 1 : currPick;
             
-            teamName = this.getTeamNameFromDraftSpot(draftID, draftSpot);
+            teamName = teamNameCache.get(draftSpot);
             Logger.logDraft(draftID, username, "CPU_PICK", "Team: " + teamName + " Pick: " + currRound + "." + currPick);
+            
             List<PlayerDataObject> playersLeft = this.getPlayersLeft(draftID, draftSize);
             int pick = this.checkForForcePickNeeded(currRound, currPick, draftID, draftSize, playersLeft);
             Logger.logDraft(draftID, username, "FORCE_PICK", pick == -1 ? "NOT_NEEDED" : "NEEDED");
+            
             if(pick == -1) {
-                VaribleOddsPicker randomNumGen = new VaribleOddsPicker();
                 pick = randomNumGen.newOdds(6);
                 pick = (int)playersLeft.get(pick-1).getRank();
             }
+            
             makePick(draftID, currPick, pick);
             moveToNextPick(draftID, username);
+            
             PlayerDataObject playerDrafted = this.createPlayerModel(pick, draftSize);
             playerDrafted = this.updatePlayerPickedMetaData(playerDrafted, currRound, currPick, teamName);
             playersDraftDuringSim.add(playerDrafted);
+            
             Logger.logPlayerDrafted(draftID, "CPU", playerDrafted.getFullName(), playerDrafted.getPosition(), currRound, currPick);
             Logger.logTeamUpdate(draftID, "CPU", teamName, "CPU_DRAFTED_PLAYER");
+            
+            // Update current round and pick for next iteration
+            currRound = this.getCurrRound(draftID);
+            currPick = this.getCurrPick(draftID);
         }
         return playersDraftDuringSim;
     } 
@@ -387,6 +458,43 @@ public class DraftServices {
         return teamArrayInt;
     }
 
+    // OPTIMIZED VERSION: Bulk fetch players in single query instead of individual queries
+    private List<PlayerDataObject> createPlayerModelListFromIntListOptimized(List<Integer> playerRanks, int draftSize) {
+        if (playerRanks.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        // Use parameterized IN clause to prevent SQL injection
+        String sql = "SELECT * FROM players WHERE player_rank IN (:playerRanks) ORDER BY player_rank";
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("playerRanks", playerRanks);
+        List<Map<String, Object>> playerMaps = namedParameterJdbcTemplate.queryForList(sql, params);
+        
+        List<PlayerDataObject> playerModelList = new ArrayList<>();
+        for (Map<String, Object> playerMap : playerMaps) {
+            String name = (String) playerMap.get("name");
+            String position = (String) playerMap.get("position");
+            int playerRank = (int) playerMap.get("player_rank");
+            Object objectPredictedScore = playerMap.get("predicted_score");
+            Double predictedScore = ((BigDecimal) objectPredictedScore).doubleValue();
+            
+            // Calculate ADP
+            String avgADP;
+            int round = (playerRank <= draftSize) ? 1 : (playerRank / draftSize) + 1;
+            int pick = playerRank % draftSize;
+            if (pick == 0) pick = draftSize;
+            String pickStr = Integer.toString(pick);
+            if (pickStr.length() == 1) pickStr = "0" + pick;
+            avgADP = round + "." + pickStr;
+            
+            PlayerDataObject player = new PlayerDataObject(name, position, (double) playerRank, predictedScore, Double.parseDouble(avgADP));
+            playerModelList.add(player);
+        }
+        
+        return playerModelList;
+    }
+    
+    // FALLBACK: Keep original method for compatibility
     private List<PlayerDataObject> createPlayerModelListFromIntList(List<Integer> teamArrayInt, int draftSize) {
         List<PlayerDataObject> playerModelList = new ArrayList<>();
         for(int playerInt : teamArrayInt) {

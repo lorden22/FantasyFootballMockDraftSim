@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
+
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -77,7 +77,7 @@ public class LoginServices{
         digest.reset();
         digest.update(salt.getBytes());
         byte[] hash = digest.digest(password.getBytes());
-        String attemptedHashPassword = bypeArrayToString(hash);
+        String attemptedHashPassword = byteArrayToString(hash);
         boolean authenticated = attemptedHashPassword.equals(hashPassword);
         Logger.logAuth(username, "AUTH_PASSWORD", authenticated ? "SUCCESS" : "FAILED_WRONG_PASSWORD");
         return authenticated;
@@ -108,7 +108,7 @@ public class LoginServices{
             return null;
         }
         String sessionID = this.generateAUserSessionID();
-        Logger.logAuth(username, "GENERATE_SESSION", "SUCCESS_" + sessionID);
+        Logger.logAuth(username, "GENERATE_SESSION", "SUCCESS");
 
         String sql = "UPDATE users SET recent_session_id = :sessionID WHERE username = :username";
         MapSqlParameterSource params = new MapSqlParameterSource();
@@ -135,7 +135,7 @@ public class LoginServices{
         return true;
     }
 
-    private static String bypeArrayToString(byte[] bytes) {
+    private static String byteArrayToString(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {
             sb.append(String.format("%02x", b));
@@ -147,6 +147,6 @@ public class LoginServices{
         SecureRandom random = new SecureRandom();
         byte[] bytes = new byte[16];
         random.nextBytes(bytes);
-        return bypeArrayToString(bytes);
+        return byteArrayToString(bytes);
     }
 }
