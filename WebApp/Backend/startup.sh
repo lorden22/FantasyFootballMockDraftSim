@@ -2,10 +2,10 @@
 
 echo "Starting Fantasy Football Mock Draft Sim container..."
 
-# Set environment variables
-USER="root"
-PASSWORD="password"
-DATABASE="db"
+# Set environment variables (use env vars with defaults)
+USER="${DB_USER:-root}"
+PASSWORD="${DB_PASSWORD:-changeme}"
+DATABASE="${DB_NAME:-db}"
 
 # Function to handle cleanup on exit
 cleanup() {
