@@ -39,7 +39,7 @@ tsc
 docker-compose up -d              # Start all services
 docker-compose down               # Stop all services
 docker-compose logs -f            # Follow logs
-docker exec fantasy-football-mock-draft mysql -u root -ppassword db  # DB shell
+docker exec fantasy-football-mock-draft mysql -u root -p"$MYSQL_ROOT_PASSWORD" db  # DB shell
 ```
 
 ## Architecture
@@ -101,7 +101,7 @@ docker exec fantasy-football-mock-draft mysql -u root -ppassword db  # DB shell
 - `players` - Player database (540 players from WebScraping/PlayerData.txt)
 - `draft_logs` - Audit history
 
-**Connection (dev):** `localhost:33306` | User: `root` | Password: `password`
+**Connection (dev):** `localhost:33306` | User: `root` | Password: (from .env file)
 
 ## Tech Stack
 

@@ -37,6 +37,7 @@ COPY emptyMockDraftDBTables.sql emptyMockDraftDBTables.sql
 # Create startup script for console with embedded database
 RUN echo '#!/bin/bash' > /app/startup-console.sh && \
     echo 'set -e' >> /app/startup-console.sh && \
+    echo 'DB_PASSWORD="${DB_PASSWORD:-changeme}"' >> /app/startup-console.sh && \
     echo 'echo "Initializing MariaDB..."' >> /app/startup-console.sh && \
     echo 'mysql_install_db --user=mysql --datadir=/var/lib/mysql' >> /app/startup-console.sh && \
     echo 'echo "Starting MariaDB..."' >> /app/startup-console.sh && \
@@ -45,12 +46,12 @@ RUN echo '#!/bin/bash' > /app/startup-console.sh && \
     echo 'until mysqladmin ping -h localhost --silent; do sleep 2; done' >> /app/startup-console.sh && \
     echo 'echo "Setting up database..."' >> /app/startup-console.sh && \
     echo 'mysql -uroot -e "CREATE DATABASE IF NOT EXISTS db;"' >> /app/startup-console.sh && \
-    echo 'mysql -uroot -e "ALTER USER '\''root'\''@'\''localhost'\'' IDENTIFIED BY '\''password'\'';"' >> /app/startup-console.sh && \
-    echo 'mysql -uroot -ppassword -e "FLUSH PRIVILEGES;"' >> /app/startup-console.sh && \
+    echo 'mysql -uroot -e "ALTER USER '\''root'\''@'\''localhost'\'' IDENTIFIED BY '\''$DB_PASSWORD'\'';"' >> /app/startup-console.sh && \
+    echo 'mysql -uroot -p"$DB_PASSWORD" -e "FLUSH PRIVILEGES;"' >> /app/startup-console.sh && \
     echo 'echo "Loading database schema..."' >> /app/startup-console.sh && \
-    echo 'mysql -uroot -ppassword db < emptyMockDraftDBTables.sql' >> /app/startup-console.sh && \
+    echo 'mysql -uroot -p"$DB_PASSWORD" db < emptyMockDraftDBTables.sql' >> /app/startup-console.sh && \
     echo 'echo "Loading sample data..."' >> /app/startup-console.sh && \
-    echo 'mysql -uroot -ppassword db < mockDraft.sql' >> /app/startup-console.sh && \
+    echo 'mysql -uroot -p"$DB_PASSWORD" db < mockDraft.sql' >> /app/startup-console.sh && \
     echo 'echo "Database ready! Starting console application..."' >> /app/startup-console.sh && \
     echo 'java -cp bin:/app/mysql-connector-java.jar -Ddb.host=localhost com.example.MockDraftDriver' >> /app/startup-console.sh
 
