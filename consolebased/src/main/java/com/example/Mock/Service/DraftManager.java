@@ -104,11 +104,19 @@ public class DraftManager {
         // Start the interactive draft
         draftHandler.startDraft();
         
-        // Print final results
-        System.out.println("\n" + "=".repeat(50));
-        System.out.println("           DRAFT COMPLETE!");
-        System.out.println("=".repeat(50));
-        draftHandler.printTeams();
+        		// Print final results
+		System.out.println("\n" + "=".repeat(50));
+		System.out.println("           DRAFT COMPLETE!");
+		System.out.println("=".repeat(50));
+		
+		// Show draft log first
+		draftHandler.printDraftLog();
+		
+		// Show team rosters
+		System.out.println("\n" + "=".repeat(50));
+		System.out.println("           TEAM ROSTERS");
+		System.out.println("=".repeat(50));
+		draftHandler.printTeams();
         
         // Mark draft as completed in database
         draftServices.completeDraft(username, draftId);

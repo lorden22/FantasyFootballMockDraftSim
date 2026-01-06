@@ -15,12 +15,18 @@ public class DraftHandler {
 	private VaribleOddsPicker randomNumGen;
 	private String username;
 	private Scanner scanner;
+	private ArrayList<DraftPick> draftPicks; // Track all draft picks
+	private int currentRound;
+	private int currentPick;
 
 	public DraftHandler(ArrayList<PlayerModel> startingPlayers, int numTeams, String userTeamName, String desiredDraftPickString, Scanner scanner) {
 		this.playersLeft = new ArrayList<PlayerModel>(startingPlayers);
 		this.randomNumGen = new VaribleOddsPicker();
 		this.teams = new ArrayList<TeamModel>();
 		this.scanner = scanner;
+		this.draftPicks = new ArrayList<DraftPick>();
+		this.currentRound = 1;
+		this.currentPick = 1;
 		int desiredDraftPickInt;
 
 		this.username = userTeamName; // For now, use team name as username (should be passed in)
@@ -50,8 +56,11 @@ public class DraftHandler {
 			this.teams.get(0).getTeamSize() <= 15) { 
 			for(TeamModel currTeam : this.teams) {
 				this.nextDraftPick(currTeam);
+				currentPick++;
 			}
 			Collections.reverse(this.teams);
+			currentRound++;
+			currentPick = 1;
 		}
 		Logger.logInfo("Draft simulation completed");
 	}
@@ -124,6 +133,9 @@ public class DraftHandler {
 		Logger.logTeamUpdate(-1, currTeam.isUserTeam() ? this.username : "CPU", currTeam.getTeamName(), "PLAYER_ADDED");
 		currTeam.addPlayer(nextPlayer.getPosition(), nextPlayer);
 
+		// Track this draft pick
+		draftPicks.add(new DraftPick(currentRound, currentPick, currTeam.getTeamName(), nextPlayer));
+
 		this.playersLeft.remove(nextPlayer);
 		this.playersLeft.sort(null);
 	}
@@ -131,12 +143,32 @@ public class DraftHandler {
 	public void printTeams() {
 		Logger.logInfo("Printing final team results");
 		for(TeamModel currTeam : this.teams) {
-			System.out.println(currTeam);
+			System.out.println(currTeam.getEnhancedDisplay());
 		}
+	}
+
+	public void printDraftLog() {
+		System.out.println("\n" + "=".repeat(80));
+		System.out.println("                              DRAFT LOG");
+		System.out.println("=".repeat(80));
+		System.out.printf("%-8s %-8s %-20s %-25s %-8s %-8s %-8s %-12s%n", 
+			"ROUND", "PICK", "TEAM", "PLAYER", "POS", "ADP", "DRAFTED", "PRED SCORE");
+		System.out.println("-".repeat(80));
+		
+		for (DraftPick pick : draftPicks) {
+			System.out.printf("%-8d %-8d %-20s %-25s %-8s %-8.1f %-8d %-12.1f%n",
+				pick.round, pick.pick, pick.teamName, pick.player.getFullName(), 
+				pick.player.getPosition(), pick.player.getAvgADP(), pick.draftedAt, pick.player.getPredictedScore());
+		}
+		System.out.println("=".repeat(80));
 	}
 
 	public ArrayList<TeamModel> returnTeams() {
 		return this.teams;
+	}
+
+	public ArrayList<DraftPick> getDraftPicks() {
+		return this.draftPicks;
 	}
 
 	private void printNextAvailablePlayers() {
@@ -151,5 +183,22 @@ public class DraftHandler {
 		}
 		System.out.println();
 		Logger.logUserInteraction(this.username, "SHOW_AVAILABLE_PLAYERS", "Displayed " + maxSizeOfList + " available players");
+	}
+
+	// Inner class to track draft picks
+	private static class DraftPick {
+		int round;
+		int pick;
+		String teamName;
+		PlayerModel player;
+		int draftedAt;
+
+		DraftPick(int round, int pick, String teamName, PlayerModel player) {
+			this.round = round;
+			this.pick = pick;
+			this.teamName = teamName;
+			this.player = player;
+			this.draftedAt = (round - 1) * 4 + pick; // Assuming 4 teams for now
+		}
 	}
 }

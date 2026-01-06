@@ -1,190 +1,229 @@
-# Fantasy-Football-Mock-Draft-Simulator
-A personal project to build a fantasy football mock draft simulator
+# Fantasy Football Mock Draft Sim
 
-## Project Status
-- Consolebased version is finished
-- WebApp ongoing
+A comprehensive fantasy football mock draft simulation application with secure HTTPS-only access.
 
-## Project Structure
+## 🚀 Quick Start
 
-The project has been organized with shared components to reduce duplication:
+### Prerequisites
+- Docker (20.10+)
+- Docker Compose (2.0+)
+
+### Deploy in 3 Steps
+
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd FantasyFootballMockDraftSim
+   ```
+
+2. **Run the deployment script**
+   ```bash
+   ./deploy.sh
+   ```
+
+3. **Access your application**
+   - Frontend: https://localhost
+   - API: https://localhost/api/
+   - Health: https://localhost/health
+
+## 🏗️ Architecture
+
+This application is deployed as a **single container** with all components:
+
+- **Frontend**: HTML/CSS/JavaScript served by nginx
+- **Backend**: Spring Boot REST API with JPA/Hibernate
+- **Database**: MariaDB with persistent storage
+- **Security**: HTTPS-only with SSL/TLS encryption
+- **Proxy**: nginx reverse proxy with load balancing
+
+## 🔒 Security Features
+
+- ✅ **HTTPS-only access** - HTTP automatically redirects to HTTPS
+- ✅ **SSL/TLS encryption** - All traffic encrypted
+- ✅ **Security headers** - XSS protection, content type validation
+- ✅ **CORS protection** - Configured for secure origins
+- ✅ **Database security** - Isolated database with secure credentials
+
+## 📁 Project Structure
 
 ```
 FantasyFootballMockDraftSim/
-├── shared/
-│   └── src/main/java/com/example/
-│       ├── common/                  # Shared components for both applications
-│       │   ├── Logger.java          # Shared logging utility
-│       │   ├── PlayerDataObject.java # Shared player data model
-│       │   ├── VaribleOddsPicker.java # Shared random picker utility
-│       │   └── PlayerModels/        # Shared player position models
-│       └── console/                 # Console-specific models
-│           ├── PlayerModel.java     # Console player wrapper
-│           └── TeamModel.java       # Console team wrapper
-├── WebApp/Backend/                  # Spring Boot web application
-│   └── src/main/java/com/example/Mock/
-│       ├── API/                     # REST Controllers
-│       ├── DAO/                     # Data Access Objects
-│       └── Service/                 # Business Logic Services
-├── consolebased/                    # Console-based application
-│   └── src/main/java/com/example/
-│       ├── Mock/
-│       │   ├── DAO/                 # Data Access Objects
-│       │   └── Service/             # Business Logic Services
-│       ├── MockDraftDriver.java     # Main console application
-│       └── DraftHandler.java        # Draft simulation logic
-├── mockDraft.sql                    # Full database with sample data
-├── emptyMockDraftDBTables.sql       # Empty database structure
-└── ffb_aliases.sh                   # Convenience aliases
+├── WebApp/
+│   ├── Backend/                 # Spring Boot application
+│   │   ├── src/main/java/      # Java source code
+│   │   ├── src/main/resources/ # Configuration files
+│   │   ├── Dockerfile          # Backend container config
+│   │   └── startup.sh          # Database initialization
+│   └── webpages/               # Frontend files
+│       ├── *.html              # HTML pages
+│       ├── *.js                # JavaScript files
+│       ├── *.ts                # TypeScript files
+│       └── styles.css          # CSS styles
+├── shared/                     # Shared Java classes
+├── Dockerfile                  # Main container configuration
+├── docker-compose.yml          # Multi-service orchestration
+├── nginx.conf                  # Web server configuration
+├── deploy.sh                   # Deployment automation script
+└── DEPLOYMENT_GUIDE.md         # Comprehensive deployment guide
 ```
 
-## Shared Components
+## 🛠️ Development
 
-The following components have been consolidated into the `shared/` directory:
-
-- **Logger**: Comprehensive logging system with daily categorized log files (auth, draft, application)
-- **PlayerDataObject**: Core player data model used by both applications
-- **VaribleOddsPicker**: Random selection utility for draft simulations
-- **PlayerModels**: Position-specific player models (QB, RB, WR, TE, K, DST)
-
-Both applications use these shared components to ensure consistency and reduce code duplication.
-
-## Database Setup
-
-The project includes SQL files at the root level for easy database setup:
-
-- **`mockDraft.sql`**: Complete database with sample data (players, teams, etc.)
-- **`emptyMockDraftDBTables.sql`**: Database structure only (empty tables)
-
-Use the database aliases to quickly set up your local MySQL database:
-
+### Local Development
 ```bash
-# Set up database with sample data
-ffbSetupDB
+# Start development environment
+./deploy.sh
 
-# Or set up empty database structure
-ffbSetupEmptyDB
+# View logs
+./deploy.sh logs
 
-# Connect to database
-ffbConnectDB
+# Stop application
+./deploy.sh stop
 
-# View tables
-ffbShowTables
+# Restart application
+./deploy.sh restart
 ```
 
-## Shared File Management
+### Building from Source
+```bash
+# Build only
+./deploy.sh build
 
-To maintain the single source of truth in the `shared/` directory while supporting different build systems:
+# Check health
+./deploy.sh health
+```
 
-- **WebApp**: Temporarily syncs shared files for Maven compilation, then removes them before Docker build
-- **Consolebased**: Uses shared files directly in Docker builds (no local copying needed)
-- **DevStartup Scripts**: Automatically handle the sync and cleanup process for development
-- **Git Safety**: Shared files are compiled into JAR, then temporary copies are removed to prevent Git tracking
+## 🌐 Production Deployment
 
-The `ffbDevStartupWebApp` script automatically syncs shared files for Maven compilation, compiles them into the JAR file, then removes the temporary files before Docker build. This ensures the latest shared components are always used while preventing Git from tracking any temporary copies.
+### Cloud Platforms Supported
+- **AWS EC2** - Ubuntu instances with Docker
+- **Google Cloud Platform** - Compute Engine VMs
+- **DigitalOcean** - Droplets with Docker
+- **Azure** - Virtual Machines
+- **Kubernetes** - Container orchestration
 
-## Recent Reorganization
+### Deployment Options
+1. **Docker Host** - Direct deployment on Linux server
+2. **Cloud Platforms** - Managed cloud services
+3. **Container Orchestration** - Kubernetes, Docker Swarm
 
-The project has been restructured for better organization:
+See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for detailed instructions.
 
-- **Consolebased**: Reorganized to match WebApp structure with Mock/DAO and Mock/Service directories
-- **WebApp**: Removed duplicate PlayerModels directory (now uses shared PlayerModels)
-- **Shared Components**: All common code (Logger, PlayerDataObject, PlayerModels, VaribleOddsPicker) consolidated in shared/ directory
-- **Consistent Structure**: Both applications now follow similar architectural patterns
-- **DevStartup Scripts**: Moved to project root with sync functionality
+## 📊 Monitoring
 
-## Requirements
+### Health Checks
+- Application health: `https://yourdomain.com/health`
+- Container status: `docker-compose ps`
+- Logs: `docker-compose logs -f`
 
-WebScraper:
-- Python 3.9 or higher
-- ChromeDriver
-- Google Chrome
+### Performance Monitoring
+- Resource usage: `docker stats`
+- Database performance: MariaDB slow query log
+- Application metrics: Spring Boot Actuator
 
+## 🔧 Configuration
 
-WebApp:
-- Java 17 or higher
-- npm
-- tsc
-- mysql
-- Docker
+### Environment Variables
+Copy `env.production` to `.env` and modify:
+```bash
+cp env.production .env
+# Edit .env with your production values
+```
 
-## Installation/How to Run
+### SSL Certificates
+- **Development**: Self-signed certificates (auto-generated)
+- **Production**: Let's Encrypt or commercial certificates
 
-WebScraper:
-- `pip install selenium`
-- python3 'WebScraper/scraper.py'
+### Database Configuration
+- **Development**: In-memory MariaDB
+- **Production**: Persistent MariaDB with backups
 
+## 🚀 Features
 
-consolebased via Docker: 
-- `docker build -f consolebased/Dockerfile -t app-console:latest .'
-- `docker run -it app-console:latest`
+### Frontend
+- ✅ Responsive design
+- ✅ User authentication
+- ✅ Draft simulation
+- ✅ Team management
+- ✅ Draft history
+- ✅ Real-time updates
 
-webapp via Docker:
-- `docker build -f webapp/Backend/Dockerfile -t app-web:latest .'
-- `docker run -it app-web:latest`
+### Backend
+- ✅ RESTful API
+- ✅ JWT authentication
+- ✅ Database persistence
+- ✅ CORS support
+- ✅ Health monitoring
+- ✅ Security headers
 
+### Database
+- ✅ Player data management
+- ✅ Draft tracking
+- ✅ User accounts
+- ✅ Team rosters
+- ✅ Historical data
 
-consolebased via local:
-- `javac consolebased/src/main/java/com/example/MockDraftDriver.java'
+## 📈 Scaling
 
-webapp via local:
-- `javac WebApp/Backend/src/main/java/com/example/Mock/Application.java'
+### Horizontal Scaling
+```yaml
+# docker-compose.yml
+services:
+  fantasy-football-app:
+    deploy:
+      replicas: 3
+```
 
-## Usage
-This project is opensource so feel to fork to host your host your own version of the webapp and consolebased version. However I open to PRs to improve the project.
+### Load Balancing
+- nginx reverse proxy
+- Round-robin load balancing
+- Health check integration
 
-## Contributing
-Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
+## 🔍 Troubleshooting
 
-## License
-[MIT]
+### Common Issues
+1. **Port conflicts** - Check if ports 80, 443, 8443 are available
+2. **SSL certificate warnings** - Normal for self-signed certificates
+3. **Database connection issues** - Check container logs
+4. **Memory issues** - Increase container memory limits
 
-## Acknowledgements
-- [FantasyPros](https://www.fantasypros.com/) for providing the data
-- [Selenium](https://www.selenium.dev/) for providing the web scraping tools
-- [Spring](https://spring.io/) for providing the webapp framework
-- [Docker](https://www.docker.com/) for providing the containerization tools
-- [Maven](https://maven.apache.org/) for providing the build tools
-- [MySQL](https://www.mysql.com/) for providing the database
+### Debug Commands
+```bash
+# View logs
+docker-compose logs -f
 
-## Contact
-Created by [Bryan Lorden] (
-    github: https://github.com/lorden22
-    LinkedIn: https://www.linkedin.com/in/blorden/
-    email: blorden.dev@gmail.com
-)
+# Access container
+docker-compose exec fantasy-football-app bash
 
-## Project Aliases
+# Check health
+curl -k https://localhost/health
 
-To simplify building, running, and developing the project, a set of helpful aliases is provided in the `ffb_aliases.sh` file at the project root.
+# Database backup
+docker exec fantasy-football-mock-draft mysqldump -u root -ppassword db > backup.sql
+```
 
-**To use these aliases:**
+## 📞 Support
 
-1. After cloning the repo, run:
-   
-   ```bash
-   source /path/to/FantasyFootballMockDraftSim/ffb_aliases.sh
-   ```
-   Replace `/path/to/` with the actual path to your cloned repo.
+For issues and questions:
+1. Check the [troubleshooting section](#troubleshooting)
+2. Review [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
+3. Check application logs
+4. Verify system requirements
 
-2. To load these aliases automatically in every terminal session, add the above line to your `~/.bashrc` or `~/.zshrc`.
+## 📝 License
 
-**Provided Aliases:**
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-*Build & Run:*
-- `ffbRoot` — Change directory to the project root
-- `buildConsoleDraft` — Build the console app Docker image
-- `buildWebbackendDraft` — Build the web backend Docker image
-- `runConsoleDraft` — Run the console app
-- `runWebbackendDraft` — Run the web backend
-- `ffbDevStartupWebApp` — Run the web app dev startup script (includes shared file sync)
-- `ffbDevStartupConsole` — Run the console app dev startup script
-- `mvnCleanFFB` — Clean the Maven project
+## 🤝 Contributing
 
-*Database:*
-- `ffbSetupDB` — Import full database with sample data (mockDraft.sql)
-- `ffbSetupEmptyDB` — Import empty database structure (emptyMockDraftDBTables.sql)
-- `ffbConnectDB` — Connect to the local database
-- `ffbShowTables` — Show all tables in the database
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
+
+---
+
+**Ready to deploy?** Run `./deploy.sh` to get started!
 
 

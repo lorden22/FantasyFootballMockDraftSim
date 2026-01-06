@@ -267,4 +267,238 @@ public class DraftServices {
         }
         return teams;
     }
+    
+    // Get draft picks for a specific draft (EXACT COPY from WebApp)
+    public List<PlayerDataObject> getDraftHistoryDraftedPlayerLog(String username, int draftID) {
+        ArrayList<PlayerDataObject> allPlayers = new ArrayList<>();
+        int draftSize = this.getDraftSize(draftID);
+        for (int i = 1; i <= draftSize; i++) {
+            List<Integer> teamArrayInt = this.createTeamIntArrayFromDB(draftID, i);
+            List<PlayerDataObject> teamPlayerList = this.createPlayerModelListFromIntList(teamArrayInt, draftSize);
+            String teamName = getUserTeamNameFromDraftSpot(draftID, i);
+            String teamDraftSpot = String.valueOf(i);
+            int round = 1;
+            int pickOdd = Integer.parseInt(teamDraftSpot);
+            int pickEven = Math.abs(Integer.parseInt(teamDraftSpot) - draftSize) + 1;
+            int pick = pickOdd;
+            for(PlayerDataObject player : teamPlayerList) {
+                player.setSpotDrafted(round+"."+pick);
+                player.setTeamDraftedBy(teamName);
+                round++;
+                pick = round % 2 == 0 ? pickEven : pickOdd;
+            }
+            allPlayers.addAll(teamPlayerList);
+            Logger.logDraft(draftID, username, "GET_DRAFT_HISTORY_PLAYERS", "Team " + i + " has " + teamPlayerList.size() + " players");
+        }
+        // Sort by spot drafted
+        allPlayers.sort((p1, p2) -> {
+            String[] spot1 = p1.getSpotDrafted().split("\\.");
+            String[] spot2 = p2.getSpotDrafted().split("\\.");
+            int round1 = Integer.parseInt(spot1[0]);
+            int round2 = Integer.parseInt(spot2[0]);
+            if (round1 != round2) return Integer.compare(round1, round2);
+            return Integer.compare(Integer.parseInt(spot1[1]), Integer.parseInt(spot2[1]));
+        });
+        return allPlayers;
+    }
+    
+    // Get team roster for a specific draft
+    public List<Map<String, Object>> getTeamRoster(int draftId) {
+        List<Map<String, Object>> teamRoster = new ArrayList<>();
+        String sql = "SELECT t.team_name, t.user_team, p.full_name, p.position, p.avg_adp, p.predicted_score, dp.pick_number " +
+                    "FROM teams t " +
+                    "JOIN draft_picks dp ON t.draft_id = dp.draft_id AND t.team_name = dp.team_name " +
+                    "JOIN players p ON dp.player_id = p.player_id " +
+                    "WHERE t.draft_id = ? " +
+                    "ORDER BY t.team_name, p.position, dp.pick_number";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, draftId);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                Map<String, Object> player = new HashMap<>();
+                player.put("team_name", rs.getString("team_name"));
+                player.put("user_team", rs.getBoolean("user_team"));
+                player.put("player_name", rs.getString("full_name"));
+                player.put("position", rs.getString("position"));
+                player.put("adp", rs.getDouble("avg_adp"));
+                player.put("predicted_score", rs.getDouble("predicted_score"));
+                player.put("draft_pick", rs.getInt("pick_number"));
+                teamRoster.add(player);
+            }
+            Logger.logDraft(draftId, "SYSTEM", "TEAM_ROSTER_LOADED", "Loaded team roster with " + teamRoster.size() + " players");
+        } catch (SQLException e) {
+            Logger.logError("Failed to load team roster for draft " + draftId + ": " + e.getMessage());
+        }
+        return teamRoster;
+    }
+    
+    // Get the most recent completed draft ID for a user
+    public int getMostRecentCompletedDraftId(String username) {
+        String sql = "SELECT draft_id FROM drafts WHERE username = ? AND complete_status = 1 ORDER BY draft_id DESC LIMIT 1";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, username);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("draft_id");
+            }
+        } catch (SQLException e) {
+            Logger.logError("Failed to get most recent completed draft ID for user " + username + ": " + e.getMessage());
+        }
+        return -1;
+    }
+    
+    // Get draft size for a specific draft
+    public int getDraftSize(int draftId) {
+        String sql = "SELECT num_teams FROM drafts WHERE draft_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, draftId);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("num_teams");
+            }
+        } catch (SQLException e) {
+            Logger.logError("Failed to get draft size for draft " + draftId + ": " + e.getMessage());
+        }
+        return -1;
+    }
+    
+    // Create team array from database
+    public List<Integer> createTeamIntArrayFromDB(int draftId, int teamIndex) {
+        List<Integer> teamArray = new ArrayList<>();
+        String sql = "SELECT team_array FROM teams WHERE draft_id = ? AND draft_spot = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, draftId);
+            stmt.setInt(2, teamIndex);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                String teamArrayStr = rs.getString("team_array");
+                if (teamArrayStr != null && !teamArrayStr.isEmpty()) {
+                    String[] playerIds = teamArrayStr.split(",");
+                    for (String playerId : playerIds) {
+                        if (!playerId.trim().isEmpty()) {
+                            teamArray.add(Integer.parseInt(playerId.trim()));
+                        }
+                    }
+                }
+            }
+        } catch (SQLException e) {
+            Logger.logError("Failed to get team array for draft " + draftId + " team " + teamIndex + ": " + e.getMessage());
+        }
+        return teamArray;
+    }
+    
+    // EXACT COPY from WebApp
+    public List<PlayerDataObject> createPlayerModelListFromIntList(List<Integer> teamArrayInt, int draftSize) {
+        List<PlayerDataObject> playerModelList = new ArrayList<>();
+        for(int playerInt : teamArrayInt) {
+            PlayerDataObject player = this.createPlayerModel(playerInt, draftSize);
+            playerModelList.add(player);
+        }
+        return playerModelList;
+    }
+
+    // EXACT COPY from WebApp
+    private PlayerDataObject createPlayerModel(int pRank, int draftSize) {
+        String sql = "SELECT * FROM players WHERE player_rank = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, pRank);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                String name = rs.getString("name");
+                String position = rs.getString("position");
+                int playerRank = rs.getInt("player_rank");
+                double predictedScore = rs.getBigDecimal("predicted_score").doubleValue();
+                
+                // Calculate ADP exactly like WebApp
+                String avgADP;
+                int round;
+                if(playerRank <= draftSize) round = 1;
+                else round = (playerRank / draftSize) + 1;
+                int pick = playerRank % draftSize;
+                if (pick == 0) {
+                    pick = 1;
+                }
+                String pickStr = Integer.toString(pick);    
+                if (Integer.toString(pick).length() == 1) {
+                    pickStr = "0" + pick;
+                }
+                avgADP = round + "." + pickStr;
+                
+                // Use WebApp constructor: (name, position, playerRank, predictedScore, avgADP)
+                return new PlayerDataObject(name, position, (double)playerRank, predictedScore, Double.parseDouble(avgADP));
+            }
+        } catch (SQLException e) {
+            Logger.logError("Failed to create player model for rank " + pRank + ": " + e.getMessage());
+        }
+        return null;
+    }
+    
+    // Get team name from draft spot
+    public String getUserTeamNameFromDraftSpot(int draftId, int teamIndex) {
+        String sql = "SELECT team_name FROM teams WHERE draft_id = ? AND draft_spot = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, draftId);
+            stmt.setInt(2, teamIndex);
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                return rs.getString("team_name");
+            }
+        } catch (SQLException e) {
+            Logger.logError("Failed to get team name for draft " + draftId + " team " + teamIndex + ": " + e.getMessage());
+        }
+        return "Team " + teamIndex;
+    }
+    
+    // Get team roster for a specific draft and team
+    public List<Map<String, Object>> getTeamRoster(int draftId, int teamIndex) {
+        List<Map<String, Object>> teamRoster = new ArrayList<>();
+        
+        // Get team players
+        List<Integer> teamArrayInt = createTeamIntArrayFromDB(draftId, teamIndex);
+        List<PlayerDataObject> teamPlayerList = createPlayerModelListFromIntList(teamArrayInt, getDraftSize(draftId));
+        String teamName = getUserTeamNameFromDraftSpot(draftId, teamIndex);
+        
+        // Use shared utility to build roster
+        try {
+            // Import the shared utility class
+            Class<?> draftAnalysisClass = Class.forName("main.java.com.example.common.DraftAnalysisUtils");
+            Object roster = draftAnalysisClass.getMethod("buildTeamRoster", String.class, boolean.class, List.class)
+                .invoke(null, teamName, false, teamPlayerList);
+            
+            // Convert roster to map format for console display
+            // This is a simplified version - in a full implementation you'd use reflection to access the roster data
+            
+            // For now, just return the raw player data
+            for (PlayerDataObject player : teamPlayerList) {
+                Map<String, Object> playerData = new HashMap<>();
+                playerData.put("player_name", player.getFullName());
+                playerData.put("position", player.getPosition());
+                playerData.put("adp", player.getAvgADP());
+                playerData.put("predicted_score", player.getPredictedScore());
+                playerData.put("draft_pick", (int) Math.round(player.getAvgADP()));
+                teamRoster.add(playerData);
+            }
+            
+        } catch (Exception e) {
+            Logger.logError("Failed to build team roster using shared utilities: " + e.getMessage());
+            // Fallback to simple player list
+            for (PlayerDataObject player : teamPlayerList) {
+                Map<String, Object> playerData = new HashMap<>();
+                playerData.put("player_name", player.getFullName());
+                playerData.put("position", player.getPosition());
+                playerData.put("adp", player.getAvgADP());
+                playerData.put("predicted_score", player.getPredictedScore());
+                playerData.put("draft_pick", (int) Math.round(player.getAvgADP()));
+                teamRoster.add(playerData);
+            }
+        }
+        
+        return teamRoster;
+    }
 } 

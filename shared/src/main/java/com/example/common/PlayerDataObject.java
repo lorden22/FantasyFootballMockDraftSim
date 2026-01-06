@@ -56,7 +56,7 @@ public class PlayerDataObject implements Comparable<PlayerDataObject> {
     public double getAllowedReach() { return this.allowedReach; }
     private void setAllowedReach(double allowedReachChange) { this.allowedReach = allowedReachChange; }
     @Override
-    public String toString() { return this.firstName + " " + this.lastName + " - Predicted 2024 score = " + this.predictedScore + ", Avg ADP = " + this.avgADP; }
+    public String toString() { return this.firstName + " " + this.lastName + " - Predicted 2026 score = " + this.predictedScore + ", Avg ADP = " + this.avgADP; }
     @Override
     public int compareTo(PlayerDataObject otherPlayer) { return Double.compare(this.getAllowedReach(), otherPlayer.getAllowedReach()); }
     @Override

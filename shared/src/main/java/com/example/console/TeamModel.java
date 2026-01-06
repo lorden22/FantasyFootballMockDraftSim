@@ -143,4 +143,193 @@ public class TeamModel implements Comparable<TeamModel>{
 	public int compareTo(TeamModel otherTeam) {
 		return this.teamName.compareTo(otherTeam.teamName);
 	}
+	
+	public String getEnhancedDisplay() {
+		StringBuilder display = new StringBuilder();
+		display.append("\n").append("=".repeat(60)).append("\n");
+		display.append("TEAM: ").append(this.teamName).append("\n");
+		display.append("=".repeat(60)).append("\n");
+		
+		// Starters section
+		display.append("\n🏈 STARTERS:\n");
+		display.append("-".repeat(40)).append("\n");
+		
+		// QB Starter
+		ArrayList<PlayerDataObject> qbs = this.thisTeamPlayers.get(QuarterBackPlayerModel.POSITIONSHORTHANDLE);
+		if (!qbs.isEmpty()) {
+			PlayerDataObject qbStarter = getStartersForPosition(qbs);
+			display.append(String.format("QB    %-20s (ADP: %-6.1f, Pick: %-2d, Score: %-6.1f)\n", 
+				qbStarter.getFullName(), qbStarter.getAvgADP(), getDraftPickNumber(qbStarter), qbStarter.getPredictedScore()));
+		} else {
+			display.append("QB    None\n");
+		}
+		
+		// RB Starters (2)
+		ArrayList<PlayerDataObject> rbs = this.thisTeamPlayers.get(RunningBackPlayerModel.POSITIONSHORTHANDLE);
+		if (!rbs.isEmpty()) {
+			ArrayList<PlayerDataObject> rbCopy = new ArrayList<>(rbs);
+			PlayerDataObject rb1 = getStartersForPosition(rbCopy);
+			display.append(String.format("RB1   %-20s (ADP: %-6.1f, Pick: %-2d, Score: %-6.1f)\n", 
+				rb1.getFullName(), rb1.getAvgADP(), getDraftPickNumber(rb1), rb1.getPredictedScore()));
+			rbCopy.remove(rb1);
+			
+			if (!rbCopy.isEmpty()) {
+				PlayerDataObject rb2 = getStartersForPosition(rbCopy);
+				display.append(String.format("RB2   %-20s (ADP: %-6.1f, Pick: %-2d, Score: %-6.1f)\n", 
+					rb2.getFullName(), rb2.getAvgADP(), getDraftPickNumber(rb2), rb2.getPredictedScore()));
+			}
+		} else {
+			display.append("RB1   None\n");
+			display.append("RB2   None\n");
+		}
+		
+		// WR Starters (2)
+		ArrayList<PlayerDataObject> wrs = this.thisTeamPlayers.get(WideReceiverPlayerModel.POSITIONSHORTHANDLE);
+		if (!wrs.isEmpty()) {
+			ArrayList<PlayerDataObject> wrCopy = new ArrayList<>(wrs);
+			PlayerDataObject wr1 = getStartersForPosition(wrCopy);
+			display.append(String.format("WR1   %-20s (ADP: %-6.1f, Pick: %-2d, Score: %-6.1f)\n", 
+				wr1.getFullName(), wr1.getAvgADP(), getDraftPickNumber(wr1), wr1.getPredictedScore()));
+			wrCopy.remove(wr1);
+			
+			if (!wrCopy.isEmpty()) {
+				PlayerDataObject wr2 = getStartersForPosition(wrCopy);
+				display.append(String.format("WR2   %-20s (ADP: %-6.1f, Pick: %-2d, Score: %-6.1f)\n", 
+					wr2.getFullName(), wr2.getAvgADP(), getDraftPickNumber(wr2), wr2.getPredictedScore()));
+			}
+		} else {
+			display.append("WR1   None\n");
+			display.append("WR2   None\n");
+		}
+		
+		// TE Starter
+		ArrayList<PlayerDataObject> tes = this.thisTeamPlayers.get(TightEndPlayerModel.POSITIONSHORTHANDLE);
+		if (!tes.isEmpty()) {
+			PlayerDataObject teStarter = getStartersForPosition(tes);
+			display.append(String.format("TE    %-20s (ADP: %-6.1f, Pick: %-2d, Score: %-6.1f)\n", 
+				teStarter.getFullName(), teStarter.getAvgADP(), getDraftPickNumber(teStarter), teStarter.getPredictedScore()));
+		} else {
+			display.append("TE    None\n");
+		}
+		
+		// FLEX (best remaining RB/WR/TE)
+		PlayerDataObject flexPlayer = getFlexPlayer();
+		if (flexPlayer != null) {
+			display.append(String.format("FLEX  %-20s (ADP: %-6.1f, Pick: %-2d, Score: %-6.1f)\n", 
+				flexPlayer.getFullName(), flexPlayer.getAvgADP(), getDraftPickNumber(flexPlayer), flexPlayer.getPredictedScore()));
+		} else {
+			display.append("FLEX  None\n");
+		}
+		
+		// K Starter
+		ArrayList<PlayerDataObject> ks = this.thisTeamPlayers.get(KickerPlayerModel.POSITIONSHORTHANDLE);
+		if (!ks.isEmpty()) {
+			PlayerDataObject kStarter = getStartersForPosition(ks);
+			display.append(String.format("K     %-20s (ADP: %-6.1f, Pick: %-2d, Score: %-6.1f)\n", 
+				kStarter.getFullName(), kStarter.getAvgADP(), getDraftPickNumber(kStarter), kStarter.getPredictedScore()));
+		} else {
+			display.append("K     None\n");
+		}
+		
+		// DST Starter
+		ArrayList<PlayerDataObject> dsts = this.thisTeamPlayers.get(DefensePlayerModel.POSITIONSHORTHANDLE);
+		if (!dsts.isEmpty()) {
+			PlayerDataObject dstStarter = getStartersForPosition(dsts);
+			display.append(String.format("DST   %-20s (ADP: %-6.1f, Pick: %-2d, Score: %-6.1f)\n", 
+				dstStarter.getFullName(), dstStarter.getAvgADP(), getDraftPickNumber(dstStarter), dstStarter.getPredictedScore()));
+		} else {
+			display.append("DST   None\n");
+		}
+		
+		// Bench section
+		display.append("\n🪑 BENCH:\n");
+		display.append("-".repeat(40)).append("\n");
+		
+		// Get all bench players (non-starters)
+		ArrayList<PlayerDataObject> benchPlayers = getBenchPlayers();
+		if (!benchPlayers.isEmpty()) {
+			for (PlayerDataObject benchPlayer : benchPlayers) {
+				display.append(String.format("BENCH %-20s (ADP: %-6.1f, Pick: %-2d, Score: %-6.1f)\n", 
+					benchPlayer.getFullName(), benchPlayer.getAvgADP(), getDraftPickNumber(benchPlayer), benchPlayer.getPredictedScore()));
+			}
+		} else {
+			display.append("No bench players\n");
+		}
+		
+		display.append("=".repeat(60)).append("\n");
+		return display.toString();
+	}
+	
+	private PlayerDataObject getFlexPlayer() {
+		ArrayList<PlayerDataObject> flexCandidates = new ArrayList<>();
+		
+		// Get best remaining RB
+		ArrayList<PlayerDataObject> rbs = this.thisTeamPlayers.get(RunningBackPlayerModel.POSITIONSHORTHANDLE);
+		if (rbs.size() > 2) {
+			ArrayList<PlayerDataObject> rbCopy = new ArrayList<>(rbs);
+			rbCopy.sort((p1, p2) -> Double.compare(p2.getPredictedScore(), p1.getPredictedScore()));
+			flexCandidates.add(rbCopy.get(2)); // 3rd best RB
+		}
+		
+		// Get best remaining WR
+		ArrayList<PlayerDataObject> wrs = this.thisTeamPlayers.get(WideReceiverPlayerModel.POSITIONSHORTHANDLE);
+		if (wrs.size() > 2) {
+			ArrayList<PlayerDataObject> wrCopy = new ArrayList<>(wrs);
+			wrCopy.sort((p1, p2) -> Double.compare(p2.getPredictedScore(), p1.getPredictedScore()));
+			flexCandidates.add(wrCopy.get(2)); // 3rd best WR
+		}
+		
+		// Get best remaining TE
+		ArrayList<PlayerDataObject> tes = this.thisTeamPlayers.get(TightEndPlayerModel.POSITIONSHORTHANDLE);
+		if (tes.size() > 1) {
+			ArrayList<PlayerDataObject> teCopy = new ArrayList<>(tes);
+			teCopy.sort((p1, p2) -> Double.compare(p2.getPredictedScore(), p1.getPredictedScore()));
+			flexCandidates.add(teCopy.get(1)); // 2nd best TE
+		}
+		
+		// Return the best flex candidate
+		return flexCandidates.stream()
+			.max((p1, p2) -> Double.compare(p1.getPredictedScore(), p2.getPredictedScore()))
+			.orElse(null);
+	}
+	
+	private ArrayList<PlayerDataObject> getBenchPlayers() {
+		ArrayList<PlayerDataObject> benchPlayers = new ArrayList<>();
+		
+		// Add all players except starters
+		for (String position : this.thisTeamPlayers.keySet()) {
+			ArrayList<PlayerDataObject> players = this.thisTeamPlayers.get(position);
+			if (players.size() > getStarterCount(position)) {
+				// Sort by predicted score and add bench players
+				ArrayList<PlayerDataObject> sortedPlayers = new ArrayList<>(players);
+				sortedPlayers.sort((p1, p2) -> Double.compare(p2.getPredictedScore(), p1.getPredictedScore()));
+				
+				for (int i = getStarterCount(position); i < sortedPlayers.size(); i++) {
+					benchPlayers.add(sortedPlayers.get(i));
+				}
+			}
+		}
+		
+		// Sort bench players by predicted score
+		benchPlayers.sort((p1, p2) -> Double.compare(p2.getPredictedScore(), p1.getPredictedScore()));
+		return benchPlayers;
+	}
+	
+	private int getStarterCount(String position) {
+		switch (position) {
+			case "QB": return 1;
+			case "RB": return 2;
+			case "WR": return 2;
+			case "TE": return 1;
+			case "K": return 1;
+			case "DST": return 1;
+			default: return 0;
+		}
+	}
+	
+	private int getDraftPickNumber(PlayerDataObject player) {
+		// This is a placeholder - in a real implementation, you'd track this
+		// For now, return a calculated position based on ADP
+		return (int) Math.round(player.getAvgADP());
+	}
 } 

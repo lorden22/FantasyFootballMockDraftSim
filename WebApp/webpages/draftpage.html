@@ -28,15 +28,29 @@
                 </div>
                 <div class="secondary-heading-container">
                     <div class="col-sm-12 text-center">
-                        <h2>2024 Fantasy Football Mock Draft Page</h2> 
+                        <h2>2026 Fantasy Football Mock Draft Page</h2> 
                     </div>   
                 </div>
                 <div class="custom-row" style="color: white;">
                     <div class="custom-col-4" id="playeLeftListCol">
-                        <div id="playerListDiv">             
+                        <div id="playerListDiv" class="player-table-section">             
                             <h3 class="text-center">Players Left</h3>
-                            <div id="playerListContainer" class="scrollable-col">
-                                <p id="playerListPar" class="player-list-par"></p> 
+                            <div id="playerListContainer" class="player-table-container">
+                                <table id="playersLeftTable" class="table table-striped table-dark player-table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">#</th>
+                                            <th scope="col">Player</th>
+                                            <th scope="col">Position</th>
+                                            <th scope="col">Score</th>
+                                            <th scope="col">ADP</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="playersLeftTableBody">
+                                    </tbody>
+                                </table>
+                                <!-- Keep the old paragraph as fallback -->
+                                <p id="playerListPar" class="player-list-par" style="display: none;"></p> 
                             </div>
                         </div>
                     </div>
@@ -65,9 +79,24 @@
                         </div>
                     </div>
                     <div class="custom-col-4" id="draftLogCol">
-                        <div id="draftLogDiv"> 
-                            <h3 class="text-center" >Draft Log</h3>
-                            <p class="text-center scrollable-col" id="draftLogPar"></p>
+                        <div id="draftLogDiv" class="draft-log-section"> 
+                            <h3 class="text-center">Draft Log</h3>
+                            <div id="draftLogContainer" class="draft-log-container">
+                                <table id="draftLogTable" class="table table-striped table-dark draft-log-table">
+                                    <thead>
+                                        <tr>
+                                            <th scope="col">Pick</th>
+                                            <th scope="col">Player</th>
+                                            <th scope="col">Position</th>
+                                            <th scope="col">Team</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="draftLogTableBody">
+                                    </tbody>
+                                </table>
+                                <!-- Keep the old paragraph as fallback -->
+                                <p class="text-center scrollable-col" id="draftLogPar" style="display: none;"></p>
+                            </div>
                         </div>
                     </div>
                 </div>  

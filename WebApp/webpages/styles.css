@@ -714,27 +714,45 @@ body {
 
 /* Player Table Specific Styles */
 .player-table-container {
-    height: 100%;
+    height: calc(100vh - 250px);
     overflow-y: auto;
     -ms-overflow-style: none;
     scrollbar-width: none;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 15px;
 }
 
 .player-table-container::-webkit-scrollbar {
     display: none;
 }
 
+.player-table-section {
+    height: 100%;
+}
+
 .player-table {
     background-color: #343a40;
     margin-bottom: 0;
     width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
 }
 
 .player-table thead {
     position: sticky;
     top: 0;
     z-index: 1;
-    background-color: #343a40;
+    background-color: #2c3034;
+}
+
+.player-table thead th {
+    background-color: #2c3034;
+    color: #ffffff;
+    font-weight: bold;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    padding: 12px 8px;
+    text-align: center;
 }
 
 .player-table tbody tr:nth-of-type(odd) {
@@ -745,12 +763,92 @@ body {
     background-color: #343a40;
 }
 
+.player-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+    cursor: pointer;
+}
+
 .player-table td,
 .player-table th {
-    padding: 8px;
+    padding: 10px 8px;
     vertical-align: middle;
     border-color: rgba(255, 255, 255, 0.1);
     color: white;
+    text-align: center;
+}
+
+.player-table td:nth-child(2) {
+    text-align: left;
+    font-weight: 500;
+}
+
+/* Draft Log Table Styles */
+.draft-log-section {
+    height: 100%;
+}
+
+.draft-log-container {
+    height: calc(100vh - 250px);
+    overflow-y: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.draft-log-container::-webkit-scrollbar {
+    display: none;
+}
+
+.draft-log-table {
+    background-color: #343a40;
+    margin-bottom: 0;
+    width: 100%;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.draft-log-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background-color: #2c3034;
+}
+
+.draft-log-table thead th {
+    background-color: #2c3034;
+    color: #ffffff;
+    font-weight: bold;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+    padding: 12px 8px;
+    text-align: center;
+}
+
+.draft-log-table tbody tr:nth-of-type(odd) {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.draft-log-table tbody tr:nth-of-type(even) {
+    background-color: #343a40;
+}
+
+.draft-log-table tbody tr:hover {
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.draft-log-table td,
+.draft-log-table th {
+    padding: 10px 8px;
+    vertical-align: middle;
+    border-color: rgba(255, 255, 255, 0.1);
+    color: white;
+    text-align: center;
+}
+
+.draft-log-table td:nth-child(2) {
+    text-align: left;
+    font-weight: 500;
 }/* Team Table Styles - keeping original */
 #allTeamsTable.table-striped tbody tr:nth-of-type(odd) td {
     background-color: rgba(255, 255, 255, 0.05);

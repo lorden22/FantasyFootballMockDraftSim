@@ -44,7 +44,7 @@ public class LoginServices {
                 digest.reset();
                 digest.update(salt.getBytes());
                 byte[] hash = digest.digest(password.getBytes());
-                String attemptedHashPassword = bypeArrayToString(hash);
+                String attemptedHashPassword = byteArrayToString(hash);
                 boolean authenticated = attemptedHashPassword.equals(hashPassword);
                 Logger.logAuth(username, "AUTH_PASSWORD", authenticated ? "SUCCESS" : "FAILED_WRONG_PASSWORD");
                 return authenticated;
@@ -56,7 +56,7 @@ public class LoginServices {
         return false;
     }
 
-    private static String bypeArrayToString(byte[] bytes) {
+    private static String byteArrayToString(byte[] bytes) {
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {
             sb.append(String.format("%02x", b));

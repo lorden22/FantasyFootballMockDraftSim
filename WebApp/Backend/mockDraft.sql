@@ -118,10 +118,15 @@ DROP TABLE IF EXISTS `users`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `users` (
   `username` varchar(50) NOT NULL,
-  `salt` char(32) NOT NULL,
+  `salt` char(64) NOT NULL,
   `hash_pass` varchar(256) NOT NULL,
   `recent_session_id` varchar(256) DEFAULT NULL,
-  PRIMARY KEY (`username`)
+  `session_created_at` datetime DEFAULT NULL,
+  `email` varchar(100) DEFAULT NULL,
+  `reset_token` varchar(64) DEFAULT NULL,
+  `reset_token_expires` datetime DEFAULT NULL,
+  PRIMARY KEY (`username`),
+  UNIQUE KEY `email_unique` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
