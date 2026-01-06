@@ -284,7 +284,7 @@ function updateDraftLogTable(data) {
         const row = document.createElement("tr");
         // Create cells safely using textContent instead of innerHTML
         const cellSpot = document.createElement("td");
-        cellSpot.textContent = currPlayer.spotDrafted;
+        cellSpot.textContent = String(currPlayer.spotDrafted);
         const cellName = document.createElement("td");
         cellName.textContent = currPlayer.fullName;
         const cellPosition = document.createElement("td");

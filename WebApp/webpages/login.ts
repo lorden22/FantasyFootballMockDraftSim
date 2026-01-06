@@ -1,11 +1,25 @@
 async function addUser(): Promise<void> {
     const userNameEle = document.getElementById("username") as HTMLInputElement;
     const passwordEle = document.getElementById("password") as HTMLInputElement;
+    const emailEle = document.getElementById("email") as HTMLInputElement | null;
     const userNameEleValue: string | null = userNameEle.value || null;
     const passwordEleValue: string | null = passwordEle.value || null;
+    const emailValue: string | null = emailEle?.value?.trim() || null;
 
     if (userNameEleValue === null || passwordEleValue === null) {
         showMessage("Username or password is null. Try again.", "error");
+        return;
+    }
+
+    // Validate password length
+    if (passwordEleValue.length < 8) {
+        showMessage("Password must be at least 8 characters.", "error");
+        return;
+    }
+
+    // Validate email format if provided
+    if (emailValue && !/^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$/.test(emailValue)) {
+        showMessage("Please enter a valid email address.", "error");
         return;
     }
 
@@ -34,14 +48,32 @@ async function addUser(): Promise<void> {
             });
             const addUserData = await addUserRes.json();
 
-            await fetch(`/api/teams/initaizeUserAccountSetup/?username=${encodeURIComponent(username)}`, {
-                method: 'POST',
-            });
+            if (addUserData) {
+                // If email was provided, save it
+                if (emailValue) {
+                    const emailFormData = new URLSearchParams();
+                    emailFormData.append('username', username);
+                    emailFormData.append('email', emailValue);
+                    await fetch('/api/login/setEmail/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                        },
+                        body: emailFormData,
+                    });
+                }
 
-            showMessage("Account created. Please login.", "success");
-            setTimeout(() => {
-                window.location.href = "loginpage.html";
-            }, 2000);
+                await fetch(`/api/teams/initaizeUserAccountSetup/?username=${encodeURIComponent(username)}`, {
+                    method: 'POST',
+                });
+
+                showMessage("Account created. Please login.", "success");
+                setTimeout(() => {
+                    window.location.href = "loginpage.html";
+                }, 2000);
+            } else {
+                showMessage("Failed to create account. Please try again.", "error");
+            }
         }
     } catch (error) {
         showMessage("An error occurred. Please try again.", "error");
