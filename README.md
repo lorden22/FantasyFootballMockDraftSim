@@ -198,8 +198,8 @@ docker-compose exec fantasy-football-app bash
 # Check health
 curl -k https://localhost/health
 
-# Database backup
-docker exec fantasy-football-mock-draft mysqldump -u root -ppassword db > backup.sql
+# Database backup (use password from your .env file)
+docker exec fantasy-football-mock-draft mysqldump -u root -p"$MYSQL_ROOT_PASSWORD" db > backup.sql
 ```
 
 ## 📞 Support
