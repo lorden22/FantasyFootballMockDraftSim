@@ -1,9 +1,13 @@
 #getRankingsScript.py
 #By:Bryan Lorden
 #08/19/2024
+#
+# Scrapes FantasyPros PPR rankings + projections and writes WebScraping/PlayerData.txt, which the
+# core module bundles and seeds into the players table. Line format: "<name> <POS> <points> <rank>".
+# Requires: pip install "selenium>=4.10" (Selenium Manager downloads a matching chromedriver).
 
+import os
 from string import digits
-from tokenize import Name
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
@@ -11,13 +15,14 @@ from selenium.common.exceptions import NoSuchElementException
 import time
 
 print("Imports Done")
+OUTPUT_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "PlayerData.txt")
+VALID_POSITIONS = {"QB", "RB", "WR", "TE", "K", "DST"}
+
 def setUp():
-    #Update Chrome webdriver path below
-    PATH = ""
     options = Options()
-    options.headless = False
-    driver = webdriver.Chrome(PATH,options=options)
-    return driver 
+    if os.environ.get("HEADLESS", "1") == "1":
+        options.add_argument("--headless=new")
+    return webdriver.Chrome(options=options)
 
 def getRankingsPage(webdriver):
     webdriver.get("https://www.fantasypros.com/nfl/rankings/ppr-cheatsheets.php")
@@ -140,10 +145,30 @@ def main():
     EntirePlayerTableRows = driver.find_element(By.ID,'ranking-table').find_element(By.TAG_NAME,'tbody').find_elements(By.TAG_NAME,"tr")
     PlayerTableRowsOnlyNoTiersList = getPlayerRowsInTable(driver,EntirePlayerTableRows)
 
-    allPlayerStats = sortAllPlayerStats(driver,PlayerTableRowsOnlyNoTiersList)
-    print(allPlayerStats)
+    try:
+        allPlayerStats = sortAllPlayerStats(driver,PlayerTableRowsOnlyNoTiersList)
+    finally:
+        driver.quit()
+    writePlayerData(allPlayerStats)
 
-    driver.close()
-    driver.quit()
+def writePlayerData(allPlayerStats):
+    lines = []
+    for rank, player in sorted(allPlayerStats.items(), key=lambda kv: int(kv[0])):
+        position = player['Position'].strip().upper()
+        if position not in VALID_POSITIONS:
+            print("Skipping " + player['Name'] + " with unknown position " + position)
+            continue
+        try:
+            points = float(str(player['PPR Point Projection'] or 0).replace(',', ''))
+        except ValueError:
+            points = 0.0
+        name = " ".join(player['Name'].split())
+        lines.append(name + " " + position + " " + format(points, '.1f') + " " + str(int(rank)))
+    tmp = OUTPUT_FILE + ".tmp"
+    with open(tmp, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    os.replace(tmp, OUTPUT_FILE)
+    print("Wrote " + str(len(lines)) + " players to " + OUTPUT_FILE)
 
-main()
+if __name__ == "__main__":
+    main()

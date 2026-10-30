@@ -1,229 +1,86 @@
-# Fantasy Football Mock Draft Sim
+# MockDraft Pro — Fantasy Football Mock Draft Simulator
 
-A comprehensive fantasy football mock draft simulation application with secure HTTPS-only access.
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Docker (20.10+)
-- Docker Compose (2.0+)
-
-### Deploy in 3 Steps
-
-1. **Clone the repository**
-   ```bash
-   git clone <your-repo-url>
-   cd FantasyFootballMockDraftSim
-   ```
-
-2. **Run the deployment script**
-   ```bash
-   ./deploy.sh
-   ```
-
-3. **Access your application**
-   - Frontend: https://localhost
-   - API: https://localhost/api/
-   - Health: https://localhost/health
-
-## 🏗️ Architecture
-
-This application is deployed as a **single container** with all components:
-
-- **Frontend**: HTML/CSS/JavaScript served by nginx
-- **Backend**: Spring Boot REST API with JPA/Hibernate
-- **Database**: MariaDB with persistent storage
-- **Security**: HTTPS-only with SSL/TLS encryption
-- **Proxy**: nginx reverse proxy with load balancing
-
-## 🔒 Security Features
-
-- ✅ **HTTPS-only access** - HTTP automatically redirects to HTTPS
-- ✅ **SSL/TLS encryption** - All traffic encrypted
-- ✅ **Security headers** - XSS protection, content type validation
-- ✅ **CORS protection** - Configured for secure origins
-- ✅ **Database security** - Isolated database with secure credentials
-
-## 📁 Project Structure
+Run realistic snake drafts against CPU managers, from the browser or the terminal. Both clients run on the
+**same core engine and the same database schema**: a draft started in the console can be resumed on the web,
+and vice-versa (when they share a database).
 
 ```
-FantasyFootballMockDraftSim/
-├── WebApp/
-│   ├── Backend/                 # Spring Boot application
-│   │   ├── src/main/java/      # Java source code
-│   │   ├── src/main/resources/ # Configuration files
-│   │   ├── Dockerfile          # Backend container config
-│   │   └── startup.sh          # Database initialization
-│   └── webpages/               # Frontend files
-│       ├── *.html              # HTML pages
-│       ├── *.js                # JavaScript files
-│       ├── *.ts                # TypeScript files
-│       └── styles.css          # CSS styles
-├── shared/                     # Shared Java classes
-├── Dockerfile                  # Main container configuration
-├── docker-compose.yml          # Multi-service orchestration
-├── nginx.conf                  # Web server configuration
-├── deploy.sh                   # Deployment automation script
-└── DEPLOYMENT_GUIDE.md         # Comprehensive deployment guide
+┌──────────────────┐   ┌──────────────────────┐
+│ React web app    │   │ Console app          │
+│ WebApp/frontend  │   │ consolebased/        │
+└────────┬─────────┘   └──────────┬───────────┘
+         │ JSON /api              │ direct calls
+┌────────▼─────────┐              │
+│ Spring Boot API  │              │
+│ WebApp/Backend   │              │
+└────────┬─────────┘              │
+         └──────────┬─────────────┘
+           ┌────────▼────────┐
+           │  mockdraft-core │  draft engine · CPU strategy · rosters · auth · all SQL · migrations
+           │  core/          │
+           └────────┬────────┘
+                    │ JDBC
+        MariaDB (production)  or  H2 embedded (console default, web "dev" profile, tests)
 ```
 
-## 🛠️ Development
+| Module | What it is |
+|---|---|
+| `core/` | Shared Java library: domain model, snake-order math, CPU draft strategy, lineup builder, auth (BCrypt, hashed session/reset tokens), JDBC repositories, schema migrations. |
+| `WebApp/Backend/` | Spring Boot 3 REST API ([docs/API.md](docs/API.md)); also serves the built frontend. |
+| `WebApp/frontend/` | React + TypeScript + Tailwind single-page app (Vite). |
+| `consolebased/` | Terminal client; single self-contained jar. |
+| `WebScraping/` | Rankings scraper; its output `PlayerData.txt` is bundled into `core` and seeded on first run. |
 
-### Local Development
+## Quick start
+
+### Console (nothing to install but Java 17+ and Maven)
 ```bash
-# Start development environment
-./deploy.sh
-
-# View logs
-./deploy.sh logs
-
-# Stop application
-./deploy.sh stop
-
-# Restart application
-./deploy.sh restart
+./devStartupConsole.sh          # builds on first run, stores data in ~/.mockdraft
+./devStartupConsole.sh --help   # connect to MariaDB instead, disable colors, etc.
 ```
 
-### Building from Source
+### Web app, local development (Java 17+, Maven, Node 20+)
 ```bash
-# Build only
-./deploy.sh build
-
-# Check health
-./deploy.sh health
+./devStartupWebApp.sh
+# App: http://localhost:5173   API: http://localhost:8080/api/health
 ```
+The backend runs with the `dev` profile: an embedded H2 database under `WebApp/Backend/data/`, and password
+reset links printed to the terminal instead of emailed.
 
-## 🌐 Production Deployment
-
-### Cloud Platforms Supported
-- **AWS EC2** - Ubuntu instances with Docker
-- **Google Cloud Platform** - Compute Engine VMs
-- **DigitalOcean** - Droplets with Docker
-- **Azure** - Virtual Machines
-- **Kubernetes** - Container orchestration
-
-### Deployment Options
-1. **Docker Host** - Direct deployment on Linux server
-2. **Cloud Platforms** - Managed cloud services
-3. **Container Orchestration** - Kubernetes, Docker Swarm
-
-See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for detailed instructions.
-
-## 📊 Monitoring
-
-### Health Checks
-- Application health: `https://yourdomain.com/health`
-- Container status: `docker-compose ps`
-- Logs: `docker-compose logs -f`
-
-### Performance Monitoring
-- Resource usage: `docker stats`
-- Database performance: MariaDB slow query log
-- Application metrics: Spring Boot Actuator
-
-## 🔧 Configuration
-
-### Environment Variables
-Copy `env.production` to `.env` and modify:
+### Production (Docker)
 ```bash
-cp env.production .env
-# Edit .env with your production values
+cp .env.example .env            # set strong DB passwords, APP_BASE_URL, SMTP settings
+docker compose up -d --build    # MariaDB + app on http://127.0.0.1:8080
+docker compose --profile https up -d   # optional: Caddy with automatic HTTPS for $DOMAIN
+docker compose run --rm console        # console client sharing the production database
 ```
+The app container is non-root, read-only, and drops all Linux capabilities. MariaDB and the app listen
+only on `127.0.0.1`; put the `https` profile (or your own TLS proxy) in front for public access.
 
-### SSL Certificates
-- **Development**: Self-signed certificates (auto-generated)
-- **Production**: Let's Encrypt or commercial certificates
-
-### Database Configuration
-- **Development**: In-memory MariaDB
-- **Production**: Persistent MariaDB with backups
-
-## 🚀 Features
-
-### Frontend
-- ✅ Responsive design
-- ✅ User authentication
-- ✅ Draft simulation
-- ✅ Team management
-- ✅ Draft history
-- ✅ Real-time updates
-
-### Backend
-- ✅ RESTful API
-- ✅ JWT authentication
-- ✅ Database persistence
-- ✅ CORS support
-- ✅ Health monitoring
-- ✅ Security headers
-
-### Database
-- ✅ Player data management
-- ✅ Draft tracking
-- ✅ User accounts
-- ✅ Team rosters
-- ✅ Historical data
-
-## 📈 Scaling
-
-### Horizontal Scaling
-```yaml
-# docker-compose.yml
-services:
-  fantasy-football-app:
-    deploy:
-      replicas: 3
-```
-
-### Load Balancing
-- nginx reverse proxy
-- Round-robin load balancing
-- Health check integration
-
-## 🔍 Troubleshooting
-
-### Common Issues
-1. **Port conflicts** - Check if ports 80, 443, 8443 are available
-2. **SSL certificate warnings** - Normal for self-signed certificates
-3. **Database connection issues** - Check container logs
-4. **Memory issues** - Increase container memory limits
-
-### Debug Commands
+## Testing
 ```bash
-# View logs
-docker-compose logs -f
-
-# Access container
-docker-compose exec fantasy-football-app bash
-
-# Check health
-curl -k https://localhost/health
-
-# Database backup (use password from your .env file)
-docker exec fantasy-football-mock-draft mysqldump -u root -p"$MYSQL_ROOT_PASSWORD" db > backup.sql
+mvn test                                    # core engine, auth, migrations, HTTP API, console flows
+(cd WebApp/frontend && npm run typecheck && npm run build)
 ```
 
-## 📞 Support
+## Security notes
+- Passwords: BCrypt (cost 12). Accounts from the old app (salted SHA-256) still sign in and are upgraded
+  to BCrypt automatically.
+- Sessions: random 256-bit tokens in an `HttpOnly; Secure; SameSite=Strict` cookie; only SHA-256 hashes are
+  stored. Logout, password change and password reset revoke sessions server-side.
+- CSRF: double-submit token (`XSRF-TOKEN` cookie → `X-XSRF-TOKEN` header) on every state-changing request.
+- Every draft query is scoped to the signed-in user; other users' drafts return 404.
+- Rate limits on sign-in, registration, password reset and draft actions.
+- Strict Content-Security-Policy (no inline or third-party scripts), HSTS, `X-Frame-Options: DENY`,
+  `nosniff`, Referrer and Permissions policies.
+- Password reset: single-use, 30-minute tokens (hashed at rest); responses never reveal whether an email
+  is registered; links are built from `APP_BASE_URL`, never the request `Host` header.
 
-For issues and questions:
-1. Check the [troubleshooting section](#troubleshooting)
-2. Review [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md)
-3. Check application logs
-4. Verify system requirements
+## Upgrading from the 1.x app
+On first start against an old database, the schema migrator detects the old `teams.team_array` layout,
+renames the old tables to `legacy_*`, and copies users, players and every draft into the new schema.
+Nothing is deleted; drop the `legacy_*` tables once you're satisfied.
 
-## 📝 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Test thoroughly
-5. Submit a pull request
-
----
-
-**Ready to deploy?** Run `./deploy.sh` to get started!
-
-
+## Updating player rankings
+Run `WebScraping/getRankingScript.py` to regenerate `WebScraping/PlayerData.txt`. Rankings are seeded into
+an empty `players` table; existing databases keep their rankings so past drafts stay accurate.

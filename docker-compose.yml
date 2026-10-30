@@ -1,0 +1,91 @@
+# Production-style stack: MariaDB + web app (+ optional HTTPS proxy and console).
+#   cp .env.example .env   # then set real secrets
+#   docker compose up -d --build
+#   docker compose --profile https up -d          # also start Caddy with automatic HTTPS for $DOMAIN
+#   docker compose run --rm console               # console app sharing the same database
+name: mockdraft
+
+services:
+  db:
+    image: mariadb:11.4
+    restart: unless-stopped
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    environment:
+      MARIADB_DATABASE: mockdraft
+      MARIADB_USER: mockdraft
+      MARIADB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:?Set DB_ROOT_PASSWORD in .env}
+    volumes:
+      - db-data:/var/lib/mysql
+    # Only reachable from this machine (for the console app / admin tools), never from the network
+    ports:
+      - "127.0.0.1:${DB_PORT:-3306}:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    security_opt: ["no-new-privileges:true"]
+
+  app:
+    build:
+      context: .
+      dockerfile: WebApp/Backend/Dockerfile
+    image: mockdraft-web
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DB_URL: jdbc:mariadb://db:3306/mockdraft
+      DB_USERNAME: mockdraft
+      DB_PASSWORD: ${DB_PASSWORD}
+      APP_BASE_URL: ${APP_BASE_URL:-http://localhost:8080}
+      APP_SECURE_COOKIES: ${APP_SECURE_COOKIES:-true}
+      MAIL_HOST: ${MAIL_HOST:-}
+      MAIL_PORT: ${MAIL_PORT:-587}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      MAIL_FROM: ${MAIL_FROM:-no-reply@localhost}
+    ports:
+      - "127.0.0.1:${APP_PORT:-8080}:8080"
+    read_only: true
+    tmpfs: ["/tmp"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+
+  caddy:
+    profiles: ["https"]
+    image: caddy:2.8-alpine
+    restart: unless-stopped
+    depends_on: [app]
+    environment:
+      DOMAIN: ${DOMAIN:?Set DOMAIN in .env to use the https profile}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+
+  console:
+    profiles: ["console"]
+    build:
+      context: .
+      dockerfile: consolebased/Dockerfile
+    image: mockdraft-console
+    depends_on:
+      db:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+    environment:
+      MOCKDRAFT_DB_URL: jdbc:mariadb://db:3306/mockdraft
+      MOCKDRAFT_DB_USER: mockdraft
+      MOCKDRAFT_DB_PASSWORD: ${DB_PASSWORD}
+
+volumes:
+  db-data:
+  caddy-data:
+  caddy-config:

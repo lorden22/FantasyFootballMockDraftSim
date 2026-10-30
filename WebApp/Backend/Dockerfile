@@ -1,63 +1,34 @@
-FROM openjdk:17-jdk-slim
+# syntax=docker/dockerfile:1.7
+# Build from the repository root:  docker build -f WebApp/Backend/Dockerfile -t mockdraft-web .
 
-# Install required packages including Maven
-RUN apt-get update -y && \
-    apt-get install -y \
-    mariadb-server \
-    mariadb-client \
-    openssl \
-    curl \
-    maven \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+# ---- 1. React frontend ----
+FROM node:22-alpine AS frontend
+WORKDIR /src/WebApp/frontend
+COPY WebApp/frontend/package.json WebApp/frontend/package-lock.json ./
+RUN npm ci --no-audit --no-fund
+COPY WebApp/frontend/ ./
+RUN npm run build
 
-# Create application directory
+# ---- 2. Java (core + web), with the built frontend bundled as static resources ----
+FROM maven:3.9-eclipse-temurin-21 AS backend
+WORKDIR /src
+COPY pom.xml ./
+COPY core/pom.xml core/
+COPY consolebased/pom.xml consolebased/
+COPY WebApp/Backend/pom.xml WebApp/Backend/
+COPY core/src core/src
+COPY WebScraping/PlayerData.txt WebScraping/
+COPY WebApp/Backend/src WebApp/Backend/src
+COPY --from=frontend /src/WebApp/frontend/dist WebApp/frontend/dist
+RUN --mount=type=cache,target=/root/.m2 mvn -B -q -pl WebApp/Backend -am package -DskipTests
+
+# ---- 3. Minimal runtime: JRE only, non-root ----
+FROM eclipse-temurin:21-jre-alpine
+RUN addgroup -S app && adduser -S -G app -h /app app
 WORKDIR /app
-
-# Copy backend source code
-COPY WebApp/Backend/ /app/backend/
-
-# Copy shared classes to backend source
-COPY shared/src/main/java/com/example/ /app/backend/src/main/java/com/example/
-
-# Generate SSL certificate and copy to resources
-COPY WebApp/Backend/generate-ssl.sh /app/generate-ssl.sh
-RUN chmod +x /app/generate-ssl.sh && /app/generate-ssl.sh
-
-# Copy the keystore to backend resources for Spring Boot
-RUN mkdir -p /app/backend/src/main/resources && \
-    cp /app/keystore.p12 /app/backend/src/main/resources/keystore.p12
-
-# Build the backend JAR
-WORKDIR /app/backend
-RUN mvn clean package -DskipTests
-
-# Copy the built JAR to app directory
-WORKDIR /app
-RUN cp /app/backend/target/WebBackend-0.0.1-SNAPSHOT.jar /app/app.jar
-
-# Copy required files
-COPY WebScraping/PlayerData.txt PlayerData.txt
-COPY mockDraft.sql mockDraft.sql
-COPY WebApp/Backend/startup.sh startup.sh
-
-# Make scripts executable
-RUN chmod +x startup.sh
-
-# SSL certificates are already in place from generation step
-
-# Create necessary directories for MariaDB
-RUN mkdir -p /var/lib/mysql /var/run/mysqld /var/log/mysql
-
-# Set permissions for MariaDB
-RUN chown -R mysql:mysql /var/lib/mysql /var/run/mysqld /var/log/mysql
-
-# Expose ports
-EXPOSE 8080 8443 3306
-
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD curl -f -k https://localhost:8443/api/health || exit 1
-
-ENTRYPOINT ["/bin/bash", "/app/startup.sh"]
-
+COPY --from=backend --chown=app:app /src/WebApp/Backend/target/mockdraft-web.jar app.jar
+USER app
+EXPOSE 8080
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+    CMD wget -qO- http://127.0.0.1:8080/api/health >/dev/null || exit 1
+ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-XX:+ExitOnOutOfMemoryError", "-Djava.security.egd=file:/dev/urandom", "-jar", "/app/app.jar"]

@@ -1,131 +1,30 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code when working in this repository.
 
-## Build & Run Commands
+## Layout
+Maven multi-module build (root `pom.xml`, Spring Boot 3.5 BOM, Java 17):
+- `core/` — **all** business logic and SQL, shared by both clients. Package `com.mockdraft.core`.
+  - `MockDraftCore` wires everything from a `DataSource` and runs migrations.
+  - `service/DraftService`, `service/AuthService` — the only entry points clients should call.
+  - `draft/` — `SnakeOrder`, `DraftState`, `DraftStrategy` (CPU picks), `RosterBuilder` (lineups).
+  - `db/Database` — JDBC helper with thread-bound transactions; `db/Migrator` + `resources/.../db/V*.sql`.
+- `WebApp/Backend/` — Spring Boot API, thin controllers over core (`com.mockdraft.web`). Contract: `docs/API.md`.
+- `WebApp/frontend/` — React/TS/Tailwind SPA (Vite). Built `dist/` is bundled into the backend jar as static files.
+- `consolebased/` — terminal client over core (`com.mockdraft.console`), shaded jar.
 
-### Production Deployment
+## Rules
+- New behaviour goes in `core` first; clients only translate input/output. Keep web and console in parity.
+- SQL must run on both MariaDB and H2 (`MODE=MariaDB`). Schema changes = new `V<n>__*.sql` + entry in `Migrator.MIGRATIONS`.
+- Every draft query is scoped by owner; never take a username from request parameters — use the session principal.
+- Validation rules live in `core/service/Validators` so both clients enforce the same constraints.
+
+## Commands
 ```bash
-./deploy.sh              # Full deployment (build + start)
-./deploy.sh build        # Build only
-./deploy.sh restart      # Restart services
-./deploy.sh stop         # Stop all services
-./deploy.sh logs         # View logs
-./deploy.sh health       # Check health status
-```
-
-### Development Mode
-```bash
-./devStartupWebApp.sh    # Start backend (Docker) + frontend (Live Server)
-                         # Backend API: https://localhost:8443/api/
-                         # Frontend: https://localhost:5500/
-                         # DB exposed: localhost:33306
-
-./devStartupConsole.sh   # Start console app in Docker
-                         # Test credentials: username=a, password=a
-```
-
-### Building Individual Components
-```bash
-# Backend (from WebApp/Backend/)
-mvn clean package -DskipTests
-
-# TypeScript compilation (from WebApp/webpages/)
-tsc
-```
-
-### Docker Commands
-```bash
-docker-compose up -d              # Start all services
-docker-compose down               # Stop all services
-docker-compose logs -f            # Follow logs
-docker exec fantasy-football-mock-draft mysql -u root -p"$MYSQL_ROOT_PASSWORD" db  # DB shell
-```
-
-## Architecture
-
-```
-┌─────────────────┐     HTTPS (443)     ┌────────────────┐
-│  Browser/Client │ ◄─────────────────► │     nginx      │
-└─────────────────┘                     └───────┬────────┘
-                                                │
-                              ┌─────────────────┴─────────────────┐
-                              │                                   │
-                    Static files (/*.html)           API (/api/*)
-                              │                                   │
-                              ▼                                   ▼
-                    ┌─────────────────┐              ┌────────────────────┐
-                    │ WebApp/webpages │              │ Spring Boot (8443) │
-                    │ (HTML/JS/CSS)   │              │ Controllers/Services│
-                    └─────────────────┘              └──────────┬─────────┘
-                                                               │
-                                                          JDBC │
-                                                               ▼
-                                                     ┌─────────────────┐
-                                                     │ MariaDB (3306)  │
-                                                     │ Database: db    │
-                                                     └─────────────────┘
-```
-
-### Component Overview
-
-| Directory | Purpose |
-|-----------|---------|
-| `WebApp/Backend/` | Spring Boot 2.7.4 REST API (Java 17) |
-| `WebApp/webpages/` | Frontend (HTML/TypeScript/CSS) |
-| `consolebased/` | Standalone console-based draft simulator |
-| `shared/` | Common Java classes used by both apps |
-| `WebScraping/` | Python script for player ranking data |
-
-### Backend Structure (WebApp/Backend/src/main/java/com/example/Mock/)
-- `API/` - REST Controllers: DraftController, LoginController, HealthController
-- `Service/` - Business logic: DraftServices, LoginServices
-- `DAO/` - Data access objects and database queries
-- `config/` - Security configuration (CORS, SSL)
-
-### Key API Endpoints
-- `POST /api/teams/startDraft` - Initialize new draft
-- `POST /api/teams/userDraftPlayer` - User makes a pick
-- `POST /api/teams/simTo` - Simulate to next user turn
-- `GET /api/login/attemptLogin` - User authentication
-- `GET /api/health` - Health check
-
-## Database
-
-**Schema file:** `mockDraft.sql`
-
-**Tables:**
-- `users` - Accounts with SHA-256 hashed passwords + salt
-- `drafts` - Draft sessions with progress tracking
-- `teams` - Team rosters per draft
-- `players` - Player database (540 players from WebScraping/PlayerData.txt)
-- `draft_logs` - Audit history
-
-**Connection (dev):** `localhost:33306` | User: `root` | Password: (from .env file)
-
-## Tech Stack
-
-- **Backend:** Java 17, Spring Boot 2.7.4, Spring Security, Spring Data JPA
-- **Frontend:** HTML5, TypeScript (ES2022), CSS3
-- **Database:** MariaDB 10.11
-- **Infrastructure:** Docker, Docker Compose, nginx
-- **Build:** Maven 3.x, TypeScript compiler
-
-## Configuration Files
-
-| File | Purpose |
-|------|---------|
-| `docker-compose.yml` | Multi-container orchestration |
-| `nginx.conf` | Reverse proxy, SSL, security headers |
-| `WebApp/Backend/src/main/resources/application.properties` | Dev Spring config |
-| `env.production` | Production environment variables |
-| `tsconfig.json` | TypeScript compiler options |
-
-## Testing
-
-```bash
-# Run backend tests (from WebApp/Backend/)
-mvn test
-
-# Maven test configuration uses Surefire Plugin v3.2.1 with forkCount=0
+mvn test                                         # all Java tests (H2, no Docker needed)
+mvn -pl WebApp/Backend -am test                  # one module (+ what it depends on)
+./devStartupWebApp.sh                            # backend (dev profile, H2) :8080 + Vite :5173
+./devStartupConsole.sh                           # console app, embedded DB in ~/.mockdraft
+(cd WebApp/frontend && npm run typecheck && npm run build)
+docker compose up -d --build                     # production-style stack (needs .env)
 ```
